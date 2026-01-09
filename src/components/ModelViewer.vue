@@ -194,8 +194,9 @@ function reloadScene() {
       loadFrame();
     },
     evt => {
-      if (evt.total > 0) {
-        const pct = Math.min(100, Math.round((evt.loaded / evt.total) * 100));
+      if (evt.total > 0 || evt.loaded > 0) {
+        const total = Math.max(evt.total || 0, evt.loaded || 0);
+        const pct = total > 0 ? Math.min(100, Math.round((evt.loaded / total) * 100)) : 0;
         progressText.value = `加载中... ${pct}%`;
       }
     }
