@@ -164,7 +164,7 @@ function loadModel(url: string, onLoad: (sceneObj: THREE.Object3D) => void, onPr
     },
     error => {
       status.value = "error";
-      progressText.value = "";
+      progressText.value = "加载中...";
       window.clearTimeout(timeoutId);
       console.error("GLB load failed", error);
     }
