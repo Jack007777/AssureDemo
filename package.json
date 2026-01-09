@@ -1,0 +1,27 @@
+{
+  "name": "wheelchair-configurator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "deploy": "gh-pages -d dist",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "jspdf": "^2.5.1",
+    "pinia": "^2.2.4",
+    "three": "^0.165.0",
+    "vue": "^3.5.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "eslint": "^9.10.0",
+    "eslint-plugin-vue": "^9.28.0",
+    "gh-pages": "^6.3.0",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  }
+}
