@@ -1,0 +1,18 @@
+{
+  "pricing": {
+    "currency": "EUR",
+    "vatRate": 0.19,
+    "discountProfiles": [
+      {
+        "id": "retail",
+        "name": "Retail",
+        "discountRate": 0
+      },
+      {
+        "id": "dealer-10",
+        "name": "Dealer -10%",
+        "discountRate": 0.1
+      }
+    ]
+  }
+}
