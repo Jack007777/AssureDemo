@@ -409,6 +409,11 @@ ursor: grab;
   .option-groups{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .model-viewer{
+    position: sticky;
+    top: 16px;
+    z-index: 1;
+  }
 }
 .model-viewer canvas{
   display: block;
