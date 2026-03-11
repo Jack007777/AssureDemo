@@ -401,8 +401,15 @@ ursor: grab;
     grid-template-columns: 1fr;
   }
   .model-viewer{
+    position: sticky;
+    top: 12px;
+    z-index: 3;
     height: 240px;
     max-height: 45vh;
+    margin-bottom: 18px;
+    box-shadow:
+      0 18px 0 0 #111a2b,
+      0 28px 28px rgba(2, 6, 18, 0.24);
   }
 }
 @media (min-width: 920px){
