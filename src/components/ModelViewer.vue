@@ -22,6 +22,11 @@ const props = defineProps<{
 const container = ref<HTMLDivElement | null>(null);
 const status = ref<"idle" | "loading" | "ready" | "empty" | "error">("idle");
 const progressText = ref("");
+const partSignature = computed(() =>
+  getModelParts()
+    .map(part => `${part.src}|${part.tint ? 1 : 0}`)
+    .join("||")
+);
 const statusText = computed(() => {
   if (!getModelParts().length) return "ç­‰å¾…æ¨¡åž‹";
   if (status.value === "loading") return progressText.value || "åŠ è½½ä¸­...";
@@ -279,15 +284,11 @@ onBeforeUnmount(() => {
   renderer = null;
 });
 
-watch(
-  () => [props.baseSrc, props.frameSrc, props.partSources],
-  () => {
-    status.value = getModelParts().length ? "loading" : "idle";
-    if (!scene) return;
-    void reloadScene();
-  },
-  { immediate: true, deep: true }
-);
+watch(partSignature, () => {
+  status.value = getModelParts().length ? "loading" : "idle";
+  if (!scene) return;
+  void reloadScene();
+});
 
 watch(
   () => props.frameColor,
