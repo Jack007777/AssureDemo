@@ -6,33 +6,49 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
+type ModelPart = {
+  src: string;
+  tint?: boolean;
+};
+
 const props = defineProps<{
   baseSrc?: string;
   frameSrc?: string;
   frameColor?: string;
   frameOffset?: { x: number; y: number; z: number };
+  partSources?: ModelPart[];
 }>();
 
 const container = ref<HTMLDivElement | null>(null);
 const status = ref<"idle" | "loading" | "ready" | "empty" | "error">("idle");
 const progressText = ref("");
 const statusText = computed(() => {
-  if (!props.baseSrc) return "等待模型";
-  if (status.value === "loading") return progressText.value || "加载中...";
-  if (status.value === "empty") return "模型为空或不含几何";
-  if (status.value === "error") return "模型加载失败";
+  if (!getModelParts().length) return "ç­‰å¾…æ¨¡åž‹";
+  if (status.value === "loading") return progressText.value || "åŠ è½½ä¸­...";
+  if (status.value === "empty") return "æ¨¡åž‹ä¸ºç©ºæˆ–ä¸å«å‡ ä½•";
+  if (status.value === "error") return "æ¨¡åž‹åŠ è½½å¤±è´¥";
   return "";
 });
+
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene | null = null;
 let camera: THREE.PerspectiveCamera | null = null;
 let controls: OrbitControls | null = null;
-let baseObject: THREE.Object3D | null = null;
+let modelRoot: THREE.Object3D | null = null;
 let dracoLoader: DRACOLoader | null = null;
-let frameObject: THREE.Object3D | null = null;
 let baseTransform: { center: THREE.Vector3; minY: number } | null = null;
 let animationId = 0;
 let resizeObserver: ResizeObserver | null = null;
+let colorTargets: THREE.Object3D[] = [];
+let loadToken = 0;
+
+function getModelParts() {
+  if (props.partSources?.length) return props.partSources;
+  const parts: ModelPart[] = [];
+  if (props.baseSrc) parts.push({ src: props.baseSrc });
+  if (props.frameSrc) parts.push({ src: props.frameSrc, tint: true });
+  return parts;
+}
 
 function disposeObject(object: THREE.Object3D) {
   object.traverse(child => {
@@ -48,17 +64,13 @@ function disposeObject(object: THREE.Object3D) {
 }
 
 function clearObject() {
-  if (scene && baseObject) {
-    scene.remove(baseObject);
-    disposeObject(baseObject);
-    baseObject = null;
-  }
-  if (scene && frameObject) {
-    scene.remove(frameObject);
-    disposeObject(frameObject);
-    frameObject = null;
+  if (scene && modelRoot) {
+    scene.remove(modelRoot);
+    disposeObject(modelRoot);
+    modelRoot = null;
   }
   baseTransform = null;
+  colorTargets = [];
 }
 
 function fitCameraToObject(object: THREE.Object3D) {
@@ -145,124 +157,114 @@ function createLoader() {
   return loader;
 }
 
-function loadModel(url: string, onLoad: (sceneObj: THREE.Object3D) => void, onProgress?: (evt: ProgressEvent) => void) {
-  const loader = createLoader();
-  const timeoutId = window.setTimeout(() => {
-    if (status.value === "loading") {
-      status.value = "error";
-      console.error("GLB load timeout");
-    }
-  }, 20000);
-  loader.load(
-    url,
-    gltf => {
-      onLoad(gltf.scene);
-      window.clearTimeout(timeoutId);
-    },
-    evt => {
-      if (onProgress) onProgress(evt);
-    },
-    error => {
-      status.value = "error";
-      progressText.value = "加载中...";
-      window.clearTimeout(timeoutId);
-      console.error("GLB load failed", error);
-    }
-  );
-}
+function loadModelAsync(url: string, onProgress?: (evt: ProgressEvent) => void) {
+  return new Promise<THREE.Object3D>((resolve, reject) => {
+    const loader = createLoader();
+    const timeoutId = window.setTimeout(() => {
+      reject(new Error(`GLB load timeout: ${url}`));
+    }, 20000);
 
-function reloadScene() {
-  clearObject();
-  if (!scene || !props.baseSrc) return;
-
-  status.value = "loading";
-  progressText.value = "加载中...";
-
-  loadModel(
-    props.baseSrc,
-    sceneObj => {
-      baseObject = sceneObj;
-      let meshCount = 0;
-      baseObject.traverse(child => {
-        if (child instanceof THREE.Mesh) meshCount += 1;
-      });
-      scene.add(baseObject);
-      fitCameraToObject(baseObject);
-      hideFrameInBase(baseObject);
-      status.value = meshCount ? "ready" : "empty";
-      progressText.value = "";
-      loadFrame();
-    },
-    evt => {
-      if (evt.total > 0 || evt.loaded > 0) {
-        const total = Math.max(evt.total || 0, evt.loaded || 0);
-        const pct = total > 0 ? Math.min(100, Math.round((evt.loaded / total) * 100)) : 0;
-        progressText.value = `加载中... ${pct}%`;
+    loader.load(
+      url,
+      gltf => {
+        window.clearTimeout(timeoutId);
+        resolve(gltf.scene);
+      },
+      evt => {
+        onProgress?.(evt);
+      },
+      error => {
+        window.clearTimeout(timeoutId);
+        reject(error);
       }
-    }
-  );
-}
-
-function loadFrame() {
-  if (!props.frameSrc || !scene) return;
-  loadModel(props.frameSrc, sceneObj => {
-    frameObject = sceneObj;
-    positionFrame();
-    scene.add(frameObject);
-    applyFrameColor();
+    );
   });
 }
 
-function positionFrame() {
-  if (!frameObject) return;
-  if (baseTransform) {
-    frameObject.position.sub(baseTransform.center);
-    frameObject.position.y -= baseTransform.minY;
-  }
-  if (props.frameOffset) {
-    frameObject.position.x += props.frameOffset.x;
-    frameObject.position.y += props.frameOffset.y;
-    frameObject.position.z += props.frameOffset.z;
+async function reloadScene() {
+  clearObject();
+  if (!scene) return;
+
+  const parts = getModelParts();
+  if (!parts.length) return;
+
+  const currentToken = ++loadToken;
+  status.value = "loading";
+  progressText.value = "åŠ è½½ä¸­...";
+  colorTargets = [];
+
+  try {
+    const group = new THREE.Group();
+    let meshCount = 0;
+
+    for (let index = 0; index < parts.length; index += 1) {
+      const part = parts[index];
+      const sceneObj = await loadModelAsync(part.src, evt => {
+        if (evt.total > 0 || evt.loaded > 0) {
+          const total = Math.max(evt.total || 0, evt.loaded || 0);
+          const pct = total > 0 ? Math.min(100, Math.round((evt.loaded / total) * 100)) : 0;
+          const combined = Math.round(((index + pct / 100) / parts.length) * 100);
+          progressText.value = `åŠ è½½ä¸­... ${combined}%`;
+        }
+      });
+
+      sceneObj.traverse(child => {
+        if (child instanceof THREE.Mesh) meshCount += 1;
+      });
+
+      if (part.tint) colorTargets.push(sceneObj);
+      group.add(sceneObj);
+    }
+
+    if (currentToken !== loadToken) {
+      disposeObject(group);
+      return;
+    }
+
+    modelRoot = group;
+    scene.add(modelRoot);
+    fitCameraToObject(modelRoot);
+    status.value = meshCount ? "ready" : "empty";
+    progressText.value = "";
+    applyFrameColor();
+  } catch (error) {
+    if (currentToken !== loadToken) return;
+    status.value = "error";
+    progressText.value = "åŠ è½½ä¸­...";
+    console.error("GLB load failed", error);
   }
 }
 
 function applyFrameColor() {
-  if (!frameObject || !props.frameColor) return;
+  if (!props.frameColor || !colorTargets.length) return;
   const color = new THREE.Color(props.frameColor);
-  frameObject.traverse(child => {
-    if (child instanceof THREE.Mesh) {
-      child.visible = true;
-      child.frustumCulled = false;
-      child.renderOrder = 1;
-      child.material = new THREE.MeshStandardMaterial({
-        color,
-        metalness: 0.15,
-        roughness: 0.55,
-        side: THREE.DoubleSide
-      });
-    }
-  });
-}
-
-function hideFrameInBase(root: THREE.Object3D) {
-  root.traverse(child => {
-    if (!(child instanceof THREE.Mesh)) return;
-    const name = child.name.toLowerCase();
-    if (name.includes("frame")) {
-      child.visible = false;
-    }
+  colorTargets.forEach(target => {
+    target.traverse(child => {
+      if (child instanceof THREE.Mesh) {
+        child.visible = true;
+        child.frustumCulled = false;
+        child.renderOrder = 1;
+        child.material = new THREE.MeshStandardMaterial({
+          color,
+          metalness: 0.15,
+          roughness: 0.55,
+          side: THREE.DoubleSide
+        });
+      }
+    });
   });
 }
 
 onMounted(() => {
   initScene();
-  reloadScene();
+  void reloadScene();
   resizeObserver = new ResizeObserver(resize);
   if (container.value) resizeObserver.observe(container.value);
   animate();
 });
 
 onBeforeUnmount(() => {
+  loadToken += 1;
   if (animationId) cancelAnimationFrame(animationId);
   resizeObserver?.disconnect();
   clearObject();
@@ -278,13 +280,13 @@ onBeforeUnmount(() => {
 });
 
 watch(
-  () => [props.baseSrc, props.frameSrc],
+  () => [props.baseSrc, props.frameSrc, props.partSources],
   () => {
-    status.value = props.baseSrc ? "loading" : "idle";
+    status.value = getModelParts().length ? "loading" : "idle";
     if (!scene) return;
-    reloadScene();
+    void reloadScene();
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 watch(
@@ -292,14 +294,6 @@ watch(
   () => {
     applyFrameColor();
   }
-);
-
-watch(
-  () => props.frameOffset,
-  () => {
-    positionFrame();
-  },
-  { deep: true }
 );
 </script>
 
