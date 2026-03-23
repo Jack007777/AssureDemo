@@ -1,6 +1,7 @@
 const WC_I18N_STORAGE_KEY = "wc-lang";
 const WC_DEFAULT_LANG = "zh-CN";
 const WC_SUPPORTED_LANGS = ["zh-CN", "en-US", "de-DE"];
+const WC_MODEL_DIAG_ID = "wc-model-diagnostic";
 
 const WC_TEXT = {
   "zh-CN": {
@@ -596,6 +597,140 @@ function wcEnsureLanguageSelect(lang) {
   return select;
 }
 
+function wcIsMobileViewport() {
+  return window.innerWidth <= 768;
+}
+
+function wcDiagnosticText(lang) {
+  if (lang === "en-US") {
+    return {
+      title: "3D model is taking too long to load",
+      body:
+        "If you are using iPhone or iPad, refresh the page once first. If the model still does not appear, try Safari and make sure Low Power Mode is off.",
+      tips: [
+        "Keep the page open for 20-30 seconds on the first load.",
+        "Switch between Wi-Fi and mobile data once.",
+        "If it still fails, send us your device model, iOS version, and browser."
+      ]
+    };
+  }
+  if (lang === "de-DE") {
+    return {
+      title: "Das 3D-Modell lädt ungewöhnlich lange",
+      body:
+        "Wenn Sie ein iPhone oder iPad verwenden, laden Sie die Seite bitte einmal neu. Falls das Modell weiter nicht erscheint, testen Sie Safari und deaktivieren Sie den Stromsparmodus.",
+      tips: [
+        "Lassen Sie die Seite beim ersten Laden 20-30 Sekunden geöffnet.",
+        "Wechseln Sie einmal zwischen WLAN und mobilen Daten.",
+        "Falls es weiter fehlschlägt, senden Sie uns Gerätemodell, iOS-Version und Browser."
+      ]
+    };
+  }
+  return {
+    title: "3D 模型加载时间过长",
+    body:
+      "如果您使用的是 iPhone 或 iPad，请先刷新一次页面。如果模型仍未显示，请优先使用 Safari，并确认已关闭低电量模式。",
+    tips: [
+      "首次打开时请保持页面停留 20-30 秒。",
+      "可以尝试在 Wi-Fi 和移动数据之间切换一次。",
+      "如果仍失败，请把设备型号、iOS 版本和浏览器告诉我们。"
+    ]
+  };
+}
+
+function wcEnsureDiagnosticStyle() {
+  const styleId = "wc-model-diagnostic-style";
+  if (document.getElementById(styleId)) return;
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = `
+    #${WC_MODEL_DIAG_ID}{
+      margin-top:12px;
+      padding:14px 14px 12px;
+      border:1px solid rgba(255,184,77,.35);
+      border-radius:14px;
+      background:linear-gradient(180deg, rgba(255,196,92,.14), rgba(255,168,54,.08));
+      color:#f6ead7;
+      box-shadow:0 10px 24px rgba(0,0,0,.14);
+    }
+    #${WC_MODEL_DIAG_ID} strong{
+      display:block;
+      margin-bottom:8px;
+      font-size:14px;
+      line-height:1.35;
+    }
+    #${WC_MODEL_DIAG_ID} p{
+      margin:0 0 8px;
+      font-size:13px;
+      line-height:1.5;
+      color:#f7dfbb;
+    }
+    #${WC_MODEL_DIAG_ID} ul{
+      margin:0;
+      padding-left:18px;
+      font-size:12px;
+      line-height:1.5;
+      color:#f3d5a5;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function wcHideModelDiagnostic() {
+  document.getElementById(WC_MODEL_DIAG_ID)?.remove();
+}
+
+function wcRenderModelDiagnostic(lang) {
+  if (!wcIsMobileViewport()) {
+    wcHideModelDiagnostic();
+    return;
+  }
+  const modelViewer = document.querySelector(".model-viewer");
+  if (!modelViewer) return;
+
+  wcEnsureDiagnosticStyle();
+  let box = document.getElementById(WC_MODEL_DIAG_ID);
+  if (!box) {
+    box = document.createElement("div");
+    box.id = WC_MODEL_DIAG_ID;
+    modelViewer.insertAdjacentElement("afterend", box);
+  }
+
+  const text = wcDiagnosticText(lang);
+  box.innerHTML = `
+    <strong>${text.title}</strong>
+    <p>${text.body}</p>
+    <ul>${text.tips.map(item => `<li>${item}</li>`).join("")}</ul>
+  `;
+}
+
+function wcRefreshModelDiagnostic() {
+  const lang = localStorage.getItem(WC_I18N_STORAGE_KEY) || WC_DEFAULT_LANG;
+  const hasCanvas = document.querySelectorAll(".model-viewer canvas").length > 0;
+  const placeholder = (document.querySelector(".model-viewer .model-placeholder")?.textContent || "").trim();
+  if (hasCanvas || !placeholder) {
+    wcHideModelDiagnostic();
+    return;
+  }
+  if (
+    /模型加载失败|Model failed to load|Modell konnte nicht geladen werden/.test(placeholder) ||
+    (wcIsMobileViewport() &&
+      /加载中|Loading|Wird geladen/.test(placeholder) &&
+      document.querySelector(".model-viewer"))
+  ) {
+    wcRenderModelDiagnostic(lang);
+  }
+}
+
+let wcModelDiagnosticTimer = 0;
+
+function wcScheduleModelDiagnostic() {
+  window.clearTimeout(wcModelDiagnosticTimer);
+  wcModelDiagnosticTimer = window.setTimeout(() => {
+    wcRefreshModelDiagnostic();
+  }, 18000);
+}
+
 function wcApplyTranslations(lang) {
   const locale = WC_TEXT[lang] || WC_TEXT[WC_DEFAULT_LANG];
   document.documentElement.lang = lang;
@@ -621,6 +756,7 @@ function wcApplyTranslations(lang) {
   style.textContent = ".option-code{display:none!important}";
 
   wcEnsureLanguageSelect(lang);
+  wcRefreshModelDiagnostic();
 }
 
 function wcSetLanguage(lang) {
@@ -634,6 +770,7 @@ function wcInitI18n() {
   const observer = new MutationObserver(() => {
     const currentLang = localStorage.getItem(WC_I18N_STORAGE_KEY) || WC_DEFAULT_LANG;
     wcApplyTranslations(currentLang);
+    wcScheduleModelDiagnostic();
     const select = document.querySelector(".select.compact");
     if (select && !select.dataset.wcI18nBound) {
       select.dataset.wcI18nBound = "true";
@@ -645,6 +782,8 @@ function wcInitI18n() {
 
   observer.observe(document.body, { childList: true, subtree: true });
   wcSetLanguage(initialLang);
+  wcScheduleModelDiagnostic();
+  window.addEventListener("resize", wcRefreshModelDiagnostic);
 }
 
 if (document.readyState === "loading") {
