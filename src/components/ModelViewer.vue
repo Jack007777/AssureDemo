@@ -47,6 +47,19 @@ let resizeObserver: ResizeObserver | null = null;
 let colorTargets: THREE.Object3D[] = [];
 let loadToken = 0;
 
+function isMobileViewport() {
+  return window.innerWidth <= 768;
+}
+
+function getRendererPixelRatio() {
+  const pixelRatio = window.devicePixelRatio || 1;
+  return isMobileViewport() ? Math.min(pixelRatio, 1.5) : pixelRatio;
+}
+
+function getLoadTimeoutMs() {
+  return isMobileViewport() ? 60000 : 30000;
+}
+
 function getModelParts() {
   if (props.partSources?.length) return props.partSources;
   const parts: ModelPart[] = [];
@@ -115,8 +128,12 @@ function initScene() {
   camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
   camera.position.set(2, 2, 2);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  renderer = new THREE.WebGLRenderer({
+    antialias: !isMobileViewport(),
+    alpha: true,
+    powerPreference: "high-performance"
+  });
+  renderer.setPixelRatio(getRendererPixelRatio());
   renderer.setSize(container.value.clientWidth, container.value.clientHeight);
   container.value.appendChild(renderer.domElement);
 
@@ -144,6 +161,7 @@ function animate() {
 function resize() {
   if (!container.value || !renderer || !camera) return;
   const { clientWidth, clientHeight } = container.value;
+  renderer.setPixelRatio(getRendererPixelRatio());
   renderer.setSize(clientWidth, clientHeight);
   camera.aspect = clientWidth / clientHeight;
   camera.updateProjectionMatrix();
@@ -167,7 +185,7 @@ function loadModelAsync(url: string, onProgress?: (evt: ProgressEvent) => void) 
     const loader = createLoader();
     const timeoutId = window.setTimeout(() => {
       reject(new Error(`GLB load timeout: ${url}`));
-    }, 20000);
+    }, getLoadTimeoutMs());
 
     loader.load(
       url,
