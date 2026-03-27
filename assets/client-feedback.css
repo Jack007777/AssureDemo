@@ -244,6 +244,10 @@ body.wc-summary-open .wc-summary-backdrop {
   pointer-events: auto;
 }
 
+.wc-mobile-category-dock {
+  display: none;
+}
+
 .wc-weight-row td:last-child,
 .wc-weight-row td {
   font-weight: 700;
@@ -273,6 +277,103 @@ body.wc-config-active .model-viewer {
 
   .wc-inline-toolbar {
     padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  body.wc-config-active .container {
+    padding-bottom: 176px;
+  }
+
+  body.wc-config-active .category-grid {
+    display: none !important;
+  }
+
+  .wc-hidden-mobile-category-title {
+    display: none !important;
+  }
+
+  .wc-mobile-category-dock {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: 96px;
+    z-index: 37;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    background: rgba(9, 17, 33, 0.96);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+    backdrop-filter: blur(10px);
+  }
+
+  .wc-mobile-category-dock[hidden] {
+    display: none !important;
+  }
+
+  body.wc-summary-open .wc-mobile-category-dock {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .wc-mobile-category-track {
+    flex: 1 1 auto;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;
+  }
+
+  .wc-mobile-category-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wc-mobile-category-chip {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(232, 237, 247, 0.78);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .wc-mobile-category-chip.active {
+    border-color: rgba(243, 201, 107, 0.72);
+    background: rgba(243, 201, 107, 0.16);
+    color: #f6d589;
+  }
+
+  .wc-mobile-category-arrow {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(232, 237, 247, 0.86);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .wc-mobile-category-arrow:disabled {
+    opacity: 0.28;
+  }
+
+  .wc-mobile-category-dock:not(.is-overflowing) .wc-mobile-category-arrow {
+    display: none;
   }
 }
 

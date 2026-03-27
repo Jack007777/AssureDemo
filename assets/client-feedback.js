@@ -450,6 +450,10 @@
     qs(".wc-switch-model", toolbar).textContent = tr("switchModel");
   }
 
+  function isMobileViewport() {
+    return window.innerWidth <= 768;
+  }
+
   function ensureSummaryUI() {
     let trigger = qs(".wc-summary-trigger");
     if (!trigger) {
@@ -475,6 +479,111 @@
     return { trigger: trigger, backdrop: backdrop };
   }
 
+  function ensureMobileCategoryDock() {
+    let dock = qs(".wc-mobile-category-dock");
+    if (!dock) {
+      dock = document.createElement("div");
+      dock.className = "wc-mobile-category-dock";
+      dock.hidden = true;
+      dock.innerHTML =
+        '<button type="button" class="wc-mobile-category-arrow is-prev" aria-label="Previous categories">‹</button>' +
+        '<div class="wc-mobile-category-track"></div>' +
+        '<button type="button" class="wc-mobile-category-arrow is-next" aria-label="Next categories">›</button>';
+      document.body.appendChild(dock);
+
+      const track = qs(".wc-mobile-category-track", dock);
+      track.addEventListener("scroll", function () {
+        updateMobileCategoryDockState();
+      }, { passive: true });
+
+      qsa(".wc-mobile-category-arrow", dock).forEach(function (arrow) {
+        arrow.addEventListener("click", function () {
+          const direction = arrow.classList.contains("is-prev") ? -1 : 1;
+          track.scrollBy({
+            left: direction * Math.max(180, track.clientWidth * 0.7),
+            behavior: "smooth",
+          });
+        });
+      });
+    }
+    return dock;
+  }
+
+  function updateMobileCategoryDockState() {
+    const dock = qs(".wc-mobile-category-dock");
+    if (!dock || dock.hidden) {
+      return;
+    }
+    const track = qs(".wc-mobile-category-track", dock);
+    const prev = qs(".wc-mobile-category-arrow.is-prev", dock);
+    const next = qs(".wc-mobile-category-arrow.is-next", dock);
+    const overflow = track.scrollWidth > track.clientWidth + 6;
+    const atStart = track.scrollLeft <= 4;
+    const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+
+    dock.classList.toggle("is-overflowing", overflow);
+    prev.disabled = !overflow || atStart;
+    next.disabled = !overflow || atEnd;
+  }
+
+  function syncCategoryTitleVisibility() {
+    const leftCard = getConfiguratorCard();
+    if (!leftCard) {
+      return;
+    }
+    const grid = qs(".category-grid", leftCard);
+    const title = grid && grid.previousElementSibling;
+    if (title && title.classList && title.classList.contains("section-title")) {
+      title.classList.toggle(
+        "wc-hidden-mobile-category-title",
+        document.body.classList.contains("wc-config-active") && isMobileViewport()
+      );
+    }
+  }
+
+  function renderMobileCategoryDock() {
+    const dock = ensureMobileCategoryDock();
+    const track = qs(".wc-mobile-category-track", dock);
+    const nativeButtons = qsa(".category-btn", getConfiguratorCard());
+    const shouldShow =
+      document.body.classList.contains("wc-config-active") &&
+      isMobileViewport() &&
+      nativeButtons.length > 0;
+
+    dock.hidden = !shouldShow;
+    syncCategoryTitleVisibility();
+    if (!shouldShow) {
+      return;
+    }
+
+    track.innerHTML = nativeButtons
+      .map(function (button, index) {
+        const labelNode = qsa("span", button).slice(-1)[0];
+        const label = (labelNode || button).textContent.trim();
+        const active = button.classList.contains("active") ? " active" : "";
+        return (
+          '<button type="button" class="wc-mobile-category-chip' + active + '" data-index="' + index + '">' +
+          label +
+          "</button>"
+        );
+      })
+      .join("");
+
+    qsa(".wc-mobile-category-chip", track).forEach(function (button) {
+      button.addEventListener("click", function () {
+        const index = Number(button.getAttribute("data-index"));
+        const target = nativeButtons[index];
+        if (!target) {
+          return;
+        }
+        target.click();
+        button.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      });
+    });
+
+    window.setTimeout(updateMobileCategoryDockState, 40);
+  }
+
   function renderSummaryTrigger() {
     const ui = ensureSummaryUI();
     const total = parseMoneyCell();
@@ -487,6 +596,7 @@
       : tr("summaryButton");
     ui.trigger.hidden = !document.body.classList.contains("wc-config-active");
     ui.backdrop.hidden = !document.body.classList.contains("wc-summary-open");
+    renderMobileCategoryDock();
   }
 
   function toggleSummary(open) {
@@ -553,6 +663,7 @@
     }
     renderToolbar();
     renderSummaryTrigger();
+    renderMobileCategoryDock();
     syncVisibleSelections();
     syncSummaryExtras();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -568,6 +679,7 @@
       toolbar.classList.add("wc-hidden-source");
     }
     renderSummaryTrigger();
+    renderMobileCategoryDock();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -598,6 +710,7 @@
             anchor.classList.add("wc-option-anchor");
             anchor.scrollIntoView({ behavior: "smooth", block: "start" });
           }
+          renderMobileCategoryDock();
           syncVisibleSelections();
           syncSummaryExtras();
         }, 120);
@@ -619,6 +732,7 @@
           syncSummaryExtras();
         }
         window.setTimeout(function () {
+          renderMobileCategoryDock();
           syncVisibleSelections();
           syncSummaryExtras();
         }, 60);
@@ -736,11 +850,18 @@
           enforceBilingualUi();
           renderModelStage();
           renderToolbar();
+          renderMobileCategoryDock();
           syncSummaryExtras();
         }, 50);
         window.setTimeout(enforceBilingualUi, 180);
       });
     }
+
+    window.addEventListener("resize", function () {
+      window.setTimeout(function () {
+        renderMobileCategoryDock();
+      }, 60);
+    });
   }
 
   function attachObservers() {
@@ -754,6 +875,7 @@
       const observer = new MutationObserver(function () {
         enforceBilingualUi();
         hideNativeControls();
+        renderMobileCategoryDock();
         syncSummaryExtras();
       });
       observer.observe(summaryCard, { childList: true, subtree: true, characterData: true });
@@ -766,6 +888,7 @@
         enforceBilingualUi();
         hideNativeControls();
         bindDynamicControls();
+        renderMobileCategoryDock();
         syncVisibleSelections();
         syncSummaryExtras();
       });
@@ -793,6 +916,7 @@
     ensureSummaryUI();
     hideNativeControls();
     bindDynamicControls();
+    renderMobileCategoryDock();
     syncVisibleSelections();
     syncSummaryExtras();
     attachObservers();
