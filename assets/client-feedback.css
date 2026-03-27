@@ -543,6 +543,19 @@ body.wc-config-active .model-viewer {
 }
 
 @media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+  }
+
+  body.wc-config-active .container,
+  body.wc-config-active .grid.grid-2,
+  body.wc-config-active .grid.grid-2 > .card:first-child {
+    touch-action: pan-y;
+    overscroll-behavior-x: none;
+  }
+
   .card.header .select.compact {
     display: none !important;
   }
