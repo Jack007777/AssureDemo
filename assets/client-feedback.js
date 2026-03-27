@@ -258,6 +258,7 @@
     syncTimer: 0,
     mobileCategoryTransitionDirection: "",
     mobileCategoryTransitionTimer: 0,
+    mobileEdgeSwipeStartX: 0,
     mobileEdgeSwipeStartY: 0,
     mobileEdgeSwipeActive: false,
     mobileEdgeSwipeConsumed: false,
@@ -1691,6 +1692,7 @@
       }
       state.mobileEdgeSwipeActive = true;
       state.mobileEdgeSwipeConsumed = false;
+      state.mobileEdgeSwipeStartX = event.touches[0].clientX;
       state.mobileEdgeSwipeStartY = event.touches[0].clientY;
     }, { passive: true });
 
@@ -1704,19 +1706,24 @@
       if (!event.touches || !event.touches.length) {
         return;
       }
+      const currentX = event.touches[0].clientX;
       const currentY = event.touches[0].clientY;
+      const deltaX = currentX - state.mobileEdgeSwipeStartX;
       const deltaY = currentY - state.mobileEdgeSwipeStartY;
-      const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      const atTop = scrollTop <= 4;
-      const atBottom = scrollTop >= maxScroll - 4;
+      const horizontalEnough = Math.abs(deltaX) >= 72;
+      const verticalDrift = Math.abs(deltaY);
+      const isHorizontalGesture = Math.abs(deltaX) > verticalDrift * 1.15;
 
-      if (atBottom && deltaY < -54) {
+      if (!horizontalEnough || !isHorizontalGesture || verticalDrift > 72) {
+        return;
+      }
+
+      if (deltaX < -72) {
         if (switchMobileCategoryByOffset(1)) {
           state.mobileEdgeSwipeConsumed = true;
           state.mobileEdgeSwipeLockUntil = Date.now() + 700;
         }
-      } else if (atTop && deltaY > 54) {
+      } else if (deltaX > 72) {
         if (switchMobileCategoryByOffset(-1)) {
           state.mobileEdgeSwipeConsumed = true;
           state.mobileEdgeSwipeLockUntil = Date.now() + 700;
