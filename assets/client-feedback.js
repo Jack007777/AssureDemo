@@ -1064,6 +1064,28 @@
       getConfigItems: function () {
         return items.slice();
       },
+      getSourceModel: function () {
+        return state.sourceModel || state.cardId || "";
+      },
+      getCardId: function () {
+        return state.cardId || state.sourceModel || "";
+      },
+      getLanguage: function () {
+        return getLang();
+      },
+      getSummaryRows: function () {
+        return qsa("table tbody tr", summaryCard)
+          .map(function (row) {
+            const cells = qsa("td", row);
+            return {
+              label: ((cells[0] && cells[0].textContent) || "").trim(),
+              value: ((cells[1] && cells[1].textContent) || "").trim(),
+            };
+          })
+          .filter(function (row) {
+            return row.label || row.value;
+          });
+      },
     };
   }
 
