@@ -657,16 +657,17 @@ body.wc-config-active .model-viewer {
 
   .wc-mobile-category-dock {
     position: fixed;
-    left: 10px;
-    right: 10px;
-    bottom: 14px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 37;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
     background: rgba(9, 17, 33, 0.96);
     box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
     backdrop-filter: blur(10px);
