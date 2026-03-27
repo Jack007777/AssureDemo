@@ -68,6 +68,48 @@ body.wc-config-active .wc-summary-backdrop {
   display: none !important;
 }
 
+.choice-btn {
+  position: relative;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.choice-btn.active {
+  border-color: rgba(243, 201, 107, 0.88) !important;
+  background:
+    linear-gradient(180deg, rgba(243, 201, 107, 0.18), rgba(14, 22, 38, 0.98)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(243, 201, 107, 0.3),
+    0 10px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.choice-btn.active::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f3c96b;
+  box-shadow: 0 0 0 4px rgba(243, 201, 107, 0.14);
+}
+
+.choice-btn.active .choice-label {
+  color: #fff2c4;
+}
+
+.choice-btn.active .chip-swatch {
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 0 0 2px rgba(243, 201, 107, 0.22),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.32);
+}
+
 .wc-model-stage {
   display: grid;
   gap: 18px;
