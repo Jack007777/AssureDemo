@@ -514,7 +514,6 @@ function buildSheetMarkup(context, views) {
     ".wc-pdf-sheet,*{box-sizing:border-box;}" +
     ".wc-pdf-sheet{width:860px;padding:36px 40px 40px;background:#ffffff;color:#0f172a;font:14px/1.5 'Segoe UI',Arial,'PingFang SC','Microsoft YaHei',sans-serif;}" +
     ".wc-pdf-title{font-size:28px;font-weight:800;letter-spacing:.02em;margin:0 0 6px;}" +
-    ".wc-pdf-subtitle{font-size:13px;color:#475569;margin:0 0 18px;}" +
     ".wc-pdf-overview{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:22px;}" +
     ".wc-pdf-overview-card{border:1px solid #d9e2ef;border-radius:14px;padding:12px 14px;background:#f8fbff;min-height:72px;}" +
     ".wc-pdf-overview-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b;margin-bottom:6px;}" +
@@ -540,7 +539,6 @@ function buildSheetMarkup(context, views) {
     "</style>" +
     '<div class="wc-pdf-sheet">' +
     '<div class="wc-pdf-title">' + escapeHtml(t("title")) + "</div>" +
-    '<div class="wc-pdf-subtitle">' + escapeHtml(t("subtitle")) + "</div>" +
     '<div class="wc-pdf-overview">' +
     overviewItems
       .map((item) => {
