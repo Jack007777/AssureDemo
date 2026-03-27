@@ -1030,6 +1030,42 @@
     next.disabled = !overflow || atEnd;
   }
 
+  function ensureActiveMobileCategoryChipVisible(behavior) {
+    const dock = qs(".wc-mobile-category-dock");
+    if (!dock || dock.hidden) {
+      return;
+    }
+    const track = qs(".wc-mobile-category-track", dock);
+    const activeChip = qs(".wc-mobile-category-chip.active", track);
+    if (!track || !activeChip) {
+      return;
+    }
+
+    const chipLeft = activeChip.offsetLeft;
+    const chipRight = chipLeft + activeChip.offsetWidth;
+    const visibleLeft = track.scrollLeft;
+    const visibleRight = visibleLeft + track.clientWidth;
+    const padding = 20;
+    const alreadyVisible = chipLeft >= visibleLeft + padding && chipRight <= visibleRight - padding;
+
+    if (alreadyVisible) {
+      return;
+    }
+
+    const targetLeft = Math.max(
+      0,
+      Math.min(
+        track.scrollWidth - track.clientWidth,
+        chipLeft - (track.clientWidth - activeChip.offsetWidth) / 2
+      )
+    );
+
+    track.scrollTo({
+      left: targetLeft,
+      behavior: behavior || "smooth",
+    });
+  }
+
   function getMobileNativeCategoryButtons() {
     return qsa(".category-btn", getConfiguratorCard());
   }
@@ -1151,7 +1187,10 @@
       dock.classList.remove("is-transitioning", "is-transitioning-next", "is-transitioning-prev");
     }
 
-    window.setTimeout(updateMobileCategoryDockState, 40);
+    window.setTimeout(function () {
+      ensureActiveMobileCategoryChipVisible(state.mobileCategoryTransitionDirection ? "smooth" : "auto");
+      updateMobileCategoryDockState();
+    }, 40);
   }
 
   function renderSummaryTrigger() {
