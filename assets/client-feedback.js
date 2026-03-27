@@ -73,6 +73,8 @@
       weightLabel: "总重量",
       weightSuffix: "kg",
       weightMeta: "总重量",
+      summarySpecTitle: "当前配置",
+      summarySpecEmpty: "暂无有效配置选项",
     },
     "en-US": {
       stageKicker: "Model Selection",
@@ -87,6 +89,8 @@
       weightLabel: "Total Weight",
       weightSuffix: "kg",
       weightMeta: "Total weight",
+      summarySpecTitle: "Current Configuration",
+      summarySpecEmpty: "No active configuration items",
     },
   };
 
@@ -221,6 +225,17 @@
       '<path d="M112 83 L82 97 L137 103" fill="none" stroke="' + accent + '" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />' +
       '<path d="M72 56 V74" fill="none" stroke="url(#wcg)" stroke-width="8" stroke-linecap="round" opacity="0.78" />' +
       '<text x="54" y="34" fill="#ffffff" fill-opacity="0.88" font-size="34" font-family="Georgia, serif">1</text>' +
+      "</svg>"
+    );
+  }
+
+  function summaryIconSvg() {
+    return (
+      '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+      '<path d="M4.5 5.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />' +
+      '<path d="M4.5 10h8.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />' +
+      '<path d="M4.5 14.5h6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />' +
+      '<circle cx="14.8" cy="13.8" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5" />' +
       "</svg>"
     );
   }
@@ -466,7 +481,10 @@
         '<div class="wc-summary-total"></div>' +
         '<div class="wc-summary-meta"></div>' +
         "</div>" +
-        '<span class="btn secondary wc-summary-cta"></span>';
+        '<span class="btn secondary wc-summary-cta">' +
+        '<span class="wc-summary-cta-icon">' + summaryIconSvg() + "</span>" +
+        '<span class="wc-summary-cta-text"></span>' +
+        "</span>";
       document.body.appendChild(trigger);
     }
     let backdrop = qs(".wc-summary-backdrop");
@@ -591,7 +609,7 @@
     qs(".wc-summary-label", ui.trigger).textContent = tr("summaryLabel");
     qs(".wc-summary-total", ui.trigger).textContent = total;
     qs(".wc-summary-meta", ui.trigger).textContent = tr("weightMeta") + ": " + weight;
-    qs(".wc-summary-cta", ui.trigger).textContent = document.body.classList.contains("wc-summary-open")
+    qs(".wc-summary-cta-text", ui.trigger).textContent = document.body.classList.contains("wc-summary-open")
       ? tr("summaryClose")
       : tr("summaryButton");
     ui.trigger.hidden = !document.body.classList.contains("wc-config-active");
@@ -697,6 +715,23 @@
     });
   }
 
+  function getActiveConfigurationItems() {
+    return qsa(".option-group", getConfiguratorCard())
+      .map(function (group) {
+        const title = (qs(".option-title", group) || {}).textContent;
+        const activeButton = qs(".choice-btn.active", group);
+        const value = activeButton && (qs(".choice-label", activeButton) || activeButton).textContent;
+        if (!title || !value) {
+          return null;
+        }
+        return {
+          title: title.trim(),
+          value: value.trim(),
+        };
+      })
+      .filter(Boolean);
+  }
+
   function bindDynamicControls() {
     qsa(".category-btn", getConfiguratorCard()).forEach(function (button) {
       if (button.dataset.wcBoundCategory) {
@@ -768,6 +803,31 @@
     if (weightRow.children[1].textContent !== weightText) {
       weightRow.children[1].textContent = weightText;
     }
+    let specBlock = qs(".wc-summary-specs", summaryCard);
+    if (!specBlock) {
+      specBlock = document.createElement("section");
+      specBlock.className = "wc-summary-specs";
+      summaryCard.appendChild(specBlock);
+    }
+    const items = getActiveConfigurationItems();
+    specBlock.innerHTML =
+      '<div class="wc-summary-spec-title">' + tr("summarySpecTitle") + "</div>" +
+      (
+        items.length
+          ? '<ul class="wc-summary-spec-list">' +
+            items
+              .map(function (item) {
+                return (
+                  '<li class="wc-summary-spec-item">' +
+                  '<span class="wc-summary-spec-name">' + item.title + "</span>" +
+                  '<span class="wc-summary-spec-value">' + item.value + "</span>" +
+                  "</li>"
+                );
+              })
+              .join("") +
+            "</ul>"
+          : '<div class="wc-summary-spec-empty">' + tr("summarySpecEmpty") + "</div>"
+      );
     renderSummaryTrigger();
     window.WC_EXPORT_CONTEXT = {
       getModelLabel: function () {
@@ -775,6 +835,9 @@
       },
       getWeightText: function () {
         return weightText;
+      },
+      getConfigItems: function () {
+        return items.slice();
       },
     };
   }
