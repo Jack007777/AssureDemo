@@ -180,6 +180,10 @@ body.wc-summary-open .grid.grid-2 > .card:last-child {
   line-height: 1.55;
 }
 
+.wc-mobile-lang-switch {
+  display: none;
+}
+
 .wc-summary-trigger {
   position: fixed;
   right: 18px;
@@ -386,6 +390,34 @@ body.wc-config-active .model-viewer {
 }
 
 @media (max-width: 768px) {
+  .card.header .select.compact {
+    display: none !important;
+  }
+
+  .wc-mobile-lang-switch {
+    display: inline-flex;
+    gap: 6px;
+    margin-left: auto;
+    padding-top: 10px;
+  }
+
+  .wc-mobile-lang-btn {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(232, 237, 247, 0.78);
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .wc-mobile-lang-btn.active {
+    border-color: rgba(243, 201, 107, 0.72);
+    background: rgba(243, 201, 107, 0.16);
+    color: #f6d589;
+  }
+
   body.wc-config-active .container {
     padding-bottom: 176px;
   }
@@ -717,6 +749,16 @@ body.wc-config-active .model-viewer {
 }
 
 @media (max-width: 420px) {
+  .wc-mobile-lang-switch {
+    gap: 5px;
+    padding-top: 8px;
+  }
+
+  .wc-mobile-lang-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
   .wc-stage-title {
     font-size: 20px;
   }

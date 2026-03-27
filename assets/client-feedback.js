@@ -469,6 +469,42 @@
     return window.innerWidth <= 768;
   }
 
+  function ensureMobileLanguageSwitch() {
+    const header = getHeaderCard();
+    if (!header) {
+      return null;
+    }
+    let bar = qs(".wc-mobile-lang-switch", header);
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.className = "wc-mobile-lang-switch";
+      bar.innerHTML =
+        '<button type="button" class="wc-mobile-lang-btn" data-lang="zh-CN">中文</button>' +
+        '<button type="button" class="wc-mobile-lang-btn" data-lang="en-US">EN</button>';
+      header.appendChild(bar);
+    }
+    return bar;
+  }
+
+  function renderMobileLanguageSwitch() {
+    const bar = ensureMobileLanguageSwitch();
+    const select = getLangSelect();
+    if (!bar || !select) {
+      return;
+    }
+    const current = getLang();
+    qsa(".wc-mobile-lang-btn", bar).forEach(function (button) {
+      const lang = button.getAttribute("data-lang");
+      button.classList.toggle("active", lang === current);
+      if (!button.dataset.wcLangBound) {
+        button.dataset.wcLangBound = "1";
+        button.addEventListener("click", function () {
+          dispatchNativeSelect(select, lang);
+        });
+      }
+    });
+  }
+
   function ensureSummaryUI() {
     let trigger = qs(".wc-summary-trigger");
     if (!trigger) {
@@ -911,6 +947,7 @@
       langSelect.addEventListener("change", function () {
         window.setTimeout(function () {
           enforceBilingualUi();
+          renderMobileLanguageSwitch();
           renderModelStage();
           renderToolbar();
           renderMobileCategoryDock();
@@ -937,6 +974,7 @@
     if (summaryCard) {
       const observer = new MutationObserver(function () {
         enforceBilingualUi();
+        renderMobileLanguageSwitch();
         hideNativeControls();
         renderMobileCategoryDock();
         syncSummaryExtras();
@@ -949,6 +987,7 @@
     if (leftCard) {
       const observer = new MutationObserver(function () {
         enforceBilingualUi();
+        renderMobileLanguageSwitch();
         hideNativeControls();
         bindDynamicControls();
         renderMobileCategoryDock();
@@ -974,6 +1013,7 @@
     }
     ensureInitialClasses();
     enforceBilingualUi();
+    renderMobileLanguageSwitch();
     renderModelStage();
     renderToolbar();
     ensureSummaryUI();
