@@ -279,10 +279,12 @@
   function summaryIconSvg() {
     return (
       '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-      '<path d="M4.5 5.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />' +
-      '<path d="M4.5 10h8.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />' +
-      '<path d="M4.5 14.5h6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />' +
-      '<circle cx="14.8" cy="13.8" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5" />' +
+      '<path d="M5.1 3.9h9.8a1.6 1.6 0 0 1 1.6 1.6v9a1.6 1.6 0 0 1-1.6 1.6H5.1a1.6 1.6 0 0 1-1.6-1.6v-9a1.6 1.6 0 0 1 1.6-1.6Z" fill="none" stroke="currentColor" stroke-width="1.5" />' +
+      '<path d="M6.5 7.1h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />' +
+      '<path d="M6.5 10.1h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />' +
+      '<path d="M6.5 13.1h4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />' +
+      '<circle cx="14.3" cy="13.2" r="2.2" fill="currentColor" fill-opacity="0.14" />' +
+      '<path d="M13.2 13.1l.8.8 1.5-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />' +
       "</svg>"
     );
   }
@@ -575,13 +577,15 @@
         '<div class="wc-mobile-config-lang"></div>' +
         '<button type="button" class="btn secondary wc-switch-model wc-mobile-switch-model"></button>' +
         "</div>" +
-        '<div class="wc-mobile-config-summary">' +
-        '<div class="wc-mobile-config-total"></div>' +
-        '<div class="wc-mobile-config-weight"></div>' +
-        "</div>" +
-        '<button type="button" class="btn secondary wc-mobile-summary-toggle">' +
-        '<span class="wc-summary-cta-icon">' + summaryIconSvg() + "</span>" +
+        '<button type="button" class="wc-mobile-config-summary wc-mobile-summary-toggle">' +
+        '<span class="wc-mobile-config-total-row">' +
+        '<span class="wc-mobile-config-total"></span>' +
+        '<span class="wc-mobile-config-summary-icon">' + summaryIconSvg() + "</span>" +
+        "</span>" +
+        '<span class="wc-mobile-config-meta-row">' +
+        '<span class="wc-mobile-config-weight"></span>' +
         '<span class="wc-mobile-summary-text"></span>' +
+        "</span>" +
         "</button>";
       container.insertBefore(bar, grid);
     }
@@ -625,6 +629,10 @@
     qs(".wc-mobile-summary-text", bar).textContent = document.body.classList.contains("wc-summary-open")
       ? tr("summaryClose")
       : tr("summaryButton");
+    qs(".wc-mobile-summary-toggle", bar).setAttribute(
+      "aria-label",
+      parseMoneyCell() + " " + (document.body.classList.contains("wc-summary-open") ? tr("summaryClose") : tr("summaryButton"))
+    );
 
     window.requestAnimationFrame(updateMobileStickyMetrics);
   }
