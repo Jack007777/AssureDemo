@@ -814,18 +814,19 @@ body.wc-config-active .model-viewer {
   .wc-mobile-content-transition .option-group {
     will-change: transform;
     transform-origin: 50% 50%;
+    backface-visibility: hidden;
   }
 
   .wc-mobile-content-transition.is-transitioning-next .h1,
   .wc-mobile-content-transition.is-transitioning-next .option-groups,
   .wc-mobile-content-transition.is-transitioning-next .option-group {
-    animation: wc-mobile-config-swap-next 380ms cubic-bezier(0.2, 0.82, 0.24, 1);
+    animation: wc-mobile-config-swap-next 460ms cubic-bezier(0.18, 0.86, 0.22, 1);
   }
 
   .wc-mobile-content-transition.is-transitioning-prev .h1,
   .wc-mobile-content-transition.is-transitioning-prev .option-groups,
   .wc-mobile-content-transition.is-transitioning-prev .option-group {
-    animation: wc-mobile-config-swap-prev 380ms cubic-bezier(0.2, 0.82, 0.24, 1);
+    animation: wc-mobile-config-swap-prev 460ms cubic-bezier(0.18, 0.86, 0.22, 1);
   }
 
   .wc-option-anchor {
@@ -1055,31 +1056,37 @@ body.wc-config-active .model-viewer {
 
   @keyframes wc-mobile-config-swap-next {
     0% {
-      transform: translate3d(42px, 0, 0) rotate(3.2deg) scale(0.992);
+      transform: perspective(1100px) translate3d(78px, 0, 0) rotate(7.2deg) scale(0.97);
     }
-    55% {
-      transform: translate3d(-10px, 0, 0) rotate(-1.15deg) scale(1.003);
+    42% {
+      transform: perspective(1100px) translate3d(-20px, 0, 0) rotate(-2.6deg) scale(1.01);
     }
-    78% {
-      transform: translate3d(4px, 0, 0) rotate(0.4deg) scale(0.999);
+    68% {
+      transform: perspective(1100px) translate3d(10px, 0, 0) rotate(1.15deg) scale(0.998);
+    }
+    86% {
+      transform: perspective(1100px) translate3d(-4px, 0, 0) rotate(-0.45deg) scale(1.001);
     }
     100% {
-      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      transform: perspective(1100px) translate3d(0, 0, 0) rotate(0deg) scale(1);
     }
   }
 
   @keyframes wc-mobile-config-swap-prev {
     0% {
-      transform: translate3d(-42px, 0, 0) rotate(-3.2deg) scale(0.992);
+      transform: perspective(1100px) translate3d(-78px, 0, 0) rotate(-7.2deg) scale(0.97);
     }
-    55% {
-      transform: translate3d(10px, 0, 0) rotate(1.15deg) scale(1.003);
+    42% {
+      transform: perspective(1100px) translate3d(20px, 0, 0) rotate(2.6deg) scale(1.01);
     }
-    78% {
-      transform: translate3d(-4px, 0, 0) rotate(-0.4deg) scale(0.999);
+    68% {
+      transform: perspective(1100px) translate3d(-10px, 0, 0) rotate(-1.15deg) scale(0.998);
+    }
+    86% {
+      transform: perspective(1100px) translate3d(4px, 0, 0) rotate(0.45deg) scale(1.001);
     }
     100% {
-      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      transform: perspective(1100px) translate3d(0, 0, 0) rotate(0deg) scale(1);
     }
   }
 }
