@@ -17,12 +17,6 @@
           blurb: "Built for everyday use with a straightforward structure, fast specification flow, and reliable repeat ordering.",
           points: ["Balanced daily-use platform", "Clear standard option set", "Suitable for routine delivery"],
         },
-        "de-DE": {
-          badge: "Aktiv Alltag",
-          name: "S2 Modell",
-          blurb: "Fuer den alltaeglichen Einsatz mit klarer Struktur, einfacher Auswahl und stabilem Standardprozess ausgelegt.",
-          points: ["Leicht fuer den Alltag", "Klare Standardoptionen", "Geeignet fuer regulaere Auslieferung"],
-        },
       },
     },
     {
@@ -42,12 +36,6 @@
           blurb: "Positioned around comfort and stability so customers can compare use cases first, then continue with detailed configuration.",
           points: ["Comfort-oriented variant", "Stable everyday positioning", "Easy side-by-side comparison with S2"],
         },
-        "de-DE": {
-          badge: "Komfort Fokus",
-          name: "S2D Modell",
-          blurb: "Komfort- und stabilitaetsorientierte Variante, damit Kunden zuerst den Einsatzzweck einordnen und dann konfigurieren koennen.",
-          points: ["Komfortorientierte Variante", "Stabile Alltagspositionierung", "Gut mit S2 vergleichbar"],
-        },
       },
     },
     {
@@ -66,12 +54,6 @@
           name: "S5 Model",
           blurb: "Built around lightweight performance, making it easier to present premium selling points before detailed component selection.",
           points: ["Premium lightweight platform", "Performance-first positioning", "Better for advanced component comparison"],
-        },
-        "de-DE": {
-          badge: "Performance Light",
-          name: "S5 Modell",
-          blurb: "Leichtbau- und performanceorientierte Plattform, ideal um zuerst Produktvorteile zu zeigen und danach ins Detail zu gehen.",
-          points: ["Leichte Premium-Plattform", "Performance-orientiert", "Gut fuer detaillierte Komponentenvergleiche"],
         },
       },
     },
@@ -105,20 +87,6 @@
       weightLabel: "Total Weight",
       weightSuffix: "kg",
       weightMeta: "Total weight",
-    },
-    "de-DE": {
-      stageKicker: "Modellauswahl",
-      stageTitle: "Waehlen Sie das passende Modell",
-      stageCopy: "Waehlen Sie das Modell passend zu Einsatzbereich und Anforderungen und wechseln Sie danach in die 3D-Konfiguration.",
-      stageEnter: "Dieses Modell konfigurieren",
-      toolbarEyebrow: "Aktuelles Modell",
-      switchModel: "Modell wechseln",
-      summaryLabel: "Aktueller Gesamtpreis",
-      summaryButton: "Details",
-      summaryClose: "Schliessen",
-      weightLabel: "Gesamtgewicht",
-      weightSuffix: "kg",
-      weightMeta: "Gesamtgewicht",
     },
   };
 

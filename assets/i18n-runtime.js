@@ -1,6 +1,6 @@
 const WC_I18N_STORAGE_KEY = "wc-lang";
 const WC_DEFAULT_LANG = "zh-CN";
-const WC_SUPPORTED_LANGS = ["zh-CN", "en-US", "de-DE"];
+const WC_SUPPORTED_LANGS = ["zh-CN", "en-US"];
 const WC_MODEL_DIAG_ID = "wc-model-diagnostic";
 
 const WC_TEXT = {
@@ -551,25 +551,21 @@ function wcTranslateDynamicText(text, lang) {
   const map = locale.map;
   if (map[trimmed]) return text.replace(trimmed, map[trimmed]);
 
-  const loadingMatch = trimmed.match(/^(加载中|Loading|Wird geladen)\.\.\.\s*(\d+%)$/);
+  const loadingMatch = trimmed.match(/^(加载中|Loading)\.\.\.\s*(\d+%)$/);
   if (loadingMatch) {
-    const prefix =
-      lang === "en-US" ? "Loading..." : lang === "de-DE" ? "Wird geladen..." : "加载中...";
+    const prefix = lang === "en-US" ? "Loading..." : "加载中...";
     return text.replace(trimmed, `${prefix} ${loadingMatch[2]}`);
   }
 
-  const loggedInMatch = trimmed.match(/^(已登录：|Logged in: |Angemeldet: )(.+)$/);
+  const loggedInMatch = trimmed.match(/^(已登录：|Logged in: )(.+)$/);
   if (loggedInMatch) {
     const dealerName =
       loggedInMatch[2] === "贸易商A"
         ? lang === "en-US"
           ? "Dealer A"
-          : lang === "de-DE"
-            ? "Händler A"
-            : "贸易商A"
+          : "贸易商A"
         : loggedInMatch[2];
-    const prefix =
-      lang === "en-US" ? "Logged in: " : lang === "de-DE" ? "Angemeldet: " : "已登录：";
+    const prefix = lang === "en-US" ? "Logged in: " : "已登录：";
     return text.replace(trimmed, `${prefix}${dealerName}`);
   }
 
@@ -580,13 +576,28 @@ function wcEnsureLanguageSelect(lang) {
   const select = document.querySelector(".select.compact");
   if (!select) return null;
 
-  const hasGerman = [...select.options].some(option => option.value === "de-DE");
-  if (!hasGerman) {
-    const option = document.createElement("option");
-    option.value = "de-DE";
-    option.textContent = "Deutsch";
-    select.appendChild(option);
-  }
+  const labels = {
+    "zh-CN": "中文",
+    "en-US": "English"
+  };
+
+  [...select.options].forEach(option => {
+    if (!WC_SUPPORTED_LANGS.includes(option.value)) {
+      option.remove();
+      return;
+    }
+    option.textContent = labels[option.value] || option.textContent;
+  });
+
+  WC_SUPPORTED_LANGS.forEach(code => {
+    const exists = [...select.options].some(option => option.value === code);
+    if (!exists) {
+      const option = document.createElement("option");
+      option.value = code;
+      option.textContent = labels[code];
+      select.appendChild(option);
+    }
+  });
 
   if (select.value !== lang) {
     select.value = lang;
@@ -611,18 +622,6 @@ function wcDiagnosticText(lang) {
         "Keep the page open for 20-30 seconds on the first load.",
         "Switch between Wi-Fi and mobile data once.",
         "If it still fails, send us your device model, iOS version, and browser."
-      ]
-    };
-  }
-  if (lang === "de-DE") {
-    return {
-      title: "Das 3D-Modell lädt ungewöhnlich lange",
-      body:
-        "Wenn Sie ein iPhone oder iPad verwenden, laden Sie die Seite bitte einmal neu. Falls das Modell weiter nicht erscheint, testen Sie Safari und deaktivieren Sie den Stromsparmodus.",
-      tips: [
-        "Lassen Sie die Seite beim ersten Laden 20-30 Sekunden geöffnet.",
-        "Wechseln Sie einmal zwischen WLAN und mobilen Daten.",
-        "Falls es weiter fehlschlägt, senden Sie uns Gerätemodell, iOS-Version und Browser."
       ]
     };
   }
@@ -713,13 +712,47 @@ function wcRefreshModelDiagnostic() {
     return;
   }
   if (
-    /模型加载失败|Model failed to load|Modell konnte nicht geladen werden/.test(placeholder) ||
+    /模型加载失败|Model failed to load/.test(placeholder) ||
     (wcIsMobileViewport() &&
-      /加载中|Loading|Wird geladen/.test(placeholder) &&
+      /加载中|Loading/.test(placeholder) &&
       document.querySelector(".model-viewer"))
   ) {
     wcRenderModelDiagnostic(lang);
   }
+}
+
+function wcForceCategoryLabels(lang) {
+  const labels =
+    lang === "en-US"
+      ? [
+          "Frame",
+          "Seat Upholstery",
+          "Backrest",
+          "Side Panels & Armrests",
+          "Footrest",
+          "Front Wheels",
+          "Rear Wheels",
+          "Brake",
+          "F55 / Frame Accessories"
+        ]
+      : [
+          "车架",
+          "座椅布面",
+          "靠背",
+          "侧板和扶手",
+          "脚踏板",
+          "前轮",
+          "后轮",
+          "刹车",
+          "F55 / 车架附件"
+        ];
+
+  document.querySelectorAll(".category-btn").forEach((button, index) => {
+    const textNode = button.querySelector("span:last-child");
+    if (textNode && labels[index]) {
+      textNode.textContent = labels[index];
+    }
+  });
 }
 
 let wcModelDiagnosticTimer = 0;
@@ -756,6 +789,7 @@ function wcApplyTranslations(lang) {
   style.textContent = ".option-code{display:none!important}";
 
   wcEnsureLanguageSelect(lang);
+  wcForceCategoryLabels(lang);
   wcRefreshModelDiagnostic();
 }
 
