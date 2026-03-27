@@ -163,6 +163,8 @@
     sourceModel: "",
     mounted: false,
     summaryOpen: false,
+    applyingDefaults: false,
+    defaultsAppliedKey: "",
     selectionLabels: {},
     selectionDetails: {},
     syncTimer: 0,
@@ -299,6 +301,12 @@
     return getCardConfig(state.cardId || "S5");
   }
 
+  function getCardConfigBySourceModel(sourceModel) {
+    return MODEL_CARDS.find(function (card) {
+      return card.sourceModel === sourceModel;
+    }) || getCardConfig(sourceModel || "S5");
+  }
+
   function getRootContainer() {
     return qs("#app .container");
   }
@@ -327,6 +335,12 @@
     return qs(".card.header select.select");
   }
 
+  function wait(ms) {
+    return new Promise(function (resolve) {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
   function dispatchNativeSelect(select, value) {
     if (!select) {
       return;
@@ -336,6 +350,115 @@
     }
     select.dispatchEvent(new Event("input", { bubbles: true }));
     select.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function syncCardStateFromModelSelect() {
+    const select = getNativeModelSelect();
+    if (!select || !select.value) {
+      return;
+    }
+    const card = getCardConfigBySourceModel(select.value);
+    if (card) {
+      state.cardId = card.id;
+      state.sourceModel = card.sourceModel;
+    }
+  }
+
+  function getConfigStore() {
+    const app = qs("#app");
+    const vueApp = app && app.__vue_app__;
+    const provides = vueApp && vueApp._context && vueApp._context.provides;
+    if (!provides) {
+      return null;
+    }
+    const piniaKey = Reflect.ownKeys(provides).find(function (key) {
+      const value = provides[key];
+      return value && value._s && typeof value._s.get === "function";
+    });
+    if (!piniaKey) {
+      return null;
+    }
+    const pinia = provides[piniaKey];
+    return pinia && pinia._s ? pinia._s.get("config") : null;
+  }
+
+  function getModuleDefinition(moduleId) {
+    const store = getConfigStore();
+    const modules = store && store.catalog && store.catalog.modules;
+    return (modules || []).find(function (module) {
+      return module.id === moduleId;
+    }) || null;
+  }
+
+  function findOptionByLabel(moduleId, label) {
+    const module = getModuleDefinition(moduleId);
+    if (!module || !module.options) {
+      return null;
+    }
+    return module.options.find(function (option) {
+      return (option.label || "").trim() === (label || "").trim();
+    }) || null;
+  }
+
+  function annotateGroupOptionIds(group) {
+    if (!group) {
+      return;
+    }
+    const moduleId = ((qs(".option-code", group) || {}).textContent || "").trim();
+    const module = getModuleDefinition(moduleId);
+    const options = module && module.options ? module.options : [];
+    qsa(".choice-btn", group).forEach(function (button, index) {
+      if (options[index]) {
+        button.dataset.optionId = options[index].id;
+      }
+    });
+  }
+
+  function annotateVisibleOptionButtons() {
+    qsa(".option-group", getConfiguratorCard()).forEach(annotateGroupOptionIds);
+  }
+
+  function setGroupSelectionVisual(group, value, optionId) {
+    if (!group) {
+      return;
+    }
+    const normalizedValue = (value || "").trim();
+    qsa(".choice-btn", group).forEach(function (button) {
+      const labelNode = qs(".choice-label", button) || button;
+      const label = (labelNode.textContent || "").trim();
+      const matches = optionId
+        ? button.dataset.optionId === optionId
+        : !!normalizedValue && label === normalizedValue;
+      button.classList.toggle("active", matches);
+    });
+    const currentNode = qs(".option-current", group);
+    if (currentNode && normalizedValue) {
+      currentNode.textContent = normalizedValue;
+    }
+  }
+
+  function reflectSelectionsFromStore() {
+    const store = getConfigStore();
+    if (!store || !store.selection) {
+      return;
+    }
+    annotateVisibleOptionButtons();
+    qsa(".option-group", getConfiguratorCard()).forEach(function (group) {
+      const moduleId = ((qs(".option-code", group) || {}).textContent || "").trim();
+      if (!moduleId) {
+        return;
+      }
+      const module = getModuleDefinition(moduleId);
+      const selectedId = store.selection[moduleId];
+      const selectedOption = module && module.options
+        ? module.options.find(function (option) {
+            return option.id === selectedId;
+          })
+        : null;
+      if (selectedOption && selectedOption.label) {
+        setGroupSelectionVisual(group, selectedOption.label, selectedOption.id);
+      }
+    });
   }
 
   function normalizeText(value) {
@@ -853,6 +976,67 @@
     }
   }
 
+  function ensureDesktopCategoryLayout() {
+    const card = getConfiguratorCard();
+    if (!card) {
+      return;
+    }
+
+    const categoryGrid = qs(".category-grid", card);
+    if (!categoryGrid) {
+      return;
+    }
+
+    let categoryTitle = categoryGrid.previousElementSibling;
+    while (categoryTitle && !categoryTitle.classList.contains("section-title")) {
+      categoryTitle = categoryTitle.previousElementSibling;
+    }
+
+    let configStart = categoryGrid.nextElementSibling;
+    while (configStart) {
+      if (qs(".h1", configStart) || configStart.classList.contains("option-groups")) {
+        break;
+      }
+      configStart = configStart.nextElementSibling;
+    }
+
+    if (!categoryTitle || !configStart) {
+      return;
+    }
+
+    let shell = qs(".wc-desktop-config-shell", card);
+    let rail = shell && qs(".wc-desktop-category-rail", shell);
+    let main = shell && qs(".wc-desktop-config-main", shell);
+
+    if (!shell) {
+      shell = document.createElement("section");
+      shell.className = "wc-desktop-config-shell";
+      rail = document.createElement("aside");
+      rail.className = "wc-desktop-category-rail";
+      main = document.createElement("div");
+      main.className = "wc-desktop-config-main";
+      shell.appendChild(rail);
+      shell.appendChild(main);
+      card.appendChild(shell);
+    }
+
+    if (categoryTitle.parentNode !== rail) {
+      rail.appendChild(categoryTitle);
+    }
+    if (categoryGrid.parentNode !== rail) {
+      rail.appendChild(categoryGrid);
+    }
+
+    let node = configStart;
+    while (node) {
+      const next = node.nextElementSibling;
+      if (node !== shell && node.parentNode !== main) {
+        main.appendChild(node);
+      }
+      node = next;
+    }
+  }
+
   function openConfigurator(cardId) {
     const card = getCardConfig(cardId);
     const select = getNativeModelSelect();
@@ -871,9 +1055,11 @@
     renderMobileConfigBar();
     renderSummaryTrigger();
     renderMobileCategoryDock();
+    ensureDesktopCategoryLayout();
     syncVisibleSelections();
     syncSummaryExtras();
     refreshRuntimeTranslations(120);
+    scheduleDefaultSelections(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -952,10 +1138,76 @@
     state.syncTimer = window.setTimeout(function () {
       state.syncTimer = 0;
       bindDynamicControls();
+      ensureDesktopCategoryLayout();
+      annotateVisibleOptionButtons();
+      reflectSelectionsFromStore();
       syncVisibleSelections();
       syncSummaryExtras();
       renderMobileCategoryDock();
     }, delay || 80);
+  }
+
+  async function applyDefaultSelections(force) {
+    if (state.applyingDefaults) {
+      return;
+    }
+
+    syncCardStateFromModelSelect();
+    const key = [state.cardId || "", state.sourceModel || ""].join("|");
+    if (!force && state.defaultsAppliedKey === key) {
+      return;
+    }
+
+    const store = getConfigStore();
+    if (!store || !store.catalog || !store.catalog.models || !store.catalog.modules) {
+      return;
+    }
+
+    state.applyingDefaults = true;
+    state.defaultsAppliedKey = "";
+
+    try {
+      const sourceModel = state.sourceModel || store.modelId || "S5";
+      const model = (store.catalog.models || []).find(function (item) {
+        return item.id === sourceModel;
+      });
+      if (!model) {
+        return;
+      }
+
+      if (typeof store.setModel === "function" && store.modelId !== sourceModel) {
+        store.setModel(sourceModel);
+      }
+
+      const modulesById = new Map((store.catalog.modules || []).map(function (module) {
+        return [module.id, module];
+      }));
+
+      model.modules.forEach(function (moduleId) {
+        const module = modulesById.get(moduleId);
+        const firstOption = module && module.options && module.options[0];
+        if (firstOption && typeof store.setOption === "function") {
+          store.setOption(moduleId, firstOption.id);
+        }
+      });
+
+      await wait(180);
+
+      reflectSelectionsFromStore();
+      syncVisibleSelections();
+      syncSummaryExtras();
+      renderMobileCategoryDock();
+      refreshRuntimeTranslations();
+      state.defaultsAppliedKey = key;
+    } finally {
+      state.applyingDefaults = false;
+    }
+  }
+
+  function scheduleDefaultSelections(force) {
+    window.setTimeout(function () {
+      applyDefaultSelections(force);
+    }, force ? 220 : 140);
   }
 
   function bindDynamicControls() {
@@ -966,11 +1218,19 @@
       button.dataset.wcBoundCategory = "1";
       button.addEventListener("click", function () {
         window.setTimeout(function () {
+          if (state.applyingDefaults) {
+            reflectSelectionsFromStore();
+            renderMobileCategoryDock();
+            syncVisibleSelections();
+            syncSummaryExtras();
+            return;
+          }
           const anchor = qs(".option-groups", getConfiguratorCard());
           if (anchor) {
             anchor.classList.add("wc-option-anchor");
             anchor.scrollIntoView({ behavior: "smooth", block: "start" });
           }
+          reflectSelectionsFromStore();
           renderMobileCategoryDock();
           syncVisibleSelections();
           syncSummaryExtras();
@@ -985,6 +1245,7 @@
       button.dataset.wcBoundChoice = "1";
       button.addEventListener("click", function () {
         const group = button.closest(".option-group");
+        annotateGroupOptionIds(group);
         const moduleId = group && (qs(".option-code", group) || {}).textContent;
         const title = group && (qs(".option-title", group) || {}).textContent;
         const labelNode = qs(".choice-label", button);
@@ -992,14 +1253,23 @@
         if (moduleId && clickedLabel) {
           const key = moduleId.trim();
           const value = clickedLabel.trim();
+          const store = getConfigStore();
+          const option = button.dataset.optionId
+            ? { id: button.dataset.optionId, label: value }
+            : findOptionByLabel(key, value);
+          if (store && option && typeof store.setOption === "function") {
+            store.setOption(key, option.id);
+          }
           state.selectionLabels[key] = value;
           state.selectionDetails[key] = {
             title: (title || key).trim(),
             value: value,
           };
+          setGroupSelectionVisual(group, value, option && option.id);
           syncSummaryExtras();
         }
         window.setTimeout(function () {
+          reflectSelectionsFromStore();
           renderMobileCategoryDock();
           syncVisibleSelections();
           syncSummaryExtras();
@@ -1123,11 +1393,18 @@
       const categoryButton = event.target.closest(".category-btn");
       if (categoryButton) {
         window.setTimeout(function () {
+          if (state.applyingDefaults) {
+            reflectSelectionsFromStore();
+            syncVisibleSelections();
+            syncSummaryExtras();
+            return;
+          }
           const anchor = qs(".option-groups", getConfiguratorCard());
           if (anchor) {
             anchor.classList.add("wc-option-anchor");
             anchor.scrollIntoView({ behavior: "smooth", block: "start" });
           }
+          reflectSelectionsFromStore();
           syncVisibleSelections();
           syncSummaryExtras();
           refreshRuntimeTranslations();
@@ -1138,6 +1415,7 @@
       const choiceButton = event.target.closest(".choice-btn");
       if (choiceButton) {
         const group = choiceButton.closest(".option-group");
+        annotateGroupOptionIds(group);
         const moduleId = group && (qs(".option-code", group) || {}).textContent;
         const title = group && (qs(".option-title", group) || {}).textContent;
         const labelNode = qs(".choice-label", choiceButton);
@@ -1145,14 +1423,23 @@
         if (moduleId && clickedLabel) {
           const key = moduleId.trim();
           const value = clickedLabel.trim();
+          const store = getConfigStore();
+          const option = choiceButton.dataset.optionId
+            ? { id: choiceButton.dataset.optionId, label: value }
+            : findOptionByLabel(key, value);
+          if (store && option && typeof store.setOption === "function") {
+            store.setOption(key, option.id);
+          }
           state.selectionLabels[key] = value;
           state.selectionDetails[key] = {
             title: (title || key).trim(),
             value: value,
           };
+          setGroupSelectionVisual(group, value, option && option.id);
           syncSummaryExtras();
         }
         window.setTimeout(function () {
+          reflectSelectionsFromStore();
           syncVisibleSelections();
           syncSummaryExtras();
           refreshRuntimeTranslations();
@@ -1174,9 +1461,19 @@
 
     document.addEventListener("change", function () {
       window.setTimeout(function () {
+        const modelSelect = getNativeModelSelect();
+        if (document.activeElement === modelSelect || (modelSelect && modelSelect.value !== state.sourceModel)) {
+          syncCardStateFromModelSelect();
+          state.selectionLabels = {};
+          state.selectionDetails = {};
+          state.defaultsAppliedKey = "";
+          scheduleDefaultSelections(true);
+        }
         enforceBilingualUi();
         renderToolbar();
+        ensureDesktopCategoryLayout();
         renderMobileCategoryDock();
+        reflectSelectionsFromStore();
         syncVisibleSelections();
         syncSummaryExtras();
         refreshRuntimeTranslations();
@@ -1260,12 +1557,16 @@
     renderToolbar();
     ensureSummaryUI();
     hideNativeControls();
+    ensureDesktopCategoryLayout();
     bindDynamicControls();
+    annotateVisibleOptionButtons();
     renderMobileConfigBar();
     renderMobileCategoryDock();
+    reflectSelectionsFromStore();
     syncVisibleSelections();
     syncSummaryExtras();
     attachObservers();
+    scheduleDefaultSelections(false);
     window.setTimeout(enforceBilingualUi, 80);
     window.setTimeout(enforceBilingualUi, 260);
     if (!state.mounted) {

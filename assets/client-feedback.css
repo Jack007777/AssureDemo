@@ -413,6 +413,53 @@ body.wc-summary-open .wc-summary-backdrop {
   font-weight: 700;
 }
 
+.wc-desktop-config-shell {
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  margin-top: 12px;
+}
+
+.wc-desktop-category-rail {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 12px;
+  align-self: start;
+}
+
+.wc-desktop-category-rail .section-title {
+  margin-bottom: 0;
+}
+
+.wc-desktop-category-rail .category-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.wc-desktop-category-rail .category-btn {
+  min-height: 88px;
+  padding: 12px 14px;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+}
+
+.wc-desktop-category-rail .category-icon {
+  width: 54px;
+  height: 46px;
+}
+
+.wc-desktop-category-rail .category-icon svg {
+  width: 46px;
+  height: 46px;
+}
+
+.wc-desktop-config-main {
+  min-width: 0;
+}
+
 .wc-option-anchor {
   scroll-margin-top: 18px;
 }
@@ -422,6 +469,15 @@ body.wc-config-active .model-viewer {
 }
 
 @media (max-width: 900px) {
+  .wc-desktop-config-shell {
+    display: block;
+    margin-top: 0;
+  }
+
+  .wc-desktop-category-rail {
+    display: none;
+  }
+
   body.wc-config-active .grid.grid-2 > .card:last-child {
     right: 10px;
     bottom: 76px;
