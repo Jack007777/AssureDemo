@@ -43,6 +43,16 @@ const TEXT = {
   },
 };
 
+Object.assign(TEXT["zh-CN"], {
+  subtitle: "",
+  noSelections: "\u6240\u9009\u914d\u7f6e\u5c06\u5728\u6b64\u5217\u51fa",
+});
+
+Object.assign(TEXT["en-US"], {
+  subtitle: "",
+  noSelections: "Selected specifications will appear here",
+});
+
 const DEFAULT_FRAME_COLOR = "#9aa6bd";
 const S5_PARTS = [
   { src: "/models/S5/Rahmen-standard.glb", tint: true },

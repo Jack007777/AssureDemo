@@ -547,6 +547,89 @@ const WC_TEXT = {
   }
 };
 
+const WC_TEXT_PATCHES = {
+  "zh-CN": {
+    "frameMaterial": "\u8f66\u67b6",
+    "frameColor": "\u8f66\u67b6\u989c\u8272",
+    "frameAngle": "\u524d\u53c9\u89d2\u5ea6",
+    "frameLength": "\u8f66\u67b6\u957f\u5ea6",
+    "seatWidth": "\u5ea7\u5bbd",
+    "seatDepth": "\u5ea7\u6df1",
+    "backrestHeight": "\u9760\u80cc\u9ad8\u5ea6",
+    "legLength": "\u817f\u957f",
+    "lateralFrame": "\u4fa7\u67b6\u8bbe\u7f6e",
+    "rearWheelsBar": "\u540e\u8f6e\u6a2a\u6746",
+    "skirtGuards": "\u4fa7\u62a4\u677f",
+    "backrestTube": "\u9760\u80cc\u7ba1",
+    "backrestHandles": "\u9760\u80cc\u628a\u624b",
+    "seatSetting": "\u5ea7\u9762\u8bbe\u7f6e",
+    "footrestSetting": "\u811a\u8e0f\u677f\u8bbe\u7f6e",
+    "frontWheel": "\u524d\u8f6e\u8bbe\u7f6e",
+    "frontFork": "\u524d\u53c9\u8bbe\u7f6e",
+    "rearWheel": "\u540e\u8f6e\u8bbe\u7f6e",
+    "handrim": "\u624b\u63a8\u5708\u8bbe\u7f6e",
+    "tyre": "\u8f6e\u80ce\u8bbe\u7f6e",
+    "brake": "\u5239\u8f66\u8bbe\u7f6e",
+    "axle": "\u8f66\u8f74\u8bbe\u7f6e",
+    "accessoryAntitipp": "\u9644\u4ef6 - \u9632\u540e\u7ffb",
+    "accessoryTippingHelp": "\u9644\u4ef6 - \u503e\u5012\u8f85\u52a9",
+    "accessoryTransitWheels": "\u9644\u4ef6 - \u8f6c\u8fd0\u8f6e",
+    "\u5207\u6362\u9009\u9879\u4f1a\u5b9e\u65f6\u6821\u9a8c\u89c4\u5219\u5e76\u66f4\u65b0\u4ef7\u683c": "\u5df2\u9009\u914d\u7f6e\u4f1a\u540c\u6b65\u66f4\u65b0\u5230\u6c47\u603b\u533a\u57df",
+    "Switching options validates rules and updates pricing in real time": "\u5df2\u9009\u914d\u7f6e\u4f1a\u540c\u6b65\u66f4\u65b0\u5230\u6c47\u603b\u533a\u57df",
+    "Beim Wechseln von Optionen werden Regeln gepr\u00fcft und Preise sofort aktualisiert": "\u5df2\u9009\u914d\u7f6e\u4f1a\u540c\u6b65\u66f4\u65b0\u5230\u6c47\u603b\u533a\u57df",
+    "\u8bf7\u9009\u62e9\u2026": "\u2014",
+    "\u8bf7\u9009\u62e9...": "\u2014",
+    "Please select\u2026": "\u2014",
+    "Bitte w\u00e4hlen\u2026": "\u2014",
+    "\u5f53\u524d\u914d\u7f6e\u65e0\u51b2\u7a81 \u2705": "\u5f53\u524d\u914d\u7f6e\u5df2\u786e\u8ba4",
+    "No conflicts in the current configuration \u2705": "\u5f53\u524d\u914d\u7f6e\u5df2\u786e\u8ba4",
+    "Aktuelle Konfiguration ohne Konflikte \u2705": "\u5f53\u524d\u914d\u7f6e\u5df2\u786e\u8ba4"
+  },
+  "en-US": {
+    "frameMaterial": "Frame",
+    "frameColor": "Frame Color",
+    "frameAngle": "Front Angle",
+    "frameLength": "Frame Length",
+    "seatWidth": "Seat Width",
+    "seatDepth": "Seat Depth",
+    "backrestHeight": "Backrest Height",
+    "legLength": "Leg Length",
+    "lateralFrame": "Lateral Frame",
+    "rearWheelsBar": "Rear Wheels Bar",
+    "skirtGuards": "Skirt Guards",
+    "backrestTube": "Backrest Tube",
+    "backrestHandles": "Backrest Handles",
+    "seatSetting": "Seat Setting",
+    "footrestSetting": "Footrest Setting",
+    "frontWheel": "Front Wheel Setting",
+    "frontFork": "Front Fork Setting",
+    "rearWheel": "Rear Wheel Setting",
+    "handrim": "Handrim Setting",
+    "tyre": "Tyre Setting",
+    "brake": "Brake Setting",
+    "axle": "Axle Setting",
+    "accessoryAntitipp": "Accessory - Anti Tip",
+    "accessoryTippingHelp": "Accessory - Tipping Help",
+    "accessoryTransitWheels": "Accessory - Transit Wheels",
+    "\u5207\u6362\u9009\u9879\u4f1a\u5b9e\u65f6\u6821\u9a8c\u89c4\u5219\u5e76\u66f4\u65b0\u4ef7\u683c": "Selections update instantly in the summary",
+    "Switching options validates rules and updates pricing in real time": "Selections update instantly in the summary",
+    "Beim Wechseln von Optionen werden Regeln gepr\u00fcft und Preise sofort aktualisiert": "Selections update instantly in the summary",
+    "\u8bf7\u9009\u62e9\u2026": "\u2014",
+    "\u8bf7\u9009\u62e9...": "\u2014",
+    "Please select\u2026": "\u2014",
+    "Bitte w\u00e4hlen\u2026": "\u2014",
+    "\u5f53\u524d\u914d\u7f6e\u65e0\u51b2\u7a81 \u2705": "Configuration confirmed",
+    "No conflicts in the current configuration \u2705": "Configuration confirmed",
+    "Aktuelle Konfiguration ohne Konflikte \u2705": "Configuration confirmed"
+  }
+};
+
+Object.keys(WC_TEXT_PATCHES).forEach((lang) => {
+  const locale = WC_TEXT[lang];
+  if (!locale || !locale.map) return;
+  Object.assign(locale.map, WC_TEXT_PATCHES[lang]);
+});
+
 function wcTranslateDynamicText(text, lang) {
   const trimmed = text.trim();
   const locale = WC_TEXT[lang] || WC_TEXT[WC_DEFAULT_LANG];
@@ -842,7 +925,10 @@ function wcInitI18n() {
   window.__WC_I18N = {
     setLanguage: wcSetLanguage,
     refresh: wcRefreshTranslations,
-    apply: wcApplyTranslations
+    apply: wcApplyTranslations,
+    translateText(text, lang) {
+      return wcTranslateDynamicText(String(text == null ? "" : text), lang || (localStorage.getItem(WC_I18N_STORAGE_KEY) || WC_DEFAULT_LANG));
+    }
   };
   window.addEventListener("wc:refresh-i18n", wcRefreshTranslations);
   window.addEventListener("resize", wcRefreshModelDiagnostic);

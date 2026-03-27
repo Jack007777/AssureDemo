@@ -99,6 +99,89 @@
     { value: "en-US", label: "English" },
   ];
 
+  const CLEAN_CARD_COPY = {
+    S2: {
+      "zh-CN": {
+        badge: "\u65e5\u5e38\u6807\u51c6",
+        name: "S2 \u8f66\u578b",
+        blurb: "\u9002\u5408\u65e5\u5e38\u4f7f\u7528\uff0c\u914d\u7f6e\u6e05\u6670\uff0c\u4fbf\u4e8e\u5feb\u901f\u5b8c\u6210\u6807\u51c6\u9009\u914d\u3002",
+        points: ["\u65e5\u5e38\u8f7b\u91cf\u8f66\u578b", "\u914d\u7f6e\u7ed3\u6784\u6e05\u6670", "\u9002\u5408\u6807\u51c6\u4ea4\u4ed8"],
+      },
+      "en-US": {
+        badge: "Daily Standard",
+        blurb: "Designed for daily use with a clear option structure and a straightforward configuration flow.",
+        points: ["Lightweight daily-use model", "Clear option structure", "Suitable for standard delivery"],
+      },
+    },
+    S2D: {
+      "zh-CN": {
+        badge: "\u8212\u9002\u52a0\u5f3a",
+        name: "S2D \u8f66\u578b",
+        blurb: "\u517c\u987e\u7a33\u5b9a\u4e0e\u8212\u9002\uff0c\u9002\u5408\u66f4\u6ce8\u91cd\u4e58\u5750\u4f53\u9a8c\u7684\u7528\u6237\u3002",
+        points: ["\u8212\u9002\u53d6\u5411", "\u7a33\u5b9a\u6027\u66f4\u5f3a", "\u9002\u5408\u65e5\u5e38\u957f\u65f6\u95f4\u4f7f\u7528"],
+      },
+      "en-US": {
+        badge: "Comfort Plus",
+        blurb: "Built around comfort and stability for users who need more support in everyday use.",
+        points: ["Comfort-oriented variant", "Greater day-to-day stability", "Suitable for longer daily use"],
+      },
+    },
+    S5: {
+      "zh-CN": {
+        badge: "\u9ad8\u6027\u80fd\u8f7b\u91cf",
+        name: "S5 \u8f66\u578b",
+        blurb: "\u9002\u5408\u8ffd\u6c42\u8f7b\u91cf\u4e0e\u6027\u80fd\u8868\u73b0\u7684\u7528\u6237\uff0c\u53ef\u8fdb\u884c\u66f4\u4e30\u5bcc\u7684\u8fdb\u9636\u9009\u914d\u3002",
+        points: ["\u9ad8\u6027\u80fd\u8f7b\u91cf\u8f66\u67b6", "\u9002\u5408\u8fdb\u9636\u9009\u914d", "\u90e8\u4ef6\u9009\u62e9\u66f4\u4e30\u5bcc"],
+      },
+      "en-US": {
+        blurb: "Built for users who prioritize lightweight performance and a broader range of advanced options.",
+        points: ["High-performance lightweight frame", "Suitable for advanced options", "Broader component selection"],
+      },
+    },
+  };
+
+  const CLEAN_UI_COPY = {
+    "zh-CN": {
+      stageKicker: "\u8f66\u578b\u9009\u62e9",
+      stageTitle: "\u9009\u62e9\u9002\u5408\u60a8\u7684\u8f66\u578b",
+      stageCopy: "\u6839\u636e\u4f7f\u7528\u573a\u666f\u4e0e\u6838\u5fc3\u9700\u6c42\u9009\u62e9\u8f66\u578b\uff0c\u8fdb\u5165\u540e\u53ef\u67e5\u770b 3D \u6548\u679c\u5e76\u5b8c\u6210\u8be6\u7ec6\u914d\u7f6e\u3002",
+      stageEnter: "\u67e5\u770b\u8f66\u578b\u914d\u7f6e",
+      toolbarEyebrow: "\u6240\u9009\u8f66\u578b",
+      switchModel: "\u66f4\u6362\u8f66\u578b",
+      summaryLabel: "\u603b\u91d1\u989d",
+      summaryButton: "\u8ba2\u5355\u660e\u7ec6",
+      summaryClose: "\u6536\u8d77\u660e\u7ec6",
+      weightLabel: "\u603b\u91cd\u91cf",
+      weightMeta: "\u603b\u91cd\u91cf",
+      summarySpecTitle: "\u5f53\u524d\u914d\u7f6e",
+      summarySpecEmpty: "\u6240\u9009\u914d\u7f6e\u5c06\u5728\u6b64\u663e\u793a",
+    },
+    "en-US": {
+      stageCopy: "Choose the model that best matches the intended use, then continue to the 3D view and detailed configuration.",
+      stageEnter: "View configuration",
+      toolbarEyebrow: "Selected Model",
+      switchModel: "Change model",
+      summaryLabel: "Total",
+      summaryButton: "Order details",
+      summaryClose: "Hide details",
+      summarySpecEmpty: "Selected specifications will appear here",
+    },
+  };
+
+  MODEL_CARDS.forEach(function (card) {
+    const patch = CLEAN_CARD_COPY[card.id];
+    if (!patch) {
+      return;
+    }
+    Object.keys(patch).forEach(function (lang) {
+      card.texts[lang] = Object.assign({}, card.texts[lang] || {}, patch[lang]);
+    });
+  });
+
+  Object.keys(CLEAN_UI_COPY).forEach(function (lang) {
+    UI_TEXT[lang] = Object.assign({}, UI_TEXT[lang] || {}, CLEAN_UI_COPY[lang]);
+  });
+
   const CATEGORY_LABELS = {
     "zh-CN": [
       "车架",
@@ -231,6 +314,17 @@
   function tr(key) {
     const lang = getLang();
     return UI_TEXT[lang][key];
+  }
+
+  function translateUiText(value) {
+    const raw = String(value == null ? "" : value);
+    if (!raw) {
+      return "";
+    }
+    if (window.__WC_I18N && typeof window.__WC_I18N.translateText === "function") {
+      return window.__WC_I18N.translateText(raw, getLang());
+    }
+    return raw;
   }
 
   function qs(selector, root) {
@@ -423,17 +517,18 @@
       return;
     }
     const normalizedValue = (value || "").trim();
+    const displayValue = translateUiText(normalizedValue).trim() || normalizedValue;
     qsa(".choice-btn", group).forEach(function (button) {
       const labelNode = qs(".choice-label", button) || button;
       const label = (labelNode.textContent || "").trim();
       const matches = optionId
         ? button.dataset.optionId === optionId
-        : !!normalizedValue && label === normalizedValue;
+        : !!normalizedValue && (label === normalizedValue || label === displayValue);
       button.classList.toggle("active", matches);
     });
     const currentNode = qs(".option-current", group);
-    if (currentNode && normalizedValue) {
-      currentNode.textContent = normalizedValue;
+    if (currentNode && displayValue) {
+      currentNode.textContent = displayValue;
     }
   }
 
@@ -1106,10 +1201,12 @@
       const key = moduleId.trim();
       const value = (!isPlaceholderValue(activeText) ? activeText : currentText || "").trim();
       if (!isPlaceholderValue(value)) {
+        const displayTitle = translateUiText((title || key).trim()) || (title || key).trim();
+        const displayValue = translateUiText(value) || value;
         state.selectionLabels[key] = value;
         state.selectionDetails[key] = {
-          title: (title || key).trim(),
-          value: value,
+          title: displayTitle,
+          value: displayValue,
         };
       } else {
         delete state.selectionLabels[key];
@@ -1265,6 +1362,8 @@
         if (moduleId && clickedLabel) {
           const key = moduleId.trim();
           const value = clickedLabel.trim();
+          const displayTitle = translateUiText((title || key).trim()) || (title || key).trim();
+          const displayValue = translateUiText(value) || value;
           const store = getConfigStore();
           const option = button.dataset.optionId
             ? { id: button.dataset.optionId, label: value }
@@ -1274,8 +1373,8 @@
           }
           state.selectionLabels[key] = value;
           state.selectionDetails[key] = {
-            title: (title || key).trim(),
-            value: value,
+            title: displayTitle,
+            value: displayValue,
           };
           setGroupSelectionVisual(group, value, option && option.id);
           syncSummaryExtras();
@@ -1435,6 +1534,8 @@
         if (moduleId && clickedLabel) {
           const key = moduleId.trim();
           const value = clickedLabel.trim();
+          const displayTitle = translateUiText((title || key).trim()) || (title || key).trim();
+          const displayValue = translateUiText(value) || value;
           const store = getConfigStore();
           const option = choiceButton.dataset.optionId
             ? { id: choiceButton.dataset.optionId, label: value }
@@ -1444,8 +1545,8 @@
           }
           state.selectionLabels[key] = value;
           state.selectionDetails[key] = {
-            title: (title || key).trim(),
-            value: value,
+            title: displayTitle,
+            value: displayValue,
           };
           setGroupSelectionVisual(group, value, option && option.id);
           syncSummaryExtras();
