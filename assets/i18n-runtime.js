@@ -799,24 +799,37 @@ function wcSetLanguage(lang) {
   wcApplyTranslations(nextLang);
 }
 
-function wcInitI18n() {
-  const initialLang = localStorage.getItem(WC_I18N_STORAGE_KEY) || WC_DEFAULT_LANG;
-  const observer = new MutationObserver(() => {
+function wcBindLanguageSelect() {
+  const select = document.querySelector(".select.compact");
+  if (select && !select.dataset.wcI18nBound) {
+    select.dataset.wcI18nBound = "true";
+    select.addEventListener("change", event => {
+      wcSetLanguage(event.target.value);
+    });
+  }
+}
+
+function wcBootI18nSync() {
+  let attempts = 0;
+  const timer = window.setInterval(() => {
+    attempts += 1;
     const currentLang = localStorage.getItem(WC_I18N_STORAGE_KEY) || WC_DEFAULT_LANG;
     wcApplyTranslations(currentLang);
     wcScheduleModelDiagnostic();
-    const select = document.querySelector(".select.compact");
-    if (select && !select.dataset.wcI18nBound) {
-      select.dataset.wcI18nBound = "true";
-      select.addEventListener("change", event => {
-        wcSetLanguage(event.target.value);
-      });
-    }
-  });
+    wcBindLanguageSelect();
 
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    if ((document.querySelector(".card.header") && document.querySelector(".grid.grid-2")) || attempts > 40) {
+      window.clearInterval(timer);
+    }
+  }, 250);
+}
+
+function wcInitI18n() {
+  const initialLang = localStorage.getItem(WC_I18N_STORAGE_KEY) || WC_DEFAULT_LANG;
   wcSetLanguage(initialLang);
   wcScheduleModelDiagnostic();
+  wcBindLanguageSelect();
+  wcBootI18nSync();
   window.addEventListener("resize", wcRefreshModelDiagnostic);
 }
 

@@ -942,6 +942,16 @@
       }
     }, true);
 
+    document.addEventListener("change", function () {
+      window.setTimeout(function () {
+        enforceBilingualUi();
+        renderToolbar();
+        renderMobileCategoryDock();
+        syncVisibleSelections();
+        syncSummaryExtras();
+      }, 80);
+    }, true);
+
     const langSelect = getLangSelect();
     if (langSelect) {
       langSelect.addEventListener("change", function () {
@@ -969,34 +979,6 @@
       observer.disconnect();
     });
     state.observers = [];
-
-    const summaryCard = getSummaryCard();
-    if (summaryCard) {
-      const observer = new MutationObserver(function () {
-        enforceBilingualUi();
-        renderMobileLanguageSwitch();
-        hideNativeControls();
-        renderMobileCategoryDock();
-        syncSummaryExtras();
-      });
-      observer.observe(summaryCard, { childList: true, subtree: true, characterData: true });
-      state.observers.push(observer);
-    }
-
-    const leftCard = getConfiguratorCard();
-    if (leftCard) {
-      const observer = new MutationObserver(function () {
-        enforceBilingualUi();
-        renderMobileLanguageSwitch();
-        hideNativeControls();
-        bindDynamicControls();
-        renderMobileCategoryDock();
-        syncVisibleSelections();
-        syncSummaryExtras();
-      });
-      observer.observe(leftCard, { childList: true, subtree: true, characterData: true });
-      state.observers.push(observer);
-    }
   }
 
   function ensureInitialClasses() {
