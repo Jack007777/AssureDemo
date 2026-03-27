@@ -277,12 +277,71 @@ body.wc-config-active .model-viewer {
 }
 
 @media (max-width: 640px) {
+  .wc-model-stage {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .wc-stage-header {
+    padding: 10px 4px 2px;
+  }
+
+  .wc-stage-kicker {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  .wc-stage-title {
+    margin: 4px 0 6px;
+    font-size: 22px;
+    line-height: 1.04;
+  }
+
+  .wc-stage-copy {
+    display: none;
+  }
+
   .wc-model-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .wc-model-card {
+    gap: 8px;
+    padding: 10px 8px 12px;
+    border-radius: 16px;
+  }
+
+  .wc-model-badge {
+    padding: 4px 7px;
+    font-size: 9px;
+    line-height: 1.15;
   }
 
   .wc-model-hero {
-    height: 154px;
+    height: 84px;
+    border-radius: 12px;
+  }
+
+  .wc-model-hero svg {
+    width: min(92px, 96%);
+  }
+
+  .wc-model-name {
+    font-size: 16px;
+    line-height: 1.1;
+  }
+
+  .wc-model-copy,
+  .wc-model-points {
+    display: none;
+  }
+
+  .wc-model-enter {
+    padding: 10px 6px;
+    min-height: 0;
+    font-size: 11px;
+    line-height: 1.2;
   }
 
   .wc-summary-trigger {
@@ -297,5 +356,33 @@ body.wc-config-active .model-viewer {
   .wc-summary-trigger .btn {
     min-width: 92px;
     padding-inline: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .wc-stage-title {
+    font-size: 20px;
+  }
+
+  .wc-model-card {
+    padding: 8px 6px 10px;
+  }
+
+  .wc-model-badge {
+    font-size: 8px;
+    padding: 4px 6px;
+  }
+
+  .wc-model-hero {
+    height: 74px;
+  }
+
+  .wc-model-name {
+    font-size: 14px;
+  }
+
+  .wc-model-enter {
+    font-size: 10px;
+    padding: 9px 4px;
   }
 }
