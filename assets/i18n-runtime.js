@@ -61,6 +61,7 @@ const WC_TEXT = {
       "Brake Setting": "刹车设置",
       "Axles Setting": "车轴设置",
       "Accessories - Anti Tipp": "附件 - 防后翻",
+      "Accessories - Anti Tip": "附件 - 防后翻",
       "Accessories - Tipping Help": "附件 - 倾倒辅助",
       "Accessories - Transit Wheels": "附件 - 转运轮",
       "Skirt Guards": "侧护板",
@@ -425,6 +426,7 @@ const WC_TEXT = {
       "Brake Setting": "Brems-Einstellung",
       "Axles Setting": "Achs-Einstellung",
       "Accessories - Anti Tipp": "Zubehör - Kippschutz",
+      "Accessories - Anti Tip": "Zubehör - Kippschutz",
       "Accessories - Tipping Help": "Zubehör - Kipphebel",
       "Accessories - Transit Wheels": "Zubehör - Transporträder",
       "Skirt Guards": "Seitenschutz",
@@ -799,6 +801,13 @@ function wcSetLanguage(lang) {
   wcApplyTranslations(nextLang);
 }
 
+function wcRefreshTranslations() {
+  const currentLang = localStorage.getItem(WC_I18N_STORAGE_KEY) || WC_DEFAULT_LANG;
+  wcApplyTranslations(currentLang);
+  wcScheduleModelDiagnostic();
+  wcBindLanguageSelect();
+}
+
 function wcBindLanguageSelect() {
   const select = document.querySelector(".select.compact");
   if (select && !select.dataset.wcI18nBound) {
@@ -830,6 +839,12 @@ function wcInitI18n() {
   wcScheduleModelDiagnostic();
   wcBindLanguageSelect();
   wcBootI18nSync();
+  window.__WC_I18N = {
+    setLanguage: wcSetLanguage,
+    refresh: wcRefreshTranslations,
+    apply: wcApplyTranslations
+  };
+  window.addEventListener("wc:refresh-i18n", wcRefreshTranslations);
   window.addEventListener("resize", wcRefreshModelDiagnostic);
 }
 

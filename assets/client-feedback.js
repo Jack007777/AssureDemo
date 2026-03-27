@@ -209,6 +209,23 @@
     return Array.from((root || document).querySelectorAll(selector));
   }
 
+  function refreshRuntimeTranslations(delay) {
+    const apply = function () {
+      if (window.__WC_I18N && typeof window.__WC_I18N.refresh === "function") {
+        window.__WC_I18N.refresh();
+        return;
+      }
+      window.dispatchEvent(new CustomEvent("wc:refresh-i18n"));
+    };
+
+    if (delay && delay > 0) {
+      window.setTimeout(apply, delay);
+      return;
+    }
+
+    window.requestAnimationFrame(apply);
+  }
+
   function heroSvg(accent) {
     return (
       '<svg viewBox="0 0 260 180" aria-hidden="true">' +
@@ -804,6 +821,7 @@
     renderMobileCategoryDock();
     syncVisibleSelections();
     syncSummaryExtras();
+    refreshRuntimeTranslations(120);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -820,6 +838,7 @@
     renderSummaryTrigger();
     renderMobileCategoryDock();
     window.scrollTo({ top: 0, behavior: "smooth" });
+    refreshRuntimeTranslations(80);
   }
 
   function syncVisibleSelections() {
@@ -996,6 +1015,7 @@
           }
           syncVisibleSelections();
           syncSummaryExtras();
+          refreshRuntimeTranslations();
         }, 120);
         return;
       }
@@ -1013,6 +1033,7 @@
         window.setTimeout(function () {
           syncVisibleSelections();
           syncSummaryExtras();
+          refreshRuntimeTranslations();
         }, 60);
         return;
       }
@@ -1023,6 +1044,7 @@
           state.selectionLabels = {};
           syncVisibleSelections();
           syncSummaryExtras();
+          refreshRuntimeTranslations();
         }, 80);
       }
     }, true);
@@ -1034,6 +1056,7 @@
         renderMobileCategoryDock();
         syncVisibleSelections();
         syncSummaryExtras();
+        refreshRuntimeTranslations();
       }, 80);
     }, true);
 
@@ -1047,6 +1070,7 @@
           renderToolbar();
           renderMobileCategoryDock();
           syncSummaryExtras();
+          refreshRuntimeTranslations();
         }, 50);
         window.setTimeout(enforceBilingualUi, 180);
       });

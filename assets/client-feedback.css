@@ -263,6 +263,22 @@ body.wc-summary-open .grid.grid-2 > .card:last-child {
   height: 16px;
 }
 
+.wc-mobile-summary-toggle .wc-summary-cta-icon {
+  flex: 0 0 16px;
+  min-width: 16px;
+  color: currentColor;
+  opacity: 0.92;
+}
+
+.wc-mobile-summary-toggle .wc-summary-cta-icon svg {
+  display: block;
+}
+
+.wc-mobile-summary-text {
+  display: inline-flex;
+  align-items: center;
+}
+
 .wc-summary-backdrop {
   position: fixed;
   inset: 0;
