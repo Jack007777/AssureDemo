@@ -90,6 +90,36 @@
     },
   };
 
+  const LANGUAGE_OPTIONS = [
+    { value: "zh-CN", label: "中文" },
+    { value: "en-US", label: "English" },
+  ];
+
+  const CATEGORY_LABELS = {
+    "zh-CN": [
+      "车架",
+      "座椅布面",
+      "靠背",
+      "侧板和扶手",
+      "脚踏板",
+      "前轮",
+      "后轮",
+      "刹车",
+      "F55 / 车架附件",
+    ],
+    "en-US": [
+      "Frame",
+      "Seat Upholstery",
+      "Backrest",
+      "Side Panels & Armrests",
+      "Footrest",
+      "Front Wheels",
+      "Rear Wheels",
+      "Brake",
+      "F55 / Frame Accessories",
+    ],
+  };
+
   const WEIGHT_BASE = {
     S2: 13.4,
     S2D: 13.9,
@@ -109,6 +139,57 @@
     const select = document.querySelector(".card.header select.select");
     const value = select && select.value;
     return UI_TEXT[value] ? value : "zh-CN";
+  }
+
+  function enforceBilingualLanguage() {
+    const select = getLangSelect() || qs(".select.compact");
+    if (!select) {
+      return;
+    }
+
+    qsa("option", select).forEach(function (option) {
+      const expected = LANGUAGE_OPTIONS.find(function (item) {
+        return item.value === option.value;
+      });
+      if (!expected) {
+        option.remove();
+        return;
+      }
+      if (option.textContent !== expected.label) {
+        option.textContent = expected.label;
+      }
+    });
+
+    LANGUAGE_OPTIONS.forEach(function (item) {
+      const existing = qsa("option", select).find(function (option) {
+        return option.value === item.value;
+      });
+      if (!existing) {
+        const option = document.createElement("option");
+        option.value = item.value;
+        option.textContent = item.label;
+        select.appendChild(option);
+      }
+    });
+
+    if (!UI_TEXT[select.value]) {
+      dispatchNativeSelect(select, "zh-CN");
+    }
+  }
+
+  function enforceCategoryLanguage() {
+    const labels = CATEGORY_LABELS[getLang()] || CATEGORY_LABELS["zh-CN"];
+    qsa(".category-btn").forEach(function (button, index) {
+      const textNode = qsa("span", button).slice(-1)[0];
+      if (textNode && labels[index] && textNode.textContent !== labels[index]) {
+        textNode.textContent = labels[index];
+      }
+    });
+  }
+
+  function enforceBilingualUi() {
+    enforceBilingualLanguage();
+    enforceCategoryLanguage();
   }
 
   function tr(key) {
@@ -652,10 +733,12 @@
     if (langSelect) {
       langSelect.addEventListener("change", function () {
         window.setTimeout(function () {
+          enforceBilingualUi();
           renderModelStage();
           renderToolbar();
           syncSummaryExtras();
         }, 50);
+        window.setTimeout(enforceBilingualUi, 180);
       });
     }
   }
@@ -669,6 +752,7 @@
     const summaryCard = getSummaryCard();
     if (summaryCard) {
       const observer = new MutationObserver(function () {
+        enforceBilingualUi();
         hideNativeControls();
         syncSummaryExtras();
       });
@@ -679,6 +763,7 @@
     const leftCard = getConfiguratorCard();
     if (leftCard) {
       const observer = new MutationObserver(function () {
+        enforceBilingualUi();
         hideNativeControls();
         bindDynamicControls();
         syncVisibleSelections();
@@ -702,6 +787,7 @@
       return false;
     }
     ensureInitialClasses();
+    enforceBilingualUi();
     renderModelStage();
     renderToolbar();
     ensureSummaryUI();
@@ -710,6 +796,8 @@
     syncVisibleSelections();
     syncSummaryExtras();
     attachObservers();
+    window.setTimeout(enforceBilingualUi, 80);
+    window.setTimeout(enforceBilingualUi, 260);
     if (!state.mounted) {
       bindEvents();
       state.mounted = true;
