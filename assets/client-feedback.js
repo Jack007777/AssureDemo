@@ -256,6 +256,7 @@
     selectionLabels: {},
     selectionDetails: {},
     syncTimer: 0,
+    categoryScrollTimers: [],
     mobileCategoryTransitionDirection: "",
     mobileCategoryTransitionTimer: 0,
     mobileEdgeSwipeStartX: 0,
@@ -1149,15 +1150,33 @@
   }
 
   function scrollCategoryContentToTop(behavior) {
-    const card = getConfiguratorCard();
-    const anchor = qs(".option-groups", card) || qs(".option-group", card);
-    if (!anchor) {
-      return;
+    while (state.categoryScrollTimers.length) {
+      window.clearTimeout(state.categoryScrollTimers.pop());
     }
-    anchor.classList.add("wc-option-anchor");
-    anchor.scrollIntoView({
-      behavior: behavior || "smooth",
-      block: "start",
+
+    const align = function (scrollBehavior) {
+      const card = getConfiguratorCard();
+      const anchor = qs(".option-groups", card) || qs(".option-group", card);
+      if (!anchor) {
+        return;
+      }
+      anchor.classList.add("wc-option-anchor");
+      const stickyOffset = isMobileViewport() && document.body.classList.contains("wc-config-active")
+        ? (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--wc-mobile-sticky-stack-height")) || 0) + 10
+        : 18;
+      const targetTop = Math.max(0, window.scrollY + anchor.getBoundingClientRect().top - stickyOffset);
+      window.scrollTo({
+        top: targetTop,
+        behavior: scrollBehavior || "auto",
+      });
+    };
+
+    const delays = behavior === "smooth" ? [0, 140, 300] : [0];
+    delays.forEach(function (delay, index) {
+      const timer = window.setTimeout(function () {
+        align(index === 0 ? behavior : "auto");
+      }, delay);
+      state.categoryScrollTimers.push(timer);
     });
   }
 
