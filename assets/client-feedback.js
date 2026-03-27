@@ -982,9 +982,15 @@
       return;
     }
 
+    const viewer = qs(".model-viewer", card);
     const categoryGrid = qs(".category-grid", card);
-    if (!categoryGrid) {
+    if (!viewer || !categoryGrid) {
       return;
+    }
+
+    let previewTitle = viewer.previousElementSibling;
+    while (previewTitle && !previewTitle.classList.contains("section-title")) {
+      previewTitle = previewTitle.previousElementSibling;
     }
 
     let categoryTitle = categoryGrid.previousElementSibling;
@@ -992,6 +998,7 @@
       categoryTitle = categoryTitle.previousElementSibling;
     }
 
+    let shellStart = previewTitle || viewer;
     let configStart = categoryGrid.nextElementSibling;
     while (configStart) {
       if (qs(".h1", configStart) || configStart.classList.contains("option-groups")) {
@@ -1000,7 +1007,7 @@
       configStart = configStart.nextElementSibling;
     }
 
-    if (!categoryTitle || !configStart) {
+    if (!categoryTitle || !configStart || !shellStart) {
       return;
     }
 
@@ -1027,10 +1034,15 @@
       rail.appendChild(categoryGrid);
     }
 
-    let node = configStart;
+    let node = shellStart;
     while (node) {
       const next = node.nextElementSibling;
-      if (node !== shell && node.parentNode !== main) {
+      if (
+        node !== shell &&
+        node !== categoryTitle &&
+        node !== categoryGrid &&
+        node.parentNode !== main
+      ) {
         main.appendChild(node);
       }
       node = next;
