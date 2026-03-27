@@ -505,6 +505,71 @@
     });
   }
 
+  function ensureMobileConfigBar() {
+    const container = getRootContainer();
+    const grid = getGrid();
+    if (!container || !grid) {
+      return null;
+    }
+    let bar = qs(".wc-mobile-config-bar", container);
+    if (!bar) {
+      bar = document.createElement("section");
+      bar.className = "wc-mobile-config-bar wc-hidden-source";
+      bar.innerHTML =
+        '<div class="wc-mobile-config-start">' +
+        '<div class="wc-mobile-config-lang"></div>' +
+        '<button type="button" class="btn secondary wc-switch-model wc-mobile-switch-model"></button>' +
+        "</div>" +
+        '<div class="wc-mobile-config-summary">' +
+        '<div class="wc-mobile-config-total"></div>' +
+        '<div class="wc-mobile-config-weight"></div>' +
+        "</div>" +
+        '<button type="button" class="btn secondary wc-mobile-summary-toggle">' +
+        '<span class="wc-summary-cta-icon">' + summaryIconSvg() + "</span>" +
+        '<span class="wc-mobile-summary-text"></span>' +
+        "</button>";
+      container.insertBefore(bar, grid);
+    }
+    return bar;
+  }
+
+  function renderMobileConfigBar() {
+    const bar = ensureMobileConfigBar();
+    const select = getLangSelect();
+    if (!bar || !select) {
+      return;
+    }
+
+    bar.classList.toggle("wc-hidden-source", !document.body.classList.contains("wc-config-active"));
+
+    const langWrap = qs(".wc-mobile-config-lang", bar);
+    if (!langWrap.dataset.wcInit) {
+      langWrap.dataset.wcInit = "1";
+      langWrap.innerHTML =
+        '<button type="button" class="wc-mobile-config-lang-btn" data-lang="zh-CN">中文</button>' +
+        '<button type="button" class="wc-mobile-config-lang-btn" data-lang="en-US">EN</button>';
+    }
+
+    const current = getLang();
+    qsa(".wc-mobile-config-lang-btn", langWrap).forEach(function (button) {
+      const lang = button.getAttribute("data-lang");
+      button.classList.toggle("active", lang === current);
+      if (!button.dataset.wcLangBound) {
+        button.dataset.wcLangBound = "1";
+        button.addEventListener("click", function () {
+          dispatchNativeSelect(select, lang);
+        });
+      }
+    });
+
+    qs(".wc-mobile-switch-model", bar).textContent = tr("switchModel");
+    qs(".wc-mobile-config-total", bar).textContent = parseMoneyCell();
+    qs(".wc-mobile-config-weight", bar).textContent = tr("weightMeta") + ": " + formatWeight(computeWeight());
+    qs(".wc-mobile-summary-text", bar).textContent = document.body.classList.contains("wc-summary-open")
+      ? tr("summaryClose")
+      : tr("summaryButton");
+  }
+
   function ensureSummaryUI() {
     let trigger = qs(".wc-summary-trigger");
     if (!trigger) {
@@ -648,8 +713,9 @@
     qs(".wc-summary-cta-text", ui.trigger).textContent = document.body.classList.contains("wc-summary-open")
       ? tr("summaryClose")
       : tr("summaryButton");
-    ui.trigger.hidden = !document.body.classList.contains("wc-config-active");
+    ui.trigger.hidden = !document.body.classList.contains("wc-config-active") || isMobileViewport();
     ui.backdrop.hidden = !document.body.classList.contains("wc-summary-open");
+    renderMobileConfigBar();
     renderMobileCategoryDock();
   }
 
@@ -716,6 +782,7 @@
       toolbar.classList.remove("wc-hidden-source");
     }
     renderToolbar();
+    renderMobileConfigBar();
     renderSummaryTrigger();
     renderMobileCategoryDock();
     syncVisibleSelections();
@@ -732,6 +799,7 @@
     if (toolbar) {
       toolbar.classList.add("wc-hidden-source");
     }
+    renderMobileConfigBar();
     renderSummaryTrigger();
     renderMobileCategoryDock();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -891,7 +959,7 @@
         return;
       }
 
-      if (event.target.closest(".wc-summary-trigger")) {
+      if (event.target.closest(".wc-summary-trigger") || event.target.closest(".wc-mobile-summary-toggle")) {
         toggleSummary();
         return;
       }
@@ -1001,6 +1069,7 @@
     ensureSummaryUI();
     hideNativeControls();
     bindDynamicControls();
+    renderMobileConfigBar();
     renderMobileCategoryDock();
     syncVisibleSelections();
     syncSummaryExtras();
