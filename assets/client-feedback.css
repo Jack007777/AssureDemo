@@ -6,6 +6,10 @@ body.wc-preselect .wc-inline-toolbar {
   display: none !important;
 }
 
+.card.header .btn.secondary {
+  display: none !important;
+}
+
 body.wc-config-active .wc-model-stage {
   display: none !important;
 }
