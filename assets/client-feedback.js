@@ -1123,6 +1123,9 @@
     }
     triggerMobileCategoryTransition(offset < 0 ? "prev" : "next");
     buttons[nextIndex].click();
+    window.setTimeout(function () {
+      scrollCategoryContentToTop("smooth");
+    }, 130);
     const dock = qs(".wc-mobile-category-dock");
     if (dock) {
       dock.classList.add("is-transitioning", offset < 0 ? "is-transitioning-prev" : "is-transitioning-next");
@@ -1143,6 +1146,19 @@
         document.body.classList.contains("wc-config-active") && isMobileViewport()
       );
     }
+  }
+
+  function scrollCategoryContentToTop(behavior) {
+    const card = getConfiguratorCard();
+    const anchor = qs(".option-groups", card) || qs(".option-group", card);
+    if (!anchor) {
+      return;
+    }
+    anchor.classList.add("wc-option-anchor");
+    anchor.scrollIntoView({
+      behavior: behavior || "smooth",
+      block: "start",
+    });
   }
 
   function renderMobileCategoryDock() {
@@ -1545,11 +1561,7 @@
             syncSummaryExtras();
             return;
           }
-          const anchor = qs(".option-groups", getConfiguratorCard());
-          if (anchor) {
-            anchor.classList.add("wc-option-anchor");
-            anchor.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
+          scrollCategoryContentToTop("smooth");
           reflectSelectionsFromStore();
           renderMobileCategoryDock();
           syncVisibleSelections();
@@ -1790,11 +1802,7 @@
             syncSummaryExtras();
             return;
           }
-          const anchor = qs(".option-groups", getConfiguratorCard());
-          if (anchor) {
-            anchor.classList.add("wc-option-anchor");
-            anchor.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
+          scrollCategoryContentToTop("smooth");
           reflectSelectionsFromStore();
           syncVisibleSelections();
           syncSummaryExtras();
