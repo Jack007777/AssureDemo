@@ -256,6 +256,12 @@
     selectionLabels: {},
     selectionDetails: {},
     syncTimer: 0,
+    mobileCategoryTransitionDirection: "",
+    mobileCategoryTransitionTimer: 0,
+    mobileEdgeSwipeStartY: 0,
+    mobileEdgeSwipeActive: false,
+    mobileEdgeSwipeConsumed: false,
+    mobileEdgeSwipeLockUntil: 0,
     observers: [],
   };
 
@@ -1024,6 +1030,56 @@
     next.disabled = !overflow || atEnd;
   }
 
+  function getMobileNativeCategoryButtons() {
+    return qsa(".category-btn", getConfiguratorCard());
+  }
+
+  function getActiveMobileCategoryIndex() {
+    return getMobileNativeCategoryButtons().findIndex(function (button) {
+      return button.classList.contains("active");
+    });
+  }
+
+  function scheduleMobileCategoryTransitionClear() {
+    if (state.mobileCategoryTransitionTimer) {
+      window.clearTimeout(state.mobileCategoryTransitionTimer);
+    }
+    state.mobileCategoryTransitionTimer = window.setTimeout(function () {
+      state.mobileCategoryTransitionDirection = "";
+      const dock = qs(".wc-mobile-category-dock");
+      if (dock) {
+        dock.classList.remove("is-transitioning", "is-transitioning-next", "is-transitioning-prev");
+      }
+    }, 420);
+  }
+
+  function triggerMobileCategoryTransition(direction) {
+    state.mobileCategoryTransitionDirection = direction === "prev" ? "prev" : "next";
+    scheduleMobileCategoryTransitionClear();
+  }
+
+  function switchMobileCategoryByOffset(offset) {
+    if (!document.body.classList.contains("wc-config-active") || !isMobileViewport() || document.body.classList.contains("wc-summary-open")) {
+      return false;
+    }
+    const buttons = getMobileNativeCategoryButtons();
+    if (!buttons.length) {
+      return false;
+    }
+    const currentIndex = getActiveMobileCategoryIndex();
+    const nextIndex = Math.max(0, Math.min(buttons.length - 1, (currentIndex < 0 ? 0 : currentIndex) + offset));
+    if (nextIndex === currentIndex || !buttons[nextIndex]) {
+      return false;
+    }
+    triggerMobileCategoryTransition(offset < 0 ? "prev" : "next");
+    buttons[nextIndex].click();
+    const dock = qs(".wc-mobile-category-dock");
+    if (dock) {
+      dock.classList.add("is-transitioning", offset < 0 ? "is-transitioning-prev" : "is-transitioning-next");
+    }
+    return true;
+  }
+
   function syncCategoryTitleVisibility() {
     const leftCard = getConfiguratorCard();
     if (!leftCard) {
@@ -1083,6 +1139,17 @@
         button.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
       });
     });
+
+    if (state.mobileCategoryTransitionDirection) {
+      dock.classList.add("is-transitioning", state.mobileCategoryTransitionDirection === "prev" ? "is-transitioning-prev" : "is-transitioning-next");
+      const activeChip = qs(".wc-mobile-category-chip.active", track);
+      if (activeChip) {
+        activeChip.classList.add("is-just-activated");
+      }
+      scheduleMobileCategoryTransitionClear();
+    } else {
+      dock.classList.remove("is-transitioning", "is-transitioning-next", "is-transitioning-prev");
+    }
 
     window.setTimeout(updateMobileCategoryDockState, 40);
   }
@@ -1263,6 +1330,7 @@
     state.selectionLabels = {};
     state.selectionDetails = {};
     state.viewerMinimized = false;
+    state.mobileCategoryTransitionDirection = "";
     toggleSummary(false);
     document.body.classList.add("wc-preselect");
     document.body.classList.remove("wc-config-active");
@@ -1569,6 +1637,64 @@
   }
 
   function bindEvents() {
+    document.addEventListener("touchstart", function (event) {
+      if (!document.body.classList.contains("wc-config-active") || !isMobileViewport() || document.body.classList.contains("wc-summary-open")) {
+        state.mobileEdgeSwipeActive = false;
+        return;
+      }
+      if (event.target && event.target.closest && event.target.closest(".wc-mobile-category-dock, .wc-mobile-config-bar, .model-viewer, .wc-mobile-viewer-restore")) {
+        state.mobileEdgeSwipeActive = false;
+        return;
+      }
+      if (!event.touches || !event.touches.length) {
+        state.mobileEdgeSwipeActive = false;
+        return;
+      }
+      state.mobileEdgeSwipeActive = true;
+      state.mobileEdgeSwipeConsumed = false;
+      state.mobileEdgeSwipeStartY = event.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener("touchmove", function (event) {
+      if (!state.mobileEdgeSwipeActive || state.mobileEdgeSwipeConsumed) {
+        return;
+      }
+      if (Date.now() < state.mobileEdgeSwipeLockUntil) {
+        return;
+      }
+      if (!event.touches || !event.touches.length) {
+        return;
+      }
+      const currentY = event.touches[0].clientY;
+      const deltaY = currentY - state.mobileEdgeSwipeStartY;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const atTop = scrollTop <= 4;
+      const atBottom = scrollTop >= maxScroll - 4;
+
+      if (atBottom && deltaY < -54) {
+        if (switchMobileCategoryByOffset(1)) {
+          state.mobileEdgeSwipeConsumed = true;
+          state.mobileEdgeSwipeLockUntil = Date.now() + 700;
+        }
+      } else if (atTop && deltaY > 54) {
+        if (switchMobileCategoryByOffset(-1)) {
+          state.mobileEdgeSwipeConsumed = true;
+          state.mobileEdgeSwipeLockUntil = Date.now() + 700;
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener("touchend", function () {
+      state.mobileEdgeSwipeActive = false;
+      state.mobileEdgeSwipeConsumed = false;
+    }, { passive: true });
+
+    document.addEventListener("touchcancel", function () {
+      state.mobileEdgeSwipeActive = false;
+      state.mobileEdgeSwipeConsumed = false;
+    }, { passive: true });
+
     document.addEventListener("click", function (event) {
       const enterCard = event.target.closest(".wc-model-card");
       if (enterCard && qs(".wc-model-enter", enterCard)) {
@@ -1675,6 +1801,7 @@
           state.selectionLabels = {};
           state.selectionDetails = {};
           state.viewerMinimized = false;
+          state.mobileCategoryTransitionDirection = "";
           state.defaultsAppliedKey = "";
           scheduleDefaultSelections(true);
         }
