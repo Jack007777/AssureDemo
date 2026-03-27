@@ -1084,14 +1084,27 @@
     state.mobileCategoryTransitionTimer = window.setTimeout(function () {
       state.mobileCategoryTransitionDirection = "";
       const dock = qs(".wc-mobile-category-dock");
+      const card = getConfiguratorCard();
       if (dock) {
         dock.classList.remove("is-transitioning", "is-transitioning-next", "is-transitioning-prev");
+      }
+      if (card) {
+        card.classList.remove("wc-mobile-content-transition", "is-transitioning-next", "is-transitioning-prev");
       }
     }, 420);
   }
 
   function triggerMobileCategoryTransition(direction) {
     state.mobileCategoryTransitionDirection = direction === "prev" ? "prev" : "next";
+    const card = getConfiguratorCard();
+    if (card) {
+      card.classList.remove("wc-mobile-content-transition", "is-transitioning-next", "is-transitioning-prev");
+      void card.offsetWidth;
+      card.classList.add(
+        "wc-mobile-content-transition",
+        direction === "prev" ? "is-transitioning-prev" : "is-transitioning-next"
+      );
+    }
     scheduleMobileCategoryTransitionClear();
   }
 
