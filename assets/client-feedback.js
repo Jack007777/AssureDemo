@@ -151,6 +151,8 @@
       summaryLabel: "\u603b\u91d1\u989d",
       summaryButton: "\u8ba2\u5355\u660e\u7ec6",
       summaryClose: "\u6536\u8d77\u660e\u7ec6",
+      viewerMinimize: "\u6536\u8d77 3D",
+      viewerRestore: "\u5c55\u5f00 3D",
       weightLabel: "\u603b\u91cd\u91cf",
       weightMeta: "\u603b\u91cd\u91cf",
       summarySpecTitle: "\u5f53\u524d\u914d\u7f6e",
@@ -164,6 +166,8 @@
       summaryLabel: "Total",
       summaryButton: "Order details",
       summaryClose: "Hide details",
+      viewerMinimize: "Hide 3D",
+      viewerRestore: "Show 3D",
       summarySpecEmpty: "Selected specifications will appear here",
     },
   };
@@ -246,6 +250,7 @@
     sourceModel: "",
     mounted: false,
     summaryOpen: false,
+    viewerMinimized: false,
     applyingDefaults: false,
     defaultsAppliedKey: "",
     selectionLabels: {},
@@ -381,6 +386,24 @@
       '<path d="M6.5 13.1h4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />' +
       '<circle cx="14.3" cy="13.2" r="2.2" fill="currentColor" fill-opacity="0.14" />' +
       '<path d="M13.2 13.1l.8.8 1.5-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />' +
+      "</svg>"
+    );
+  }
+
+  function viewerToggleIconSvg(type) {
+    if (type === "restore") {
+      return (
+        '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+        '<path d="M4.8 10.1h10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />' +
+        '<path d="M10 4.9v10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />' +
+        '<rect x="4.1" y="4.1" width="11.8" height="11.8" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.42" />' +
+        "</svg>"
+      );
+    }
+    return (
+      '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+      '<path d="M4.8 10.1h10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />' +
+      '<rect x="4.1" y="4.1" width="11.8" height="11.8" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.42" />' +
       "</svg>"
     );
   }
@@ -794,6 +817,10 @@
         '<div class="wc-mobile-config-start">' +
         '<div class="wc-mobile-config-lang"></div>' +
         '<button type="button" class="btn secondary wc-switch-model wc-mobile-switch-model"></button>' +
+        '<button type="button" class="btn secondary wc-mobile-viewer-toggle">' +
+        '<span class="wc-mobile-viewer-toggle-icon">' + viewerToggleIconSvg("minimize") + "</span>" +
+        '<span class="wc-mobile-viewer-toggle-text"></span>' +
+        "</button>" +
         "</div>" +
         '<button type="button" class="wc-mobile-config-summary wc-mobile-summary-toggle">' +
         '<span class="wc-mobile-config-total-row">' +
@@ -808,6 +835,49 @@
       container.insertBefore(bar, grid);
     }
     return bar;
+  }
+
+  function ensureMobileViewerRestore() {
+    const card = getConfiguratorCard();
+    const viewer = qs(".model-viewer", card);
+    if (!card || !viewer) {
+      return null;
+    }
+    let restore = qs(".wc-mobile-viewer-restore", card);
+    if (!restore) {
+      restore = document.createElement("button");
+      restore.type = "button";
+      restore.className = "wc-mobile-viewer-restore";
+      restore.innerHTML =
+        '<span class="wc-mobile-viewer-restore-icon">' + viewerToggleIconSvg("restore") + "</span>" +
+        '<span class="wc-mobile-viewer-restore-text"></span>';
+      viewer.insertAdjacentElement("afterend", restore);
+    }
+    return restore;
+  }
+
+  function renderMobileViewerState() {
+    const isActive = document.body.classList.contains("wc-config-active") && isMobileViewport();
+    const restore = ensureMobileViewerRestore();
+    const toggle = qs(".wc-mobile-viewer-toggle");
+    const nextState = !!(isActive && state.viewerMinimized);
+
+    document.body.classList.toggle("wc-mobile-viewer-minimized", nextState);
+
+    if (toggle) {
+      qs(".wc-mobile-viewer-toggle-text", toggle).textContent = nextState ? tr("viewerRestore") : tr("viewerMinimize");
+      qs(".wc-mobile-viewer-toggle-icon", toggle).innerHTML = viewerToggleIconSvg(nextState ? "restore" : "minimize");
+      toggle.setAttribute("aria-pressed", nextState ? "true" : "false");
+      toggle.setAttribute("aria-label", nextState ? tr("viewerRestore") : tr("viewerMinimize"));
+    }
+
+    if (restore) {
+      restore.hidden = !nextState;
+      qs(".wc-mobile-viewer-restore-text", restore).textContent = tr("viewerRestore");
+      restore.setAttribute("aria-label", tr("viewerRestore"));
+    }
+
+    window.requestAnimationFrame(updateMobileStickyMetrics);
   }
 
   function renderMobileConfigBar() {
@@ -842,6 +912,7 @@
     });
 
     qs(".wc-mobile-switch-model", bar).textContent = tr("switchModel");
+    renderMobileViewerState();
     qs(".wc-mobile-config-total", bar).textContent = parseMoneyCell();
     qs(".wc-mobile-config-weight", bar).textContent = tr("weightMeta") + ": " + formatWeight(computeWeight());
     qs(".wc-mobile-summary-text", bar).textContent = document.body.classList.contains("wc-summary-open")
@@ -859,8 +930,15 @@
     const isActive = document.body.classList.contains("wc-config-active") && isMobileViewport();
     const bar = qs(".wc-mobile-config-bar");
     const viewer = qs(".model-viewer", getConfiguratorCard());
+    const restore = qs(".wc-mobile-viewer-restore", getConfiguratorCard());
     const barHeight = isActive && bar ? Math.ceil(bar.getBoundingClientRect().height) : 0;
-    const viewerHeight = isActive && viewer ? Math.ceil(viewer.getBoundingClientRect().height) : 0;
+    const viewerHeight = isActive
+      ? Math.ceil(
+          state.viewerMinimized
+            ? ((restore && !restore.hidden && restore.getBoundingClientRect().height) || 0)
+            : ((viewer && viewer.getBoundingClientRect().height) || 0)
+        )
+      : 0;
     const stackHeight = isActive ? barHeight + viewerHeight + 28 : 0;
 
     document.documentElement.style.setProperty("--wc-mobile-config-bar-height", barHeight + "px");
@@ -1029,6 +1107,13 @@
     renderSummaryTrigger();
   }
 
+  function toggleMobileViewer(force) {
+    const next = typeof force === "boolean" ? force : !state.viewerMinimized;
+    state.viewerMinimized = next;
+    renderMobileViewerState();
+    renderMobileCategoryDock();
+  }
+
   function hideNativeControls() {
     const header = getHeaderCard();
     const headerButtons = header ? qsa("button", header) : [];
@@ -1151,6 +1236,7 @@
     state.sourceModel = card.sourceModel;
     state.selectionLabels = {};
     state.selectionDetails = {};
+    state.viewerMinimized = false;
     dispatchNativeSelect(select, card.sourceModel);
     document.body.classList.remove("wc-preselect");
     document.body.classList.add("wc-config-active");
@@ -1173,6 +1259,7 @@
   function backToModelStage() {
     state.selectionLabels = {};
     state.selectionDetails = {};
+    state.viewerMinimized = false;
     toggleSummary(false);
     document.body.classList.add("wc-preselect");
     document.body.classList.remove("wc-config-active");
@@ -1491,6 +1578,11 @@
         return;
       }
 
+      if (event.target.closest(".wc-mobile-viewer-toggle") || event.target.closest(".wc-mobile-viewer-restore")) {
+        toggleMobileViewer();
+        return;
+      }
+
       if (event.target.closest(".wc-summary-trigger") || event.target.closest(".wc-mobile-summary-toggle")) {
         toggleSummary();
         return;
@@ -1579,6 +1671,7 @@
           syncCardStateFromModelSelect();
           state.selectionLabels = {};
           state.selectionDetails = {};
+          state.viewerMinimized = false;
           state.defaultsAppliedKey = "";
           scheduleDefaultSelections(true);
         }
@@ -1601,6 +1694,7 @@
           renderMobileLanguageSwitch();
           renderModelStage();
           renderToolbar();
+          renderMobileViewerState();
           renderMobileCategoryDock();
           syncSummaryExtras();
           refreshRuntimeTranslations();
@@ -1611,6 +1705,7 @@
 
     window.addEventListener("resize", function () {
       window.setTimeout(function () {
+        renderMobileViewerState();
         renderSummaryTrigger();
       }, 60);
     });
@@ -1674,6 +1769,7 @@
     bindDynamicControls();
     annotateVisibleOptionButtons();
     renderMobileConfigBar();
+    renderMobileViewerState();
     renderMobileCategoryDock();
     reflectSelectionsFromStore();
     syncVisibleSelections();
