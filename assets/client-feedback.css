@@ -42,6 +42,12 @@ body.wc-summary-open .grid.grid-2 > .card:last-child {
   pointer-events: auto;
 }
 
+:root {
+  --wc-mobile-config-bar-height: 0px;
+  --wc-mobile-viewer-height: 0px;
+  --wc-mobile-sticky-stack-height: 0px;
+}
+
 .wc-hidden-source {
   display: none !important;
 }
@@ -430,7 +436,7 @@ body.wc-config-active .model-viewer {
 
   .wc-mobile-config-bar {
     position: sticky;
-    top: 10px;
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
     z-index: 38;
     display: grid;
     grid-template-columns: auto minmax(92px, 1fr) auto;
@@ -511,23 +517,27 @@ body.wc-config-active .model-viewer {
   }
 
   body.wc-config-active .container {
+    padding-top: 8px;
     padding-bottom: 104px;
   }
 
   body.wc-config-active .grid.grid-2 > .card:first-child {
     padding: 12px;
+    overflow: visible;
   }
 
   body.wc-config-active .model-viewer {
-    position: relative !important;
-    top: auto !important;
-    z-index: 1 !important;
-    width: 100%;
+    position: sticky !important;
+    top: calc(env(safe-area-inset-top, 0px) + var(--wc-mobile-config-bar-height, 0px) + 16px) !important;
+    z-index: 34 !important;
+    width: min(100%, 320px);
+    max-width: 100%;
     height: auto !important;
     min-height: 0 !important;
     aspect-ratio: 1 / 1;
-    margin-bottom: 12px;
-    box-shadow: none !important;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24) !important;
   }
 
   .model-viewer::after {
@@ -539,6 +549,10 @@ body.wc-config-active .model-viewer {
 
   .option-groups {
     gap: 10px;
+  }
+
+  .wc-option-anchor {
+    scroll-margin-top: calc(var(--wc-mobile-sticky-stack-height, 0px) + 18px);
   }
 
   .option-group {

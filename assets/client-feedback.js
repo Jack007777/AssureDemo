@@ -537,10 +537,12 @@
     const bar = ensureMobileConfigBar();
     const select = getLangSelect();
     if (!bar || !select) {
+      updateMobileStickyMetrics();
       return;
     }
 
-    bar.classList.toggle("wc-hidden-source", !document.body.classList.contains("wc-config-active"));
+    const isActive = document.body.classList.contains("wc-config-active");
+    bar.classList.toggle("wc-hidden-source", !isActive);
 
     const langWrap = qs(".wc-mobile-config-lang", bar);
     if (!langWrap.dataset.wcInit) {
@@ -568,6 +570,21 @@
     qs(".wc-mobile-summary-text", bar).textContent = document.body.classList.contains("wc-summary-open")
       ? tr("summaryClose")
       : tr("summaryButton");
+
+    window.requestAnimationFrame(updateMobileStickyMetrics);
+  }
+
+  function updateMobileStickyMetrics() {
+    const isActive = document.body.classList.contains("wc-config-active") && isMobileViewport();
+    const bar = qs(".wc-mobile-config-bar");
+    const viewer = qs(".model-viewer", getConfiguratorCard());
+    const barHeight = isActive && bar ? Math.ceil(bar.getBoundingClientRect().height) : 0;
+    const viewerHeight = isActive && viewer ? Math.ceil(viewer.getBoundingClientRect().height) : 0;
+    const stackHeight = isActive ? barHeight + viewerHeight + 28 : 0;
+
+    document.documentElement.style.setProperty("--wc-mobile-config-bar-height", barHeight + "px");
+    document.documentElement.style.setProperty("--wc-mobile-viewer-height", viewerHeight + "px");
+    document.documentElement.style.setProperty("--wc-mobile-sticky-stack-height", stackHeight + "px");
   }
 
   function ensureSummaryUI() {
@@ -1037,7 +1054,7 @@
 
     window.addEventListener("resize", function () {
       window.setTimeout(function () {
-        renderMobileCategoryDock();
+        renderSummaryTrigger();
       }, 60);
     });
   }
