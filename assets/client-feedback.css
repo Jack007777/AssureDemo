@@ -677,7 +677,10 @@ body.wc-config-active .model-viewer {
   .wc-mobile-category-chip {
     flex: 0 0 auto;
     min-width: max-content;
-    padding: 10px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.04);
@@ -692,6 +695,39 @@ body.wc-config-active .model-viewer {
     border-color: rgba(243, 201, 107, 0.72);
     background: rgba(243, 201, 107, 0.16);
     color: #f6d589;
+  }
+
+  .wc-mobile-category-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+  }
+
+  .wc-mobile-category-icon svg {
+    width: 18px;
+    height: 18px;
+    overflow: visible;
+  }
+
+  .wc-mobile-category-icon .base {
+    opacity: 0.28;
+  }
+
+  .wc-mobile-category-icon .accent {
+    opacity: 0.96;
+  }
+
+  .wc-mobile-category-chip.active .wc-mobile-category-icon .base {
+    opacity: 0.34;
+  }
+
+  .wc-mobile-category-label {
+    display: inline-flex;
+    align-items: center;
   }
 
   .wc-mobile-category-arrow {

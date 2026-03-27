@@ -713,10 +713,15 @@
       .map(function (button, index) {
         const labelNode = qsa("span", button).slice(-1)[0];
         const label = (labelNode || button).textContent.trim();
+        const iconNode = qs(".category-icon", button);
+        const iconMarkup = iconNode
+          ? '<span class="wc-mobile-category-icon" aria-hidden="true">' + iconNode.innerHTML + "</span>"
+          : "";
         const active = button.classList.contains("active") ? " active" : "";
         return (
           '<button type="button" class="wc-mobile-category-chip' + active + '" data-index="' + index + '">' +
-          label +
+          iconMarkup +
+          '<span class="wc-mobile-category-label">' + label + "</span>" +
           "</button>"
         );
       })
