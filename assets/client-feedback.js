@@ -79,9 +79,9 @@
 
   const UI_TEXT = {
     "zh-CN": {
-      stageKicker: "车型入口",
-      stageTitle: "先选择车型，再进入 3D 选配",
-      stageCopy: "客户先看车型和卖点，再进入对应的配置页面。这样比直接把 3D 和所有配置项一起抛出来更利于判断。",
+      stageKicker: "车型选择",
+      stageTitle: "选择适合您的车型",
+      stageCopy: "根据使用场景与核心需求选择车型，进入后可查看 3D 效果并完成详细配置。",
       stageEnter: "进入该车型",
       toolbarEyebrow: "当前车型",
       switchModel: "切换车型",
@@ -93,9 +93,9 @@
       weightMeta: "总重量",
     },
     "en-US": {
-      stageKicker: "Model Entry",
-      stageTitle: "Choose a model first, then enter 3D configuration",
-      stageCopy: "Customers see each model and its selling points first, then continue to the matching configuration flow.",
+      stageKicker: "Model Selection",
+      stageTitle: "Choose the model that fits your needs",
+      stageCopy: "Start with the model that best matches the intended use, then continue to the 3D view and detailed configuration.",
       stageEnter: "Configure this model",
       toolbarEyebrow: "Current Model",
       switchModel: "Switch model",
@@ -107,9 +107,9 @@
       weightMeta: "Total weight",
     },
     "de-DE": {
-      stageKicker: "Modelleinstieg",
-      stageTitle: "Zuerst Modell waehlen, dann in die 3D-Konfiguration gehen",
-      stageCopy: "Kunden sehen zuerst Modell und Verkaufsargumente und wechseln danach in den passenden Konfigurationsablauf.",
+      stageKicker: "Modellauswahl",
+      stageTitle: "Waehlen Sie das passende Modell",
+      stageCopy: "Waehlen Sie das Modell passend zu Einsatzbereich und Anforderungen und wechseln Sie danach in die 3D-Konfiguration.",
       stageEnter: "Dieses Modell konfigurieren",
       toolbarEyebrow: "Aktuelles Modell",
       switchModel: "Modell wechseln",
