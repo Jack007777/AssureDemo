@@ -817,10 +817,6 @@
         '<div class="wc-mobile-config-start">' +
         '<div class="wc-mobile-config-lang"></div>' +
         '<button type="button" class="btn secondary wc-switch-model wc-mobile-switch-model"></button>' +
-        '<button type="button" class="btn secondary wc-mobile-viewer-toggle">' +
-        '<span class="wc-mobile-viewer-toggle-icon">' + viewerToggleIconSvg("minimize") + "</span>" +
-        '<span class="wc-mobile-viewer-toggle-text"></span>' +
-        "</button>" +
         "</div>" +
         '<button type="button" class="wc-mobile-config-summary wc-mobile-summary-toggle">' +
         '<span class="wc-mobile-config-total-row">' +
@@ -837,11 +833,18 @@
     return bar;
   }
 
-  function ensureMobileViewerRestore() {
+  function ensureMobileViewerControls() {
     const card = getConfiguratorCard();
     const viewer = qs(".model-viewer", card);
     if (!card || !viewer) {
       return null;
+    }
+    let toggle = qs(".wc-mobile-viewer-corner-toggle", viewer);
+    if (!toggle) {
+      toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "wc-mobile-viewer-corner-toggle";
+      viewer.appendChild(toggle);
     }
     let restore = qs(".wc-mobile-viewer-restore", card);
     if (!restore) {
@@ -853,22 +856,22 @@
         '<span class="wc-mobile-viewer-restore-text"></span>';
       viewer.insertAdjacentElement("afterend", restore);
     }
-    return restore;
+    return { toggle: toggle, restore: restore };
   }
 
   function renderMobileViewerState() {
     const isActive = document.body.classList.contains("wc-config-active") && isMobileViewport();
-    const restore = ensureMobileViewerRestore();
-    const toggle = qs(".wc-mobile-viewer-toggle");
+    const controls = ensureMobileViewerControls();
+    const toggle = controls && controls.toggle;
+    const restore = controls && controls.restore;
     const nextState = !!(isActive && state.viewerMinimized);
 
     document.body.classList.toggle("wc-mobile-viewer-minimized", nextState);
 
     if (toggle) {
-      qs(".wc-mobile-viewer-toggle-text", toggle).textContent = nextState ? tr("viewerRestore") : tr("viewerMinimize");
-      qs(".wc-mobile-viewer-toggle-icon", toggle).innerHTML = viewerToggleIconSvg(nextState ? "restore" : "minimize");
-      toggle.setAttribute("aria-pressed", nextState ? "true" : "false");
-      toggle.setAttribute("aria-label", nextState ? tr("viewerRestore") : tr("viewerMinimize"));
+      toggle.hidden = !isActive || nextState;
+      toggle.innerHTML = viewerToggleIconSvg("minimize");
+      toggle.setAttribute("aria-label", tr("viewerMinimize"));
     }
 
     if (restore) {
@@ -1578,7 +1581,7 @@
         return;
       }
 
-      if (event.target.closest(".wc-mobile-viewer-toggle") || event.target.closest(".wc-mobile-viewer-restore")) {
+      if (event.target.closest(".wc-mobile-viewer-corner-toggle") || event.target.closest(".wc-mobile-viewer-restore")) {
         toggleMobileViewer();
         return;
       }
