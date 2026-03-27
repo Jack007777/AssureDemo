@@ -752,8 +752,8 @@
     qs(".wc-summary-cta-text", ui.trigger).textContent = document.body.classList.contains("wc-summary-open")
       ? tr("summaryClose")
       : tr("summaryButton");
-    ui.trigger.hidden = !document.body.classList.contains("wc-config-active") || isMobileViewport();
-    ui.backdrop.hidden = !document.body.classList.contains("wc-summary-open");
+    ui.trigger.hidden = true;
+    ui.backdrop.hidden = !isMobileViewport() || !document.body.classList.contains("wc-summary-open");
     renderMobileConfigBar();
     renderMobileCategoryDock();
   }

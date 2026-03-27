@@ -28,14 +28,14 @@ body.wc-config-active .grid.grid-2 > .card:first-child {
 body.wc-config-active .grid.grid-2 > .card:last-child {
   position: fixed;
   right: 18px;
-  bottom: 88px;
+  bottom: 18px;
   width: min(390px, calc(100vw - 24px));
   max-height: min(72vh, 760px);
   overflow: auto;
   z-index: 35;
-  transform: translateY(calc(100% + 24px));
-  opacity: 0;
-  pointer-events: none;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
   transition: transform 180ms ease, opacity 180ms ease;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
@@ -44,6 +44,14 @@ body.wc-summary-open .grid.grid-2 > .card:last-child {
   transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
+}
+
+.wc-summary-trigger {
+  display: none !important;
+}
+
+body.wc-config-active .wc-summary-backdrop {
+  display: none !important;
 }
 
 :root {
@@ -371,12 +379,23 @@ body.wc-config-active .model-viewer {
     bottom: 76px;
     width: calc(100vw - 20px);
     max-height: min(72vh, 620px);
+    transform: translateY(calc(100% + 24px));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body.wc-summary-open .grid.grid-2 > .card:last-child {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  body.wc-config-active .wc-summary-backdrop {
+    display: block !important;
   }
 
   .wc-summary-trigger {
-    right: 10px;
-    bottom: 10px;
-    min-width: calc(100vw - 20px);
+    display: none !important;
   }
 
   .wc-inline-toolbar {
