@@ -477,6 +477,14 @@ body.wc-config-active .model-viewer {
   min-height: min(56vh, 580px);
 }
 
+@media (min-width: 901px) {
+  body.wc-config-active .wc-desktop-config-main .model-viewer {
+    position: sticky;
+    top: 18px;
+    z-index: 1;
+  }
+}
+
 @media (max-width: 900px) {
   body.wc-config-active .grid.grid-2 {
     grid-template-columns: minmax(0, 1fr) !important;

@@ -607,6 +607,23 @@
       });
   }
 
+  function syncDesktopViewerSticky() {
+    const viewer = qs(".model-viewer", getConfiguratorCard());
+    if (!viewer) {
+      return;
+    }
+
+    if (document.body.classList.contains("wc-config-active") && window.innerWidth > 900) {
+      viewer.style.position = "sticky";
+      viewer.style.top = "18px";
+      viewer.style.zIndex = "1";
+    } else {
+      viewer.style.removeProperty("position");
+      viewer.style.removeProperty("top");
+      viewer.style.removeProperty("z-index");
+    }
+  }
+
   function findOptionByLabel(moduleId, label) {
     const module = getModuleDefinition(moduleId);
     if (!module || !module.options) {
@@ -1693,6 +1710,7 @@
     renderSummaryTrigger();
     renderMobileCategoryDock();
     ensureDesktopCategoryLayout();
+    syncDesktopViewerSticky();
     renderSyntheticSeatWidthGroup();
     syncVisibleSelections();
     syncSummaryExtras();
@@ -1716,6 +1734,7 @@
     renderMobileConfigBar();
     renderSummaryTrigger();
     renderMobileCategoryDock();
+    syncDesktopViewerSticky();
     window.scrollTo({ top: 0, behavior: "smooth" });
     refreshRuntimeTranslations(80);
   }
@@ -1783,6 +1802,7 @@
       state.syncTimer = 0;
       bindDynamicControls();
       ensureDesktopCategoryLayout();
+      syncDesktopViewerSticky();
       renderSyntheticSeatWidthGroup();
       annotateVisibleOptionButtons();
       reflectSelectionsFromStore();
