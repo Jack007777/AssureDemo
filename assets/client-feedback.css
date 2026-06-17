@@ -16,23 +16,26 @@ body.wc-config-active .wc-model-stage {
 
 body.wc-config-active .grid.grid-2 {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 390px) !important;
+  gap: 22px;
   align-items: start;
 }
 
 body.wc-config-active .grid.grid-2 > .card:first-child {
-  width: min(1100px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
 }
 
 body.wc-config-active .grid.grid-2 > .card:last-child {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  width: min(390px, calc(100vw - 24px));
-  max-height: min(72vh, 760px);
+  position: sticky;
+  top: 18px;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  max-height: calc(100vh - 36px);
   overflow: auto;
-  z-index: 35;
+  z-index: 2;
   transform: none;
   opacity: 1;
   pointer-events: auto;
@@ -469,6 +472,11 @@ body.wc-config-active .model-viewer {
 }
 
 @media (max-width: 900px) {
+  body.wc-config-active .grid.grid-2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0;
+  }
+
   .wc-desktop-config-shell {
     display: block;
     margin-top: 0;
@@ -479,13 +487,16 @@ body.wc-config-active .model-viewer {
   }
 
   body.wc-config-active .grid.grid-2 > .card:last-child {
+    position: fixed;
     right: 10px;
     bottom: 76px;
     width: calc(100vw - 20px);
     max-height: min(72vh, 620px);
+    top: auto;
     transform: translateY(calc(100% + 24px));
     opacity: 0;
     pointer-events: none;
+    z-index: 35;
   }
 
   body.wc-summary-open .grid.grid-2 > .card:last-child {

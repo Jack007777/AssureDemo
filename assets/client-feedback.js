@@ -217,6 +217,13 @@
     S5: 10.8,
   };
 
+  const FRAME_COLOR_HEX = {
+    "color-red": "#ff3b30",
+    "color-green": "#34c759",
+    "color-yellow": "#ffd60a",
+    "color-blue": "#0a84ff",
+  };
+
   const MODULE_ORDER = [
     "frameMaterial",
     "frameColor",
@@ -257,6 +264,8 @@
     selectionDetails: {},
     syncTimer: 0,
     categoryScrollTimers: [],
+    mobileChipAlignTimers: [],
+    mobilePendingCategoryIndex: -1,
     mobileCategoryTransitionDirection: "",
     mobileCategoryTransitionTimer: 0,
     mobileEdgeSwipeStartX: 0,
@@ -264,6 +273,8 @@
     mobileEdgeSwipeActive: false,
     mobileEdgeSwipeConsumed: false,
     mobileEdgeSwipeLockUntil: 0,
+    viewerRuntime: null,
+    viewerModulePromise: null,
     observers: [],
   };
 
@@ -515,6 +526,87 @@
     }) || null;
   }
 
+  function getGroupModuleId(group) {
+    if (!group) {
+      return "";
+    }
+    if (group.dataset && group.dataset.moduleId) {
+      return group.dataset.moduleId;
+    }
+
+    const titleText = ((qs(".option-title", group) || {}).textContent || "").trim();
+    const codeText = ((qs(".option-code", group) || {}).textContent || "").trim();
+    const store = getConfigStore();
+    const modules = (store && store.catalog && store.catalog.modules) || [];
+    const candidates = [titleText, codeText]
+      .filter(Boolean)
+      .map(normalizeText);
+
+    const matched = modules.find(function (module) {
+      const aliases = [
+        module.id,
+        module.name,
+        translateUiText(module.name),
+      ]
+        .filter(Boolean)
+        .map(normalizeText);
+
+      return candidates.some(function (candidate) {
+        return aliases.indexOf(candidate) >= 0;
+      });
+    });
+
+    const moduleId = matched ? matched.id : "";
+    if (moduleId && group.dataset) {
+      group.dataset.moduleId = moduleId;
+    }
+    return moduleId;
+  }
+
+  function getFrameColorHex(selection) {
+    return FRAME_COLOR_HEX[(selection && selection.frameColor) || ""] || "#9aa6bd";
+  }
+
+  function syncRuntimeViewer() {
+    const card = getConfiguratorCard();
+    const viewer = qs(".model-viewer", card);
+    const store = getConfigStore();
+    if (!viewer || !store) {
+      return;
+    }
+
+    if (!state.viewerModulePromise) {
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260617-s5-runtime-widthdepth");
+    }
+
+    const sourceModel = state.sourceModel || store.modelId || "S5";
+    const selection = Object.assign({}, store.selection || {});
+    const frameColor = getFrameColorHex(selection);
+
+    state.viewerModulePromise
+      .then(function (viewerModule) {
+        if (!viewerModule || typeof viewerModule.mountRuntimeModelViewer !== "function") {
+          return;
+        }
+        if (!state.viewerRuntime || state.viewerRuntime.container !== viewer) {
+          if (state.viewerRuntime && typeof state.viewerRuntime.dispose === "function") {
+            state.viewerRuntime.dispose();
+          }
+          state.viewerRuntime = viewerModule.mountRuntimeModelViewer(viewer);
+        }
+        if (state.viewerRuntime && typeof state.viewerRuntime.update === "function") {
+          state.viewerRuntime.update({
+            sourceModel: sourceModel,
+            selection: selection,
+            frameColor: frameColor,
+          });
+        }
+      })
+      .catch(function (error) {
+        console.error("Runtime viewer sync failed", error);
+      });
+  }
+
   function findOptionByLabel(moduleId, label) {
     const module = getModuleDefinition(moduleId);
     if (!module || !module.options) {
@@ -529,7 +621,7 @@
     if (!group) {
       return;
     }
-    const moduleId = ((qs(".option-code", group) || {}).textContent || "").trim();
+    const moduleId = getGroupModuleId(group);
     const module = getModuleDefinition(moduleId);
     const options = module && module.options ? module.options : [];
     qsa(".choice-btn", group).forEach(function (button, index) {
@@ -570,7 +662,7 @@
     }
     annotateVisibleOptionButtons();
     qsa(".option-group", getConfiguratorCard()).forEach(function (group) {
-      const moduleId = ((qs(".option-code", group) || {}).textContent || "").trim();
+      const moduleId = getGroupModuleId(group);
       if (!moduleId) {
         return;
       }
@@ -1005,10 +1097,13 @@
       qsa(".wc-mobile-category-arrow", dock).forEach(function (arrow) {
         arrow.addEventListener("click", function () {
           const direction = arrow.classList.contains("is-prev") ? -1 : 1;
-          track.scrollBy({
-            left: direction * Math.max(180, track.clientWidth * 0.7),
-            behavior: "smooth",
-          });
+          const switched = switchMobileCategoryByOffset(direction);
+          if (!switched) {
+            track.scrollBy({
+              left: direction * Math.max(180, track.clientWidth * 0.7),
+              behavior: "smooth",
+            });
+          }
         });
       });
     }
@@ -1026,10 +1121,14 @@
     const overflow = track.scrollWidth > track.clientWidth + 6;
     const atStart = track.scrollLeft <= 4;
     const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+    const activeIndex = getActiveMobileCategoryIndex();
+    const buttons = getMobileNativeCategoryButtons();
+    const atFirstCategory = activeIndex <= 0;
+    const atLastCategory = activeIndex >= buttons.length - 1;
 
     dock.classList.toggle("is-overflowing", overflow);
-    prev.disabled = !overflow || atStart;
-    next.disabled = !overflow || atEnd;
+    prev.disabled = !overflow || (atStart && atFirstCategory);
+    next.disabled = !overflow || (atEnd && atLastCategory);
   }
 
   function ensureActiveMobileCategoryChipVisible(behavior) {
@@ -1038,7 +1137,10 @@
       return;
     }
     const track = qs(".wc-mobile-category-track", dock);
-    const activeChip = qs(".wc-mobile-category-chip.active", track);
+    const activeChip =
+      (state.mobilePendingCategoryIndex >= 0 &&
+        qs('.wc-mobile-category-chip[data-index="' + state.mobilePendingCategoryIndex + '"]', track)) ||
+      qs(".wc-mobile-category-chip.active", track);
     if (!track || !activeChip) {
       return;
     }
@@ -1053,23 +1155,50 @@
     if (alreadyVisible) {
       return;
     }
+    activeChip.scrollIntoView({
+      behavior: behavior === "instant" ? "auto" : behavior || "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }
 
-    const targetLeft = Math.max(
-      0,
-      Math.min(
-        track.scrollWidth - track.clientWidth,
-        chipLeft - (track.clientWidth - activeChip.offsetWidth) / 2
-      )
-    );
+  function scheduleActiveMobileCategoryChipAlignment(behavior) {
+    while (state.mobileChipAlignTimers.length) {
+      window.clearTimeout(state.mobileChipAlignTimers.pop());
+    }
 
-    track.scrollTo({
-      left: targetLeft,
-      behavior: behavior || "smooth",
+    [40, 180, 340].forEach(function (delay, index) {
+      const timer = window.setTimeout(function () {
+        ensureActiveMobileCategoryChipVisible(index === 0 ? behavior : "auto");
+        updateMobileCategoryDockState();
+      }, delay);
+      state.mobileChipAlignTimers.push(timer);
+    });
+  }
+
+  function queuePendingMobileCategoryVisibilitySync() {
+    [120, 260, 420].forEach(function (delay, index) {
+      window.setTimeout(function () {
+        ensureActiveMobileCategoryChipVisible(index === 0 ? "smooth" : "instant");
+        updateMobileCategoryDockState();
+      }, delay);
     });
   }
 
   function getMobileNativeCategoryButtons() {
     return qsa(".category-btn", getConfiguratorCard());
+  }
+
+  function triggerNativeCategoryButton(button) {
+    if (!button) {
+      return false;
+    }
+    button.dispatchEvent(new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }));
+    return true;
   }
 
   function getActiveMobileCategoryIndex() {
@@ -1122,12 +1251,27 @@
     if (nextIndex === currentIndex || !buttons[nextIndex]) {
       return false;
     }
+    const dock = qs(".wc-mobile-category-dock");
+    const track = dock && qs(".wc-mobile-category-track", dock);
+    const currentChip =
+      track &&
+      (qs('.wc-mobile-category-chip[data-index="' + (currentIndex < 0 ? 0 : currentIndex) + '"]', track) ||
+        qs(".wc-mobile-category-chip.active", track));
+    const scrollStep = currentChip ? currentChip.offsetWidth + 18 : 108;
+
+    state.mobilePendingCategoryIndex = nextIndex;
     triggerMobileCategoryTransition(offset < 0 ? "prev" : "next");
-    buttons[nextIndex].click();
+    triggerNativeCategoryButton(buttons[nextIndex]);
+    if (track) {
+      track.scrollBy({
+        left: offset * scrollStep,
+        behavior: "smooth",
+      });
+    }
+    queuePendingMobileCategoryVisibilitySync();
     window.setTimeout(function () {
       scrollCategoryContentToTop("smooth");
     }, 130);
-    const dock = qs(".wc-mobile-category-dock");
     if (dock) {
       dock.classList.add("is-transitioning", offset < 0 ? "is-transitioning-prev" : "is-transitioning-next");
     }
@@ -1180,6 +1324,49 @@
     });
   }
 
+  function buildMobileCategoryChip(button, index) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "wc-mobile-category-chip";
+    chip.setAttribute("data-index", String(index));
+    chip.addEventListener("click", function () {
+      const targetIndex = Number(chip.getAttribute("data-index"));
+      const target = getMobileNativeCategoryButtons()[targetIndex];
+      if (!target) {
+        return;
+      }
+      state.mobilePendingCategoryIndex = targetIndex;
+      triggerNativeCategoryButton(target);
+      chip.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      queuePendingMobileCategoryVisibilitySync();
+    });
+    syncMobileCategoryChip(chip, button, index);
+    return chip;
+  }
+
+  function syncMobileCategoryChip(chip, button, index) {
+    const labelNode = qsa("span", button).slice(-1)[0];
+    const label = (labelNode || button).textContent.trim();
+    const iconNode = qs(".category-icon", button);
+    const active = button.classList.contains("active");
+    chip.setAttribute("data-index", String(index));
+    chip.classList.toggle("active", active);
+    chip.innerHTML = "";
+
+    if (iconNode) {
+      const icon = document.createElement("span");
+      icon.className = "wc-mobile-category-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML = iconNode.innerHTML;
+      chip.appendChild(icon);
+    }
+
+    const labelSpan = document.createElement("span");
+    labelSpan.className = "wc-mobile-category-label";
+    labelSpan.textContent = label;
+    chip.appendChild(labelSpan);
+  }
+
   function renderMobileCategoryDock() {
     const dock = ensureMobileCategoryDock();
     const track = qs(".wc-mobile-category-track", dock);
@@ -1195,35 +1382,20 @@
       return;
     }
 
-    track.innerHTML = nativeButtons
-      .map(function (button, index) {
-        const labelNode = qsa("span", button).slice(-1)[0];
-        const label = (labelNode || button).textContent.trim();
-        const iconNode = qs(".category-icon", button);
-        const iconMarkup = iconNode
-          ? '<span class="wc-mobile-category-icon" aria-hidden="true">' + iconNode.innerHTML + "</span>"
-          : "";
-        const active = button.classList.contains("active") ? " active" : "";
-        return (
-          '<button type="button" class="wc-mobile-category-chip' + active + '" data-index="' + index + '">' +
-          iconMarkup +
-          '<span class="wc-mobile-category-label">' + label + "</span>" +
-          "</button>"
-        );
-      })
-      .join("");
-
-    qsa(".wc-mobile-category-chip", track).forEach(function (button) {
-      button.addEventListener("click", function () {
-        const index = Number(button.getAttribute("data-index"));
-        const target = nativeButtons[index];
-        if (!target) {
-          return;
-        }
-        target.click();
-        button.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-      });
+    const existingChips = qsa(".wc-mobile-category-chip", track);
+    nativeButtons.forEach(function (button, index) {
+      const chip = existingChips[index] || buildMobileCategoryChip(button, index);
+      syncMobileCategoryChip(chip, button, index);
+      if (!chip.parentElement) {
+        track.appendChild(chip);
+      }
     });
+
+    existingChips.slice(nativeButtons.length).forEach(function (chip) {
+      chip.remove();
+    });
+
+    ensureActiveMobileCategoryChipVisible("instant");
 
     if (state.mobileCategoryTransitionDirection) {
       dock.classList.add("is-transitioning", state.mobileCategoryTransitionDirection === "prev" ? "is-transitioning-prev" : "is-transitioning-next");
@@ -1236,10 +1408,18 @@
       dock.classList.remove("is-transitioning", "is-transitioning-next", "is-transitioning-prev");
     }
 
-    window.setTimeout(function () {
-      ensureActiveMobileCategoryChipVisible(state.mobileCategoryTransitionDirection ? "smooth" : "auto");
-      updateMobileCategoryDockState();
-    }, 40);
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () {
+        ensureActiveMobileCategoryChipVisible(
+          state.mobileCategoryTransitionDirection ? "smooth" : "instant"
+        );
+        updateMobileCategoryDockState();
+      });
+    });
+
+    scheduleActiveMobileCategoryChipAlignment(
+      state.mobileCategoryTransitionDirection ? "smooth" : "auto"
+    );
   }
 
   function renderSummaryTrigger() {
@@ -1436,7 +1616,7 @@
   function syncVisibleSelections() {
     const groups = qsa(".option-group", getConfiguratorCard());
     groups.forEach(function (group) {
-      const moduleId = (qs(".option-code", group) || {}).textContent;
+      const moduleId = getGroupModuleId(group);
       const title = (qs(".option-title", group) || {}).textContent;
       const activeButton = qs(".choice-btn.active", group);
       const activeText = activeButton && (qs(".choice-label", activeButton) || activeButton).textContent;
@@ -1499,6 +1679,7 @@
       syncVisibleSelections();
       syncSummaryExtras();
       renderMobileCategoryDock();
+      syncRuntimeViewer();
     }, delay || 80);
   }
 
@@ -1552,6 +1733,7 @@
       syncVisibleSelections();
       syncSummaryExtras();
       renderMobileCategoryDock();
+      syncRuntimeViewer();
       refreshRuntimeTranslations();
       state.defaultsAppliedKey = key;
     } finally {
@@ -1578,6 +1760,7 @@
             renderMobileCategoryDock();
             syncVisibleSelections();
             syncSummaryExtras();
+            syncRuntimeViewer();
             return;
           }
           scrollCategoryContentToTop("smooth");
@@ -1585,6 +1768,7 @@
           renderMobileCategoryDock();
           syncVisibleSelections();
           syncSummaryExtras();
+          syncRuntimeViewer();
         }, 120);
       });
     });
@@ -1597,7 +1781,7 @@
       button.addEventListener("click", function () {
         const group = button.closest(".option-group");
         annotateGroupOptionIds(group);
-        const moduleId = group && (qs(".option-code", group) || {}).textContent;
+        const moduleId = getGroupModuleId(group);
         const title = group && (qs(".option-title", group) || {}).textContent;
         const labelNode = qs(".choice-label", button);
         const clickedLabel = (labelNode || button).textContent;
@@ -1626,6 +1810,7 @@
           renderMobileCategoryDock();
           syncVisibleSelections();
           syncSummaryExtras();
+          syncRuntimeViewer();
         }, 60);
       });
     });
@@ -1703,6 +1888,10 @@
       },
       getLanguage: function () {
         return getLang();
+      },
+      getSelection: function () {
+        const store = getConfigStore();
+        return Object.assign({}, (store && store.selection) || {});
       },
       getSummaryRows: function () {
         return qsa("table tbody tr", summaryCard)
@@ -1834,7 +2023,7 @@
       if (choiceButton) {
         const group = choiceButton.closest(".option-group");
         annotateGroupOptionIds(group);
-        const moduleId = group && (qs(".option-code", group) || {}).textContent;
+        const moduleId = getGroupModuleId(group);
         const title = group && (qs(".option-title", group) || {}).textContent;
         const labelNode = qs(".choice-label", choiceButton);
         const clickedLabel = (labelNode || choiceButton).textContent;
@@ -1898,6 +2087,7 @@
         reflectSelectionsFromStore();
         syncVisibleSelections();
         syncSummaryExtras();
+        syncRuntimeViewer();
         refreshRuntimeTranslations();
       }, 80);
     }, true);
@@ -1909,12 +2099,13 @@
           enforceBilingualUi();
           renderMobileLanguageSwitch();
           renderModelStage();
-          renderToolbar();
-          renderMobileViewerState();
-          renderMobileCategoryDock();
-          syncSummaryExtras();
-          refreshRuntimeTranslations();
-        }, 50);
+        renderToolbar();
+        renderMobileViewerState();
+        renderMobileCategoryDock();
+        syncSummaryExtras();
+        syncRuntimeViewer();
+        refreshRuntimeTranslations();
+      }, 50);
         window.setTimeout(enforceBilingualUi, 180);
       });
     }
@@ -1990,6 +2181,7 @@
     reflectSelectionsFromStore();
     syncVisibleSelections();
     syncSummaryExtras();
+    syncRuntimeViewer();
     attachObservers();
     scheduleDefaultSelections(false);
     window.setTimeout(enforceBilingualUi, 80);

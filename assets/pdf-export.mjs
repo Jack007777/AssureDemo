@@ -2,6 +2,7 @@ import * as THREE from "/assets/vendor/three.module.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260615-s5-runtime";
 import html2canvas from "/assets/html2canvas.esm-CBrSDip1.js";
 
 const TEXT = {
@@ -54,15 +55,6 @@ Object.assign(TEXT["en-US"], {
 });
 
 const DEFAULT_FRAME_COLOR = "#9aa6bd";
-const S5_PARTS = [
-  { src: "/models/S5/Rahmen-standard.glb", tint: true },
-  { src: "/models/S5/Sitzbespannung.glb", tint: false },
-  { src: "/models/S5/Ruecken.glb", tint: false },
-  { src: "/models/S5/Seitenteilen-standard.glb", tint: false },
-  { src: "/models/S5/Fussbrett.glb", tint: false },
-  { src: "/models/S5/Lenkraerder-standard.glb", tint: false },
-  { src: "/models/S5/Antriebsraede-Klein.glb", tint: false },
-];
 
 let dracoLoader = null;
 let exportInFlight = false;
@@ -197,6 +189,7 @@ function readExportContext() {
   const summaryRows = readSummaryRows();
   const configItems = readConfigItems();
   const generatedAt = new Date().toLocaleString(getLanguage() === "zh-CN" ? "zh-CN" : "en-GB");
+  const selection = typeof context.getSelection === "function" ? context.getSelection() : {};
   return {
     language: getLanguage(),
     modelLabel,
@@ -206,6 +199,7 @@ function readExportContext() {
     summaryRows,
     configItems,
     generatedAt,
+    selection,
   };
 }
 
@@ -254,13 +248,9 @@ function getFrameColorHex() {
 }
 
 function getModelParts(sourceModel) {
-  if ((sourceModel || "").toUpperCase() === "S5") {
-    return S5_PARTS;
-  }
-  return [
-    { src: `/models/${sourceModel}/${sourceModel}.glb`, tint: false },
-    { src: `/models/${sourceModel}/frame.glb`, tint: true },
-  ];
+  const context = window.WC_EXPORT_CONTEXT || {};
+  const selection = typeof context.getSelection === "function" ? context.getSelection() : {};
+  return getModelPartsForSourceModel(sourceModel, selection);
 }
 
 function ensureJsPdf() {
