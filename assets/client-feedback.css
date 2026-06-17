@@ -67,6 +67,12 @@ body.wc-config-active .wc-summary-backdrop {
   display: none !important;
 }
 
+.model-viewer > canvas:not(.wc-runtime-canvas),
+.model-viewer > .model-placeholder:not(.wc-runtime-model-status),
+.model-viewer > .wc-hidden-source {
+  display: none !important;
+}
+
 .choice-meta {
   display: none !important;
 }

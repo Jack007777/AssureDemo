@@ -45,6 +45,23 @@ class RuntimeModelViewer {
   init() {
     this.container.style.position = this.container.style.position || "relative";
 
+    Array.from(this.container.children).forEach((child) => {
+      if (!(child instanceof HTMLElement)) {
+        return;
+      }
+      if (child.classList.contains("wc-mobile-viewer-corner-toggle")) {
+        return;
+      }
+      child.classList.add("wc-hidden-source");
+      child.setAttribute("aria-hidden", "true");
+      child.style.display = "none";
+      child.querySelectorAll("canvas").forEach((canvas) => {
+        if (canvas instanceof HTMLCanvasElement) {
+          canvas.style.display = "none";
+        }
+      });
+    });
+
     const root = document.createElement("div");
     root.className = "wc-runtime-model-viewer";
     root.style.position = "absolute";
@@ -79,6 +96,8 @@ class RuntimeModelViewer {
       alpha: true,
       powerPreference: "high-performance",
     });
+    this.renderer.domElement.className = `${this.renderer.domElement.className} wc-runtime-canvas`.trim();
+    this.renderer.domElement.setAttribute("data-runtime-canvas", "true");
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.setPixelRatio(getRendererPixelRatio());
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
