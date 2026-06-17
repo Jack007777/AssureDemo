@@ -679,6 +679,106 @@
     });
   }
 
+  function getActiveCategoryIndex() {
+    return qsa(".category-btn", getConfiguratorCard()).findIndex(function (button) {
+      return button.classList.contains("active");
+    });
+  }
+
+  function isFrameCategoryActive() {
+    return getActiveCategoryIndex() === 0;
+  }
+
+  function getSelectedOptionLabel(module, optionId) {
+    if (!module || !module.options) {
+      return "";
+    }
+    const selected = module.options.find(function (option) {
+      return option.id === optionId;
+    });
+    return selected && selected.label ? selected.label : "";
+  }
+
+  function renderSyntheticSeatWidthGroup() {
+    const card = getConfiguratorCard();
+    const groupsWrap = qs(".option-groups", card);
+    const store = getConfigStore();
+    if (!card || !groupsWrap || !store) {
+      return;
+    }
+
+    const existing = qs(".wc-synthetic-seat-width", groupsWrap);
+    if (!isFrameCategoryActive()) {
+      if (existing) {
+        existing.remove();
+      }
+      return;
+    }
+
+    const module = getModuleDefinition("seatWidth");
+    if (!module || !module.options || !module.options.length) {
+      if (existing) {
+        existing.remove();
+      }
+      return;
+    }
+
+    const selectedId = (store.selection && store.selection.seatWidth) || "";
+    const selectedLabel = getSelectedOptionLabel(module, selectedId);
+    const title = getSeatWidthDisplayTitle();
+    const currentText = translateUiText(selectedLabel) || selectedLabel || "请选择...";
+
+    const group = existing || document.createElement("section");
+    group.className = "option-group wc-synthetic-seat-width";
+    group.dataset.moduleId = "seatWidth";
+    group.innerHTML =
+      '<div class="option-header">' +
+      '<div>' +
+      '<div class="option-title">' + title + "</div>" +
+      '<div class="option-code">seatWidth</div>' +
+      "</div>" +
+      '<div class="option-current">' + currentText + "</div>" +
+      "</div>" +
+      '<div class="choice-grid">' +
+      module.options.map(function (option) {
+        const active = option.id === selectedId ? " active" : "";
+        const optionLabel = translateUiText(option.label) || option.label;
+        return (
+          '<button type="button" class="choice-btn' + active + '" data-option-id="' + option.id + '">' +
+          '<span class="choice-label">' + optionLabel + "</span>" +
+          '<span class="choice-meta">+0,00 €</span>' +
+          "</button>"
+        );
+      }).join("") +
+      "</div>";
+
+    if (!existing) {
+      groupsWrap.insertBefore(group, groupsWrap.firstElementChild || null);
+    }
+
+    qsa(".choice-btn", group).forEach(function (button) {
+      if (button.dataset.wcBoundSyntheticChoice) {
+        return;
+      }
+      button.dataset.wcBoundSyntheticChoice = "1";
+      button.addEventListener("click", function () {
+        const optionId = button.dataset.optionId;
+        const configStore = getConfigStore();
+        if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
+          return;
+        }
+        configStore.setOption("seatWidth", optionId);
+        window.setTimeout(function () {
+          renderSyntheticSeatWidthGroup();
+          reflectSelectionsFromStore();
+          syncVisibleSelections();
+          syncSummaryExtras();
+          syncRuntimeViewer();
+        }, 80);
+      });
+    });
+  }
+
   function normalizeText(value) {
     return (value || "")
       .toLowerCase()
@@ -717,6 +817,12 @@
 
   function getCurrentModelLabel() {
     return getActiveCardConfig().texts[getLang()].name;
+  }
+
+  function getSeatWidthDisplayTitle() {
+    return getLang() === "en-US"
+      ? "Frame Width / Seat Width (SW)"
+      : "车架宽度 / 座宽 (SW)";
   }
 
   function computeWeightDelta(moduleId, rawLabel) {
@@ -1587,6 +1693,7 @@
     renderSummaryTrigger();
     renderMobileCategoryDock();
     ensureDesktopCategoryLayout();
+    renderSyntheticSeatWidthGroup();
     syncVisibleSelections();
     syncSummaryExtras();
     refreshRuntimeTranslations(120);
@@ -1627,7 +1734,9 @@
       const key = moduleId.trim();
       const value = (!isPlaceholderValue(activeText) ? activeText : currentText || "").trim();
       if (!isPlaceholderValue(value)) {
-        const displayTitle = translateUiText((title || key).trim()) || (title || key).trim();
+        const displayTitle = key === "seatWidth"
+          ? getSeatWidthDisplayTitle()
+          : (translateUiText((title || key).trim()) || (title || key).trim());
         const displayValue = translateUiText(value) || value;
         state.selectionLabels[key] = value;
         state.selectionDetails[key] = {
@@ -1674,6 +1783,7 @@
       state.syncTimer = 0;
       bindDynamicControls();
       ensureDesktopCategoryLayout();
+      renderSyntheticSeatWidthGroup();
       annotateVisibleOptionButtons();
       reflectSelectionsFromStore();
       syncVisibleSelections();
