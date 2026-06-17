@@ -1,9 +1,8 @@
 import * as THREE from "three";
-import { OrbitControls } from "/node_modules/three/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "/assets/vendor/OrbitControls.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
-import { FBXLoader } from "/node_modules/three/examples/jsm/loaders/FBXLoader.js";
 import { getModelPartsForSourceModel } from "/assets/model-parts.mjs";
 
 function isMobileViewport() {
@@ -128,10 +127,6 @@ class RuntimeModelViewer {
   }
 
   loadObject(part, onProgress) {
-    const lower = part.src.toLowerCase();
-    if (lower.endsWith(".fbx")) {
-      return this.loadFbx(part.src);
-    }
     return this.loadGlb(part.src, onProgress);
   }
 
@@ -149,28 +144,6 @@ class RuntimeModelViewer {
           resolve(gltf.scene);
         },
         (evt) => onProgress && onProgress(evt),
-        (error) => {
-          window.clearTimeout(timeoutId);
-          reject(error);
-        }
-      );
-    });
-  }
-
-  loadFbx(src) {
-    return new Promise((resolve, reject) => {
-      const loader = new FBXLoader();
-      const timeoutId = window.setTimeout(() => {
-        reject(new Error(`FBX load timeout: ${src}`));
-      }, getLoadTimeoutMs());
-
-      loader.load(
-        src,
-        (object) => {
-          window.clearTimeout(timeoutId);
-          resolve(object);
-        },
-        undefined,
         (error) => {
           window.clearTimeout(timeoutId);
           reject(error);
