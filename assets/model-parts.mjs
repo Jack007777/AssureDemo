@@ -10,10 +10,10 @@ function getS5FramePart(selection) {
   const frameAngle = selection.frameAngle || "";
   const frameLength = selection.frameLength || "";
   if (frameAngle === "fa-90" && frameLength === "fl-long") {
-    return { key: "frame", src: "/models/S5/90度长车架 _ 90-degree long frame.optimized.glb", tint: true };
+    return { key: "frame", src: "/models/S5/90度长车架 _ 90-degree long frame.glb", tint: true };
   }
   if (frameAngle === "fa-90") {
-    return { key: "frame", src: "/models/S5/90度短车架 _ 90-degree short frame.optimized.glb", tint: true };
+    return { key: "frame", src: "/models/S5/90度短车架 _ 90-degree short frame.glb", tint: true };
   }
   return { key: "frame", src: "/models/S5/Rahmen-standard.glb", tint: true };
 }

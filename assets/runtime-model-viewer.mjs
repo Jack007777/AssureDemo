@@ -3,7 +3,7 @@ import { OrbitControls } from "/assets/vendor/OrbitControls.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-raw-fix1";
 
 function isMobileViewport() {
   return window.innerWidth <= 768;
