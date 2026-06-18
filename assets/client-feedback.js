@@ -1864,7 +1864,7 @@
       configStart = configStart.nextElementSibling;
     }
 
-    if (!categoryTitle || !configStart || !shellStart) {
+    if (!categoryTitle || !configStart) {
       return;
     }
 
