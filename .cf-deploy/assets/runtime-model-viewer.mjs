@@ -3,7 +3,7 @@ import { OrbitControls } from "/assets/vendor/OrbitControls.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix2";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix3";
 
 function isMobileViewport() {
   return window.innerWidth <= 768;
@@ -244,16 +244,28 @@ class RuntimeModelViewer {
 
     const targets = [];
     frameObject.updateMatrixWorld(true);
+    const frameBox = new THREE.Box3().setFromObject(frameObject);
+    const zThreshold = frameBox.min.z + (frameBox.max.z - frameBox.min.z) * 0.72;
+    const yThreshold = frameBox.min.y + (frameBox.max.y - frameBox.min.y) * 0.62;
 
     frameObject.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) {
         return;
       }
 
-      const box = new THREE.Box3().setFromObject(child);
-      const center = box.getCenter(new THREE.Vector3());
+      if (!child.geometry) {
+        return;
+      }
+      if (!child.geometry.boundingBox) {
+        child.geometry.computeBoundingBox();
+      }
+      if (!child.geometry.boundingBox) {
+        return;
+      }
 
-      if (center.z <= 0.28) {
+      const center = child.geometry.boundingBox.getCenter(new THREE.Vector3()).applyMatrix4(child.matrixWorld);
+
+      if (center.z <= zThreshold || center.y >= yThreshold) {
         return;
       }
 
@@ -291,9 +303,9 @@ class RuntimeModelViewer {
         return;
       }
 
-      child.rotateX(THREE.MathUtils.degToRad(-10));
-      child.position.y += 0.018;
-      child.position.z += 0.028;
+      child.rotateX(THREE.MathUtils.degToRad(-9));
+      child.position.y += 0.012;
+      child.position.z += 0.018;
     });
   }
 

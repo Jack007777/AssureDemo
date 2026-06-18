@@ -578,7 +578,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-frame90-runtime-fix2");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-frame90-runtime-fix3");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
