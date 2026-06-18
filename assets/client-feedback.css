@@ -473,8 +473,8 @@ body.wc-summary-open .wc-summary-backdrop {
 
 .wc-desktop-config-main {
   display: grid;
-  grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
   align-items: start;
   min-width: 0;
 }
@@ -515,13 +515,20 @@ body.wc-config-active .model-viewer {
   body.wc-config-active .wc-desktop-options-panel {
     position: relative !important;
     z-index: 5 !important;
-    margin-top: 18px;
+    margin-top: 0;
+    width: 100%;
   }
 
   body.wc-config-active .wc-desktop-options-panel .option-group,
   body.wc-config-active .wc-desktop-options-panel .choice-btn {
     position: relative;
     z-index: 6;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel .option-groups,
+  body.wc-config-active .wc-desktop-options-panel .option-group {
+    width: 100%;
+    min-width: 0;
   }
 
   body.wc-config-active .wc-synthetic-seat-width {
