@@ -484,7 +484,10 @@ body.wc-summary-open .wc-summary-backdrop {
   top: auto;
   align-self: start;
   min-width: 0;
-  z-index: 1;
+  z-index: 4;
+  background: rgba(10, 18, 34, 0.98);
+  border-radius: 20px;
+  padding-bottom: 14px;
 }
 
 .wc-desktop-viewer-panel.wc-is-sticky {
@@ -523,12 +526,12 @@ body.wc-config-active .model-viewer {
   body.wc-config-active .wc-desktop-viewer-panel {
     position: sticky !important;
     top: 18px !important;
-    z-index: 1 !important;
+    z-index: 8 !important;
   }
 
   body.wc-config-active .wc-desktop-options-panel {
     position: relative !important;
-    z-index: 5 !important;
+    z-index: 2 !important;
     margin-top: 0;
     width: 100%;
   }
@@ -555,19 +558,15 @@ body.wc-config-active .model-viewer {
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer {
     position: relative !important;
     top: auto !important;
-    z-index: 1 !important;
+    z-index: 9 !important;
     margin-bottom: 16px;
   }
 
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer,
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer canvas,
   body.wc-config-active .wc-desktop-viewer-panel .wc-runtime-canvas {
-    pointer-events: none !important;
-    cursor: default !important;
-  }
-
-  body.wc-config-active .wc-desktop-viewer-panel .model-viewer::after {
-    pointer-events: none !important;
+    pointer-events: auto !important;
+    cursor: grab !important;
   }
 }
 
