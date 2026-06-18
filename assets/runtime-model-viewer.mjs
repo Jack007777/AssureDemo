@@ -3,7 +3,7 @@ import { OrbitControls } from "/assets/vendor/OrbitControls.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix1";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix2";
 
 function isMobileViewport() {
   return window.innerWidth <= 768;
@@ -233,6 +233,70 @@ class RuntimeModelViewer {
     }
   }
 
+  getFrameAngleTargets(frameObject) {
+    if (!frameObject) {
+      return [];
+    }
+
+    if (Array.isArray(frameObject.userData.frameAngleTargets)) {
+      return frameObject.userData.frameAngleTargets;
+    }
+
+    const targets = [];
+    frameObject.updateMatrixWorld(true);
+
+    frameObject.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+
+      const box = new THREE.Box3().setFromObject(child);
+      const center = box.getCenter(new THREE.Vector3());
+
+      if (center.z <= 0.28) {
+        return;
+      }
+
+      child.userData.basePosition = child.position.clone();
+      child.userData.baseRotation = child.rotation.clone();
+      child.userData.baseQuaternion = child.quaternion.clone();
+      targets.push(child);
+    });
+
+    frameObject.userData.frameAngleTargets = targets;
+    return targets;
+  }
+
+  applyFrameAngleFallback(frameObject, isFrontAngle90) {
+    if (!frameObject) {
+      return;
+    }
+
+    const targets = this.getFrameAngleTargets(frameObject);
+    if (!targets.length) {
+      return;
+    }
+
+    targets.forEach((child) => {
+      if (child.userData.basePosition) {
+        child.position.copy(child.userData.basePosition);
+      }
+      if (child.userData.baseQuaternion) {
+        child.quaternion.copy(child.userData.baseQuaternion);
+      } else if (child.userData.baseRotation) {
+        child.rotation.copy(child.userData.baseRotation);
+      }
+
+      if (!isFrontAngle90) {
+        return;
+      }
+
+      child.rotateX(THREE.MathUtils.degToRad(-10));
+      child.position.y += 0.018;
+      child.position.z += 0.028;
+    });
+  }
+
   applyDimensionAdjustments(selection) {
     if (!this.partObjects.length) {
       return;
@@ -257,6 +321,7 @@ class RuntimeModelViewer {
         case "frame":
           object.scale.x = widthScale;
           object.scale.z = depthScale;
+          this.applyFrameAngleFallback(object, isFrontAngle90);
           break;
         case "seat":
         case "backrest":
