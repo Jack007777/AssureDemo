@@ -529,6 +529,13 @@ body.wc-config-active .model-viewer {
     top: auto !important;
     z-index: 1 !important;
   }
+
+  body.wc-config-active .wc-desktop-viewer-panel .model-viewer,
+  body.wc-config-active .wc-desktop-viewer-panel .model-viewer canvas,
+  body.wc-config-active .wc-desktop-viewer-panel .wc-runtime-canvas {
+    pointer-events: none !important;
+    cursor: default !important;
+  }
 }
 
 @media (max-width: 900px) {
