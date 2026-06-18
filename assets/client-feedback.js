@@ -704,8 +704,8 @@
     });
   }
 
-  function isFrameCategoryActive() {
-    return getActiveCategoryIndex() === 0;
+  function isSeatUpholsteryCategoryActive() {
+    return getActiveCategoryIndex() === 1;
   }
 
   function getSelectedOptionLabel(module, optionId) {
@@ -727,7 +727,7 @@
     }
 
     const existing = qs(".wc-synthetic-seat-width", groupsWrap);
-    if (!isFrameCategoryActive()) {
+    if (!isSeatUpholsteryCategoryActive()) {
       if (existing) {
         existing.remove();
       }
@@ -832,7 +832,7 @@
     }
 
     const existing = qs(".wc-synthetic-seat-width", groupsWrap);
-    if (!isFrameCategoryActive()) {
+    if (!isSeatUpholsteryCategoryActive()) {
       if (existing) {
         existing.remove();
       }
@@ -973,9 +973,7 @@
   }
 
   function getSeatWidthDisplayTitle() {
-    return getLang() === "en-US"
-      ? "Frame Width / Seat Width (SW)"
-      : "车架宽度 / 座宽 (SW)";
+    return getLang() === "en-US" ? "Seat Width (SW)" : "座椅宽度 (SW)";
   }
 
   function computeWeightDelta(moduleId, rawLabel) {
