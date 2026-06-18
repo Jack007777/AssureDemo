@@ -103,7 +103,7 @@ export function getModelPartsForSourceModel(sourceModel, selection = {}) {
       getS5RearWheelPart(selection),
       getS5HandrimPart(selection),
       getS5BrakePart(selection),
-      getS5AxlePart(selection),
+      selection.axle && selection.axle.indexOf("tetra") >= 0 ? getS5AxlePart(selection) : null,
       getS5BackrestHandlePart(selection),
       getS5AntiTipPart(selection),
       getS5TippingHelpPart(selection),
