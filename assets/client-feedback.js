@@ -879,6 +879,131 @@
     }
   }
 
+  function renderSyntheticSeatWidthGroup() {
+    const card = getConfiguratorCard();
+    const groupsWrap = qs(".option-groups", card);
+    const store = getConfigStore();
+    if (!card || !groupsWrap || !store) {
+      return;
+    }
+
+    const existing = qs(".wc-synthetic-seat-width", groupsWrap);
+    if (!isFrameCategoryActive()) {
+      if (existing) {
+        existing.remove();
+      }
+      state.syntheticSeatWidthMarkup = "";
+      return;
+    }
+
+    const module = getModuleDefinition("seatWidth");
+    if (!module || !module.options || !module.options.length) {
+      if (existing) {
+        existing.remove();
+      }
+      state.syntheticSeatWidthMarkup = "";
+      return;
+    }
+
+    const selectedId = (store.selection && store.selection.seatWidth) || "";
+    const selectedLabel = getSelectedOptionLabel(module, selectedId);
+    const title = getSeatWidthDisplayTitle();
+    const currentText = translateUiText(selectedLabel) || selectedLabel || "Please choose...";
+    const useNativeSelect = !isMobileViewport();
+
+    const group = existing || document.createElement("section");
+    group.className = "option-group wc-synthetic-seat-width";
+    group.dataset.moduleId = "seatWidth";
+
+    const bodyMarkup = useNativeSelect
+      ? (
+        '<div class="wc-seatwidth-native-wrap">' +
+        '<select class="select wc-seatwidth-native-select">' +
+        module.options.map(function (option) {
+          const optionLabel = translateUiText(option.label) || option.label;
+          const selected = option.id === selectedId ? ' selected' : '';
+          return '<option value="' + option.id + '"' + selected + '>' + optionLabel + '</option>';
+        }).join("") +
+        "</select>" +
+        "</div>"
+      )
+      : (
+        '<div class="choice-grid">' +
+        module.options.map(function (option) {
+          const active = option.id === selectedId ? " active" : "";
+          const optionLabel = translateUiText(option.label) || option.label;
+          return (
+            '<button type="button" class="choice-btn' + active + '" data-option-id="' + option.id + '">' +
+            '<span class="choice-label">' + optionLabel + "</span>" +
+            '<span class="choice-meta">+0,00 EUR</span>' +
+            "</button>"
+          );
+        }).join("") +
+        "</div>"
+      );
+
+    const markup =
+      '<div class="option-header">' +
+      '<div>' +
+      '<div class="option-title">' + title + "</div>" +
+      '<div class="option-code">seatWidth</div>' +
+      "</div>" +
+      '<div class="option-current">' + currentText + "</div>" +
+      "</div>" +
+      bodyMarkup;
+
+    if (!existing || markup !== state.syntheticSeatWidthMarkup) {
+      group.innerHTML = markup;
+      state.syntheticSeatWidthMarkup = markup;
+    }
+
+    if (!existing) {
+      groupsWrap.insertBefore(group, groupsWrap.firstElementChild || null);
+    }
+
+    qsa(".choice-btn", group).forEach(function (button) {
+      if (button.dataset.wcBoundSyntheticChoice) {
+        return;
+      }
+      button.dataset.wcBoundSyntheticChoice = "1";
+      button.addEventListener("click", function () {
+        const optionId = button.dataset.optionId;
+        const configStore = getConfigStore();
+        if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
+          return;
+        }
+        configStore.setOption("seatWidth", optionId);
+        window.setTimeout(function () {
+          renderSyntheticSeatWidthGroup();
+          reflectSelectionsFromStore();
+          syncVisibleSelections();
+          syncSummaryExtras();
+          syncRuntimeViewer();
+        }, 80);
+      });
+    });
+
+    const nativeSelect = qs(".wc-seatwidth-native-select", group);
+    if (nativeSelect && !nativeSelect.dataset.wcBoundSyntheticSelect) {
+      nativeSelect.dataset.wcBoundSyntheticSelect = "1";
+      nativeSelect.addEventListener("change", function () {
+        const optionId = nativeSelect.value;
+        const configStore = getConfigStore();
+        if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
+          return;
+        }
+        configStore.setOption("seatWidth", optionId);
+        window.setTimeout(function () {
+          renderSyntheticSeatWidthGroup();
+          reflectSelectionsFromStore();
+          syncVisibleSelections();
+          syncSummaryExtras();
+          syncRuntimeViewer();
+        }, 80);
+      });
+    }
+  }
+
   function includesAny(label, fragments) {
     return fragments.some(function (part) {
       return label.indexOf(part) >= 0;
