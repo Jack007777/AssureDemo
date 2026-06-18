@@ -576,7 +576,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-seatwidth-visibility-fix1");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-desktop-viewer-layout-fix1");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
@@ -1639,7 +1639,6 @@
       categoryTitle = categoryTitle.previousElementSibling;
     }
 
-    let shellStart = previewTitle || viewer;
     let configStart = categoryGrid.nextElementSibling;
     while (configStart) {
       if (qs(".h1", configStart) || configStart.classList.contains("option-groups")) {
@@ -1655,6 +1654,8 @@
     let shell = qs(".wc-desktop-config-shell", card);
     let rail = shell && qs(".wc-desktop-category-rail", shell);
     let main = shell && qs(".wc-desktop-config-main", shell);
+    let viewerPanel = main && qs(".wc-desktop-viewer-panel", main);
+    let optionsPanel = main && qs(".wc-desktop-options-panel", main);
 
     if (!shell) {
       shell = document.createElement("section");
@@ -1663,9 +1664,27 @@
       rail.className = "wc-desktop-category-rail";
       main = document.createElement("div");
       main.className = "wc-desktop-config-main";
+      viewerPanel = document.createElement("div");
+      viewerPanel.className = "wc-desktop-viewer-panel";
+      optionsPanel = document.createElement("div");
+      optionsPanel.className = "wc-desktop-options-panel";
+      main.appendChild(viewerPanel);
+      main.appendChild(optionsPanel);
       shell.appendChild(rail);
       shell.appendChild(main);
       card.appendChild(shell);
+    }
+
+    if (!viewerPanel) {
+      viewerPanel = document.createElement("div");
+      viewerPanel.className = "wc-desktop-viewer-panel";
+      main.insertBefore(viewerPanel, main.firstChild || null);
+    }
+
+    if (!optionsPanel) {
+      optionsPanel = document.createElement("div");
+      optionsPanel.className = "wc-desktop-options-panel";
+      main.appendChild(optionsPanel);
     }
 
     if (categoryTitle.parentNode !== rail) {
@@ -1675,16 +1694,25 @@
       rail.appendChild(categoryGrid);
     }
 
-    let node = shellStart;
+    if (previewTitle && previewTitle.parentNode !== viewerPanel) {
+      viewerPanel.appendChild(previewTitle);
+    }
+    if (viewer.parentNode !== viewerPanel) {
+      viewerPanel.appendChild(viewer);
+    }
+
+    let node = configStart;
     while (node) {
       const next = node.nextElementSibling;
       if (
         node !== shell &&
         node !== categoryTitle &&
         node !== categoryGrid &&
-        node.parentNode !== main
+        node !== previewTitle &&
+        node !== viewer &&
+        node.parentNode !== optionsPanel
       ) {
-        main.appendChild(node);
+        optionsPanel.appendChild(node);
       }
       node = next;
     }

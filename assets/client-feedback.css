@@ -466,6 +466,21 @@ body.wc-summary-open .wc-summary-backdrop {
 }
 
 .wc-desktop-config-main {
+  display: grid;
+  grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  min-width: 0;
+}
+
+.wc-desktop-viewer-panel {
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  min-width: 0;
+}
+
+.wc-desktop-options-panel {
   min-width: 0;
 }
 
@@ -478,10 +493,10 @@ body.wc-config-active .model-viewer {
 }
 
 @media (min-width: 901px) {
-  body.wc-config-active .wc-desktop-config-main .model-viewer {
-    position: sticky;
-    top: 18px;
-    z-index: 1;
+  body.wc-config-active .wc-desktop-viewer-panel .model-viewer {
+    position: static;
+    top: auto;
+    z-index: auto;
   }
 }
 
@@ -494,6 +509,15 @@ body.wc-config-active .model-viewer {
   .wc-desktop-config-shell {
     display: block;
     margin-top: 0;
+  }
+
+  .wc-desktop-config-main {
+    display: block;
+  }
+
+  .wc-desktop-viewer-panel,
+  .wc-desktop-options-panel {
+    position: static;
   }
 
   .wc-desktop-category-rail {
