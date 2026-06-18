@@ -18,6 +18,12 @@ function getLoadTimeoutMs() {
   return isMobileViewport() ? 60000 : 30000;
 }
 
+const STANDARD_FRAME_REFERENCE = {
+  centerX: -0.30462795178594515,
+  centerZ: 0.06859170858019681,
+  minY: -0.24619369150314263,
+};
+
 export function mountRuntimeModelViewer(container) {
   return new RuntimeModelViewer(container);
 }
@@ -149,7 +155,7 @@ class RuntimeModelViewer {
   }
 
   loadObject(part, onProgress) {
-    return this.loadGlb(part.src, onProgress);
+    return this.loadGlb(part.src, onProgress).then((object) => this.normalizeSpecialPart(part, object));
   }
 
   loadGlb(src, onProgress) {
@@ -172,6 +178,31 @@ class RuntimeModelViewer {
         }
       );
     });
+  }
+
+  normalizeSpecialPart(part, object) {
+    if (!part || !object) {
+      return object;
+    }
+    if (part.key === "frame" && /90-degree (short|long) frame\.glb$/i.test(part.src || "")) {
+      const wrapper = new THREE.Group();
+      const primary = object;
+      const mirrored = object.clone(true);
+      mirrored.scale.x *= -1;
+      wrapper.add(primary);
+      wrapper.add(mirrored);
+
+      const box = new THREE.Box3().setFromObject(wrapper);
+      const center = box.getCenter(new THREE.Vector3());
+      const deltaX = STANDARD_FRAME_REFERENCE.centerX - center.x;
+      const deltaZ = STANDARD_FRAME_REFERENCE.centerZ - center.z;
+      const deltaY = STANDARD_FRAME_REFERENCE.minY - box.min.y;
+      wrapper.position.x += deltaX;
+      wrapper.position.y += deltaY;
+      wrapper.position.z += deltaZ;
+      return wrapper;
+    }
+    return object;
   }
 
   disposeObject(object) {
