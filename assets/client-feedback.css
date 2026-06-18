@@ -82,8 +82,14 @@ body.wc-config-active .wc-summary-backdrop {
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
+    box-shadow 180ms ease;
+  transform: none !important;
+}
+
+.choice-btn:hover,
+.choice-btn:focus,
+.choice-btn:focus-visible {
+  transform: none !important;
 }
 
 .choice-btn.active {
@@ -496,10 +502,11 @@ body.wc-config-active .model-viewer {
 }
 
 @media (min-width: 901px) {
+  body.wc-config-active .model-viewer,
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer {
-    position: static;
-    top: auto;
-    z-index: auto;
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
   }
 }
 
