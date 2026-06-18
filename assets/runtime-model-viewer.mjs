@@ -40,6 +40,7 @@ class RuntimeModelViewer {
     this.loadToken = 0;
     this.signature = "";
     this.partsSignature = "";
+    this.currentSourceModel = "";
     this.init();
   }
 
@@ -329,6 +330,13 @@ class RuntimeModelViewer {
     });
   }
 
+  getPartEntrySignature(entry) {
+    if (!entry) {
+      return "";
+    }
+    return `${entry.src || ""}|${entry.object && entry.object.userData && entry.object.userData.partTint ? 1 : 0}`;
+  }
+
   async update({ sourceModel, selection, frameColor }) {
     const parts = getModelPartsForSourceModel(sourceModel, selection || {});
     const partsSignature = JSON.stringify({
@@ -349,18 +357,21 @@ class RuntimeModelViewer {
     if (partsSignature === this.partsSignature && this.modelRoot) {
       this.signature = signature;
       this.applyDimensionAdjustments(selection || {});
-      this.fitCameraToObject(this.modelRoot);
       this.applyFrameColor(frameColor);
       this.showStatus("");
       return;
     }
 
+    const canPatchExisting = this.currentSourceModel === sourceModel && !!this.modelRoot;
     this.signature = signature;
     this.partsSignature = partsSignature;
-    this.clearObject();
+    if (!canPatchExisting) {
+      this.clearObject();
+    }
 
     if (!this.scene || !parts.length) {
       this.showStatus("Waiting for model");
+      this.currentSourceModel = sourceModel;
       return;
     }
 
@@ -369,6 +380,77 @@ class RuntimeModelViewer {
     this.colorTargets = [];
 
     try {
+      if (canPatchExisting && this.modelRoot) {
+        const group = this.modelRoot;
+        const existingByKey = new Map(
+          this.partObjects.map((entry) => [entry.key || "", entry])
+        );
+        const nextPartObjects = [];
+        const nextColorTargets = [];
+
+        for (let index = 0; index < parts.length; index += 1) {
+          const part = parts[index];
+          const partKey = part.key || "";
+          const desiredSignature = `${part.src}|${part.tint ? 1 : 0}`;
+          const existingEntry = existingByKey.get(partKey);
+
+          if (existingEntry && this.getPartEntrySignature(existingEntry) === desiredSignature) {
+            nextPartObjects.push(existingEntry);
+            if (part.tint) {
+              nextColorTargets.push(existingEntry.object);
+            }
+            existingByKey.delete(partKey);
+            continue;
+          }
+
+          const object = await this.loadObject(part, (evt) => {
+            if (!evt || (!evt.total && !evt.loaded)) return;
+            const total = Math.max(evt.total || 0, evt.loaded || 0);
+            const pct = total > 0 ? Math.min(100, Math.round((evt.loaded / total) * 100)) : 0;
+            const combined = Math.round(((index + pct / 100) / parts.length) * 100);
+            this.showStatus(`Loading... ${combined}%`);
+          });
+
+          if (currentToken !== this.loadToken) {
+            this.disposeObject(object);
+            return;
+          }
+
+          object.userData.partKey = partKey;
+          object.userData.partSrc = part.src;
+          object.userData.partTint = !!part.tint;
+
+          if (existingEntry) {
+            group.remove(existingEntry.object);
+            this.disposeObject(existingEntry.object);
+            existingByKey.delete(partKey);
+          }
+
+          group.add(object);
+          nextPartObjects.push({
+            key: partKey,
+            src: part.src,
+            object,
+          });
+          if (part.tint) {
+            nextColorTargets.push(object);
+          }
+        }
+
+        existingByKey.forEach((entry) => {
+          group.remove(entry.object);
+          this.disposeObject(entry.object);
+        });
+
+        this.partObjects = nextPartObjects;
+        this.colorTargets = nextColorTargets;
+        this.currentSourceModel = sourceModel;
+        this.applyDimensionAdjustments(selection || {});
+        this.applyFrameColor(frameColor);
+        this.showStatus("");
+        return;
+      }
+
       const group = new THREE.Group();
       let meshCount = 0;
 
@@ -410,6 +492,7 @@ class RuntimeModelViewer {
 
       this.modelRoot = group;
       this.scene.add(group);
+      this.currentSourceModel = sourceModel;
       this.applyDimensionAdjustments(selection || {});
       this.fitCameraToObject(group);
       this.applyFrameColor(frameColor);
