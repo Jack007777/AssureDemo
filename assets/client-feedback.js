@@ -804,6 +804,81 @@
       .trim();
   }
 
+  function normalizeDesktopSeatWidthControl() {
+    if (isMobileViewport()) {
+      return;
+    }
+    const group = qs(".wc-synthetic-seat-width", getConfiguratorCard());
+    if (!group) {
+      return;
+    }
+    const grid = qs(".choice-grid", group);
+    if (!grid) {
+      return;
+    }
+
+    const options = qsa(".choice-btn", group)
+      .map(function (button) {
+        const labelNode = qs(".choice-label", button) || button;
+        return {
+          id: button.dataset.optionId || "",
+          label: (labelNode.textContent || "").trim(),
+          active: button.classList.contains("active"),
+        };
+      })
+      .filter(function (option) {
+        return option.id && option.label;
+      });
+
+    if (!options.length) {
+      return;
+    }
+
+    const current = qs(".option-current", group);
+    const selected = options.find(function (option) {
+      return option.active;
+    }) || options[0];
+    const wrapper = document.createElement("div");
+    wrapper.className = "wc-seatwidth-native-wrap";
+    wrapper.innerHTML =
+      '<select class="select wc-seatwidth-native-select">' +
+      options.map(function (option) {
+        const selectedAttr = option.id === selected.id ? ' selected' : '';
+        return '<option value="' + option.id + '"' + selectedAttr + '>' + option.label + '</option>';
+      }).join("") +
+      "</select>";
+
+    grid.replaceWith(wrapper);
+    if (current) {
+      current.textContent = selected.label;
+    }
+
+    const nativeSelect = qs(".wc-seatwidth-native-select", group);
+    if (nativeSelect && !nativeSelect.dataset.wcBoundSyntheticSelect) {
+      nativeSelect.dataset.wcBoundSyntheticSelect = "1";
+      nativeSelect.addEventListener("change", function () {
+        const optionId = nativeSelect.value;
+        const option = options.find(function (item) {
+          return item.id === optionId;
+        });
+        const configStore = getConfigStore();
+        if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
+          return;
+        }
+        configStore.setOption("seatWidth", optionId);
+        if (current && option) {
+          current.textContent = option.label;
+        }
+        window.setTimeout(function () {
+          reflectSelectionsFromStore();
+          syncVisibleSelections();
+          syncSummaryExtras();
+          syncRuntimeViewer();
+        }, 80);
+      });
+    }
+  }
+
   function includesAny(label, fragments) {
     return fragments.some(function (part) {
       return label.indexOf(part) >= 0;
@@ -1741,6 +1816,7 @@
     ensureDesktopCategoryLayout();
     syncDesktopViewerSticky();
     renderSyntheticSeatWidthGroup();
+    normalizeDesktopSeatWidthControl();
     syncVisibleSelections();
     syncSummaryExtras();
     refreshRuntimeTranslations(120);
@@ -1833,6 +1909,7 @@
       ensureDesktopCategoryLayout();
       syncDesktopViewerSticky();
       renderSyntheticSeatWidthGroup();
+      normalizeDesktopSeatWidthControl();
       annotateVisibleOptionButtons();
       reflectSelectionsFromStore();
       syncVisibleSelections();
@@ -2347,6 +2424,7 @@
     renderMobileViewerState();
     renderMobileCategoryDock();
     reflectSelectionsFromStore();
+    normalizeDesktopSeatWidthControl();
     syncVisibleSelections();
     syncSummaryExtras();
     syncRuntimeViewer();
