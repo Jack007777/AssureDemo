@@ -349,6 +349,7 @@ class RuntimeModelViewer {
     if (partsSignature === this.partsSignature && this.modelRoot) {
       this.signature = signature;
       this.applyDimensionAdjustments(selection || {});
+      this.fitCameraToObject(this.modelRoot);
       this.applyFrameColor(frameColor);
       this.showStatus("");
       return;
