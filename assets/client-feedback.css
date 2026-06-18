@@ -515,6 +515,7 @@ body.wc-config-active .model-viewer {
   body.wc-config-active .wc-desktop-options-panel {
     position: relative !important;
     z-index: 5 !important;
+    margin-top: 18px;
   }
 
   body.wc-config-active .wc-desktop-options-panel .option-group,
@@ -523,11 +524,18 @@ body.wc-config-active .model-viewer {
     z-index: 6;
   }
 
+  body.wc-config-active .wc-synthetic-seat-width {
+    position: relative;
+    z-index: 20 !important;
+    margin-top: 12px;
+  }
+
   body.wc-config-active .model-viewer,
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer {
     position: relative !important;
     top: auto !important;
     z-index: 1 !important;
+    margin-bottom: 16px;
   }
 
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer,
@@ -535,6 +543,10 @@ body.wc-config-active .model-viewer {
   body.wc-config-active .wc-desktop-viewer-panel .wc-runtime-canvas {
     pointer-events: none !important;
     cursor: default !important;
+  }
+
+  body.wc-config-active .wc-desktop-viewer-panel .model-viewer::after {
+    pointer-events: none !important;
   }
 }
 
