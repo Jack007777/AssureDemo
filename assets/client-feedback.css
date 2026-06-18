@@ -502,11 +502,32 @@ body.wc-config-active .model-viewer {
 }
 
 @media (min-width: 901px) {
+  body.wc-config-active .wc-desktop-config-main {
+    position: relative;
+    isolation: isolate;
+  }
+
+  body.wc-config-active .wc-desktop-viewer-panel {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel {
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel .option-group,
+  body.wc-config-active .wc-desktop-options-panel .choice-btn {
+    position: relative;
+    z-index: 6;
+  }
+
   body.wc-config-active .model-viewer,
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer {
-    position: static !important;
+    position: relative !important;
     top: auto !important;
-    z-index: auto !important;
+    z-index: 1 !important;
   }
 }
 
