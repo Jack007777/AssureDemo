@@ -578,7 +578,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-viewer-incremental-fix1");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-viewer-fade-fix1");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";

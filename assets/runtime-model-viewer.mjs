@@ -41,6 +41,7 @@ class RuntimeModelViewer {
     this.signature = "";
     this.partsSignature = "";
     this.currentSourceModel = "";
+    this.transitions = [];
     this.init();
   }
 
@@ -194,6 +195,7 @@ class RuntimeModelViewer {
     }
     this.colorTargets = [];
     this.partObjects = [];
+    this.transitions = [];
   }
 
   getSeatWidthCm(selection) {
@@ -337,6 +339,58 @@ class RuntimeModelViewer {
     return `${entry.src || ""}|${entry.object && entry.object.userData && entry.object.userData.partTint ? 1 : 0}`;
   }
 
+  setObjectOpacity(object, opacity) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach((material) => {
+        if (!material) {
+          return;
+        }
+        material.transparent = opacity < 1;
+        material.opacity = opacity;
+        material.needsUpdate = true;
+      });
+    });
+  }
+
+  queueTransition(object, mode, duration, onComplete) {
+    if (!object) {
+      return;
+    }
+    this.transitions.push({
+      object,
+      mode,
+      start: performance.now(),
+      duration: duration || 220,
+      onComplete: typeof onComplete === "function" ? onComplete : null,
+    });
+  }
+
+  updateTransitions() {
+    if (!this.transitions.length) {
+      return;
+    }
+    const now = performance.now();
+    this.transitions = this.transitions.filter((transition) => {
+      const progress = Math.min(1, (now - transition.start) / transition.duration);
+      const opacity = transition.mode === "fade-in" ? progress : 1 - progress;
+      this.setObjectOpacity(transition.object, opacity);
+      if (progress >= 1) {
+        if (transition.onComplete) {
+          transition.onComplete();
+        }
+        return false;
+      }
+      return true;
+    });
+  }
+
   async update({ sourceModel, selection, frameColor }) {
     const parts = getModelPartsForSourceModel(sourceModel, selection || {});
     const partsSignature = JSON.stringify({
@@ -419,14 +473,18 @@ class RuntimeModelViewer {
           object.userData.partKey = partKey;
           object.userData.partSrc = part.src;
           object.userData.partTint = !!part.tint;
+          this.setObjectOpacity(object, 0);
 
           if (existingEntry) {
-            group.remove(existingEntry.object);
-            this.disposeObject(existingEntry.object);
+            this.queueTransition(existingEntry.object, "fade-out", 180, () => {
+              group.remove(existingEntry.object);
+              this.disposeObject(existingEntry.object);
+            });
             existingByKey.delete(partKey);
           }
 
           group.add(object);
+          this.queueTransition(object, "fade-in", 220);
           nextPartObjects.push({
             key: partKey,
             src: part.src,
@@ -438,8 +496,10 @@ class RuntimeModelViewer {
         }
 
         existingByKey.forEach((entry) => {
-          group.remove(entry.object);
-          this.disposeObject(entry.object);
+          this.queueTransition(entry.object, "fade-out", 180, () => {
+            group.remove(entry.object);
+            this.disposeObject(entry.object);
+          });
         });
 
         this.partObjects = nextPartObjects;
@@ -477,11 +537,14 @@ class RuntimeModelViewer {
         }
         object.userData.partKey = part.key || "";
         object.userData.partSrc = part.src;
+        object.userData.partTint = !!part.tint;
         this.partObjects.push({
           key: part.key || "",
           src: part.src,
           object,
         });
+        this.setObjectOpacity(object, 0);
+        this.queueTransition(object, "fade-in", 260);
         group.add(object);
       }
 
@@ -517,6 +580,7 @@ class RuntimeModelViewer {
 
   animate() {
     if (!this.renderer || !this.scene || !this.camera) return;
+    this.updateTransitions();
     this.controls && this.controls.update();
     this.renderer.render(this.scene, this.camera);
     this.animationId = requestAnimationFrame(() => this.animate());
