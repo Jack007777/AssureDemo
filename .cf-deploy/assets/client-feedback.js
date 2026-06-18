@@ -1120,6 +1120,26 @@
     qs(".wc-switch-model", toolbar).textContent = tr("switchModel");
   }
 
+  function syncStageVisibility() {
+    const stage = qs(".wc-model-stage");
+    const grid = getGrid();
+    const toolbar = qs(".wc-inline-toolbar");
+    const isConfigActive = document.body.classList.contains("wc-config-active");
+
+    if (stage) {
+      stage.hidden = isConfigActive;
+      stage.style.display = isConfigActive ? "none" : "";
+    }
+    if (grid) {
+      grid.hidden = !isConfigActive;
+      grid.style.display = isConfigActive ? "" : "none";
+    }
+    if (toolbar) {
+      toolbar.hidden = !isConfigActive;
+      toolbar.style.display = isConfigActive ? "" : "none";
+    }
+  }
+
   function isMobileViewport() {
     return window.innerWidth <= 768;
   }
@@ -1863,6 +1883,7 @@
     dispatchNativeSelect(select, card.sourceModel);
     document.body.classList.remove("wc-preselect");
     document.body.classList.add("wc-config-active");
+    syncStageVisibility();
     const toolbar = ensureToolbar();
     if (toolbar) {
       toolbar.classList.remove("wc-hidden-source");
@@ -1890,6 +1911,7 @@
     toggleSummary(false);
     document.body.classList.add("wc-preselect");
     document.body.classList.remove("wc-config-active");
+    syncStageVisibility();
     const toolbar = ensureToolbar();
     if (toolbar) {
       toolbar.classList.add("wc-hidden-source");
@@ -2460,6 +2482,7 @@
     document.body.classList.add("wc-preselect");
     document.body.classList.remove("wc-config-active");
     document.body.classList.remove("wc-summary-open");
+    syncStageVisibility();
   }
 
   function mountEnhancements() {
@@ -2473,6 +2496,7 @@
     renderMobileLanguageSwitch();
     renderModelStage();
     renderToolbar();
+    syncStageVisibility();
     ensureSummaryUI();
     hideNativeControls();
     ensureDesktopCategoryLayout();
