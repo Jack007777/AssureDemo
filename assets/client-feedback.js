@@ -275,6 +275,7 @@
     mobileEdgeSwipeLockUntil: 0,
     viewerRuntime: null,
     viewerModulePromise: null,
+    syntheticSeatWidthMarkup: "",
     observers: [],
   };
 
@@ -576,7 +577,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-desktop-viewer-layout-fix1");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-seatwidth-click-stability-fix1");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
@@ -612,16 +613,9 @@
     if (!viewer) {
       return;
     }
-
-    if (document.body.classList.contains("wc-config-active") && window.innerWidth > 900) {
-      viewer.style.position = "sticky";
-      viewer.style.top = "18px";
-      viewer.style.zIndex = "1";
-    } else {
-      viewer.style.removeProperty("position");
-      viewer.style.removeProperty("top");
-      viewer.style.removeProperty("z-index");
-    }
+    viewer.style.removeProperty("position");
+    viewer.style.removeProperty("top");
+    viewer.style.removeProperty("z-index");
   }
 
   function findOptionByLabel(moduleId, label) {
@@ -729,6 +723,7 @@
       if (existing) {
         existing.remove();
       }
+      state.syntheticSeatWidthMarkup = "";
       return;
     }
 
@@ -737,6 +732,7 @@
       if (existing) {
         existing.remove();
       }
+      state.syntheticSeatWidthMarkup = "";
       return;
     }
 
@@ -748,7 +744,7 @@
     const group = existing || document.createElement("section");
     group.className = "option-group wc-synthetic-seat-width";
     group.dataset.moduleId = "seatWidth";
-    group.innerHTML =
+    const markup =
       '<div class="option-header">' +
       '<div>' +
       '<div class="option-title">' + title + "</div>" +
@@ -768,6 +764,11 @@
         );
       }).join("") +
       "</div>";
+
+    if (!existing || markup !== state.syntheticSeatWidthMarkup) {
+      group.innerHTML = markup;
+      state.syntheticSeatWidthMarkup = markup;
+    }
 
     if (!existing) {
       groupsWrap.insertBefore(group, groupsWrap.firstElementChild || null);
@@ -2289,6 +2290,15 @@
 
     const observer = new MutationObserver(function (mutations) {
       const shouldRefresh = mutations.some(function (mutation) {
+        if (
+          mutation.type === "attributes" &&
+          mutation.target &&
+          mutation.target.nodeType === 1 &&
+          (mutation.target.closest(".wc-synthetic-seat-width") ||
+            mutation.target.closest(".choice-btn"))
+        ) {
+          return false;
+        }
         const target =
           mutation.target && mutation.target.nodeType === 1
             ? mutation.target
