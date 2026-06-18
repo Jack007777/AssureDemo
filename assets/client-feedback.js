@@ -610,13 +610,20 @@
   }
 
   function syncDesktopViewerSticky() {
-    const viewer = qs(".model-viewer", getConfiguratorCard());
-    if (!viewer) {
+    const card = getConfiguratorCard();
+    const viewer = qs(".model-viewer", card);
+    const viewerPanel = qs(".wc-desktop-viewer-panel", card);
+    if (!viewer || !viewerPanel) {
       return;
     }
-    viewer.style.removeProperty("position");
-    viewer.style.removeProperty("top");
-    viewer.style.removeProperty("z-index");
+    if (isMobileViewport() || !document.body.classList.contains("wc-config-active")) {
+      viewerPanel.classList.remove("wc-is-sticky");
+      viewer.style.removeProperty("position");
+      viewer.style.removeProperty("top");
+      viewer.style.removeProperty("z-index");
+      return;
+    }
+    viewerPanel.classList.add("wc-is-sticky");
   }
 
   function findOptionByLabel(moduleId, label) {
@@ -806,93 +813,14 @@
   }
 
   function normalizeDesktopSeatWidthControl() {
-    if (isMobileViewport()) {
-      return;
-    }
-    const group = qs(".wc-synthetic-seat-width", getConfiguratorCard());
-    if (!group) {
-      return;
-    }
-    const grid = qs(".choice-grid", group);
-    if (!grid) {
-      return;
-    }
-
-    const options = qsa(".choice-btn", group)
-      .map(function (button) {
-        const labelNode = qs(".choice-label", button) || button;
-        return {
-          id: button.dataset.optionId || "",
-          label: (labelNode.textContent || "").trim(),
-          active: button.classList.contains("active"),
-        };
-      })
-      .filter(function (option) {
-        return option.id && option.label;
-      });
-
-    if (!options.length) {
-      return;
-    }
-
-    const current = qs(".option-current", group);
-    const selected = options.find(function (option) {
-      return option.active;
-    }) || options[0];
-    const wrapper = document.createElement("div");
-    wrapper.className = "wc-seatwidth-native-wrap";
-    wrapper.innerHTML =
-      '<select class="select wc-seatwidth-native-select">' +
-      options.map(function (option) {
-        const selectedAttr = option.id === selected.id ? ' selected' : '';
-        return '<option value="' + option.id + '"' + selectedAttr + '>' + option.label + '</option>';
-      }).join("") +
-      "</select>";
-
-    grid.replaceWith(wrapper);
-    if (current) {
-      current.textContent = selected.label;
-    }
-
-    const nativeSelect = qs(".wc-seatwidth-native-select", group);
-    if (nativeSelect && !nativeSelect.dataset.wcBoundSyntheticSelect) {
-      nativeSelect.dataset.wcBoundSyntheticSelect = "1";
-      nativeSelect.addEventListener("change", function () {
-        const optionId = nativeSelect.value;
-        const option = options.find(function (item) {
-          return item.id === optionId;
-        });
-        const configStore = getConfigStore();
-        if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
-          return;
-        }
-        configStore.setOption("seatWidth", optionId);
-        if (current && option) {
-          current.textContent = option.label;
-        }
-        window.setTimeout(function () {
-          reflectSelectionsFromStore();
-          syncVisibleSelections();
-          syncSummaryExtras();
-          syncRuntimeViewer();
-        }, 80);
-      });
-    }
+    return;
   }
 
   function ensureSeatWidthDesktopGuard() {
     if (state.seatWidthDesktopGuardTimer) {
-      return;
+      window.clearInterval(state.seatWidthDesktopGuardTimer);
+      state.seatWidthDesktopGuardTimer = 0;
     }
-    state.seatWidthDesktopGuardTimer = window.setInterval(function () {
-      if (!document.body.classList.contains("wc-config-active")) {
-        return;
-      }
-      if (isMobileViewport()) {
-        return;
-      }
-      normalizeDesktopSeatWidthControl();
-    }, 200);
   }
 
   function renderSyntheticSeatWidthGroup() {
@@ -925,63 +853,89 @@
     const selectedLabel = getSelectedOptionLabel(module, selectedId);
     const title = getSeatWidthDisplayTitle();
     const currentText = translateUiText(selectedLabel) || selectedLabel || "Please choose...";
-    const useNativeSelect = true;
 
     const group = existing || document.createElement("section");
     group.className = "option-group wc-synthetic-seat-width";
     group.dataset.moduleId = "seatWidth";
 
-    const bodyMarkup = useNativeSelect
-      ? (
-        '<div class="wc-seatwidth-native-wrap">' +
-        '<select class="select wc-seatwidth-native-select">' +
-        module.options.map(function (option) {
-          const optionLabel = translateUiText(option.label) || option.label;
-          const selected = option.id === selectedId ? ' selected' : '';
-          return '<option value="' + option.id + '"' + selected + '>' + optionLabel + '</option>';
-        }).join("") +
-        "</select>" +
-        "</div>"
-      )
-      : "";
-
-    const markup =
-      '<div class="option-header">' +
-      '<div>' +
-      '<div class="option-title">' + title + "</div>" +
-      '<div class="option-code">seatWidth</div>' +
-      "</div>" +
-      '<div class="option-current">' + currentText + "</div>" +
-      "</div>" +
-      bodyMarkup;
-
-    if (!existing || markup !== state.syntheticSeatWidthMarkup) {
-      group.innerHTML = markup;
-      state.syntheticSeatWidthMarkup = markup;
-    }
-
     if (!existing) {
+      group.innerHTML =
+        '<div class="option-header">' +
+        '<div>' +
+        '<div class="option-title"></div>' +
+        '<div class="option-code">seatWidth</div>' +
+        "</div>" +
+        '<div class="option-current"></div>' +
+        "</div>" +
+        '<div class="choice-grid"></div>';
       groupsWrap.insertBefore(group, groupsWrap.firstElementChild || null);
     }
 
-    const nativeSelect = qs(".wc-seatwidth-native-select", group);
-    if (nativeSelect && !nativeSelect.dataset.wcBoundSyntheticSelect) {
-      nativeSelect.dataset.wcBoundSyntheticSelect = "1";
-      nativeSelect.addEventListener("change", function () {
-        const optionId = nativeSelect.value;
-        const configStore = getConfigStore();
-        if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
-          return;
-        }
-        configStore.setOption("seatWidth", optionId);
-        window.setTimeout(function () {
-          renderSyntheticSeatWidthGroup();
-          reflectSelectionsFromStore();
-          syncVisibleSelections();
-          syncSummaryExtras();
-          syncRuntimeViewer();
-        }, 80);
-      });
+    const titleNode = qs(".option-title", group);
+    const currentNode = qs(".option-current", group);
+    const gridNode = qs(".choice-grid", group);
+    if (!titleNode || !currentNode || !gridNode) {
+      return;
+    }
+
+    titleNode.textContent = title;
+    currentNode.textContent = currentText;
+
+    module.options.forEach(function (option) {
+      let button = qs('.choice-btn[data-option-id="' + option.id + '"]', gridNode);
+      const optionLabel = translateUiText(option.label) || option.label;
+      if (!button) {
+        button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice-btn";
+        button.dataset.optionId = option.id;
+        button.innerHTML =
+          '<span class="choice-label"></span>' +
+          '<span class="choice-meta">+0,00 EUR</span>';
+        gridNode.appendChild(button);
+      }
+
+      const labelNode = qs(".choice-label", button);
+      if (labelNode) {
+        labelNode.textContent = optionLabel;
+      }
+      button.classList.toggle("active", option.id === selectedId);
+
+      if (!button.dataset.wcBoundSyntheticChoice) {
+        button.dataset.wcBoundSyntheticChoice = "1";
+        button.addEventListener("click", function () {
+          const optionId = button.dataset.optionId;
+          const configStore = getConfigStore();
+          if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
+            return;
+          }
+          configStore.setOption("seatWidth", optionId);
+          window.setTimeout(function () {
+            renderSyntheticSeatWidthGroup();
+            reflectSelectionsFromStore();
+            syncVisibleSelections();
+            syncSummaryExtras();
+            syncRuntimeViewer();
+          }, 80);
+        });
+      }
+    });
+
+    qsa(".choice-btn", gridNode).forEach(function (button) {
+      if (!module.options.some(function (option) { return option.id === button.dataset.optionId; })) {
+        button.remove();
+      }
+    });
+
+    state.syntheticSeatWidthMarkup = module.options
+      .map(function (option) {
+        return option.id + ":" + (option.id === selectedId ? "1" : "0");
+      })
+      .join("|");
+
+    setGroupSelectionVisual(group, selectedLabel, selectedId);
+    if (currentNode && currentText) {
+      currentNode.textContent = currentText;
     }
   }
 

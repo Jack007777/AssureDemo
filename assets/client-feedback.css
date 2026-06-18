@@ -487,6 +487,11 @@ body.wc-summary-open .wc-summary-backdrop {
   z-index: 1;
 }
 
+.wc-desktop-viewer-panel.wc-is-sticky {
+  position: sticky;
+  top: 18px;
+}
+
 .wc-desktop-options-panel {
   min-width: 0;
   position: relative;
@@ -516,7 +521,8 @@ body.wc-config-active .model-viewer {
   }
 
   body.wc-config-active .wc-desktop-viewer-panel {
-    position: relative !important;
+    position: sticky !important;
+    top: 18px !important;
     z-index: 1 !important;
   }
 
