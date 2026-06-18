@@ -3,7 +3,7 @@ import { OrbitControls } from "/assets/vendor/OrbitControls.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix4";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix5";
 
 function isMobileViewport() {
   return window.innerWidth <= 768;
@@ -245,8 +245,8 @@ class RuntimeModelViewer {
     const targets = [];
     frameObject.updateMatrixWorld(true);
     const frameBox = new THREE.Box3().setFromObject(frameObject);
-    const zThreshold = frameBox.min.z + (frameBox.max.z - frameBox.min.z) * 0.72;
-    const yThreshold = frameBox.min.y + (frameBox.max.y - frameBox.min.y) * 0.62;
+    const zThreshold = frameBox.min.z + (frameBox.max.z - frameBox.min.z) * 0.54;
+    const yThreshold = frameBox.min.y + (frameBox.max.y - frameBox.min.y) * 0.74;
 
     frameObject.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) {
@@ -299,8 +299,8 @@ class RuntimeModelViewer {
     const box = new THREE.Box3().setFromObject(frameObject);
     const pivotWorld = new THREE.Vector3(
       (box.min.x + box.max.x) * 0.5,
-      box.min.y + (box.max.y - box.min.y) * 0.22,
-      box.min.z + (box.max.z - box.min.z) * 0.72
+      box.min.y + (box.max.y - box.min.y) * 0.24,
+      box.min.z + (box.max.z - box.min.z) * 0.58
     );
     const pivotLocal = frameObject.worldToLocal(pivotWorld.clone());
 
@@ -334,9 +334,9 @@ class RuntimeModelViewer {
       return;
     }
 
-    rig.rotation.x = THREE.MathUtils.degToRad(-9);
-    rig.position.y += 0.008;
-    rig.position.z += 0.012;
+    rig.rotation.x = THREE.MathUtils.degToRad(-8);
+    rig.position.y += 0.004;
+    rig.position.z += 0.008;
   }
 
   applyDimensionAdjustments(selection) {
@@ -367,9 +367,16 @@ class RuntimeModelViewer {
           break;
         case "seat":
         case "backrest":
+          object.scale.x = widthScale;
+          object.scale.z = depthScale;
+          break;
         case "sideguards":
           object.scale.x = widthScale;
           object.scale.z = depthScale;
+          if (isFrontAngle90) {
+            object.position.y += 0.003;
+            object.position.z += 0.01;
+          }
           break;
         case "footrest":
           object.scale.x = widthScale;
