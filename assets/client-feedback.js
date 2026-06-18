@@ -925,7 +925,7 @@
     const selectedLabel = getSelectedOptionLabel(module, selectedId);
     const title = getSeatWidthDisplayTitle();
     const currentText = translateUiText(selectedLabel) || selectedLabel || "Please choose...";
-    const useNativeSelect = !isMobileViewport();
+    const useNativeSelect = true;
 
     const group = existing || document.createElement("section");
     group.className = "option-group wc-synthetic-seat-width";
@@ -943,20 +943,7 @@
         "</select>" +
         "</div>"
       )
-      : (
-        '<div class="choice-grid">' +
-        module.options.map(function (option) {
-          const active = option.id === selectedId ? " active" : "";
-          const optionLabel = translateUiText(option.label) || option.label;
-          return (
-            '<button type="button" class="choice-btn' + active + '" data-option-id="' + option.id + '">' +
-            '<span class="choice-label">' + optionLabel + "</span>" +
-            '<span class="choice-meta">+0,00 EUR</span>' +
-            "</button>"
-          );
-        }).join("") +
-        "</div>"
-      );
+      : "";
 
     const markup =
       '<div class="option-header">' +
@@ -976,28 +963,6 @@
     if (!existing) {
       groupsWrap.insertBefore(group, groupsWrap.firstElementChild || null);
     }
-
-    qsa(".choice-btn", group).forEach(function (button) {
-      if (button.dataset.wcBoundSyntheticChoice) {
-        return;
-      }
-      button.dataset.wcBoundSyntheticChoice = "1";
-      button.addEventListener("click", function () {
-        const optionId = button.dataset.optionId;
-        const configStore = getConfigStore();
-        if (!configStore || typeof configStore.setOption !== "function" || !optionId) {
-          return;
-        }
-        configStore.setOption("seatWidth", optionId);
-        window.setTimeout(function () {
-          renderSyntheticSeatWidthGroup();
-          reflectSelectionsFromStore();
-          syncVisibleSelections();
-          syncSummaryExtras();
-          syncRuntimeViewer();
-        }, 80);
-      });
-    });
 
     const nativeSelect = qs(".wc-seatwidth-native-select", group);
     if (nativeSelect && !nativeSelect.dataset.wcBoundSyntheticSelect) {

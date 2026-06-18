@@ -497,6 +497,14 @@ body.wc-summary-open .wc-summary-backdrop {
   scroll-margin-top: 18px;
 }
 
+.wc-seatwidth-native-wrap {
+  margin-top: 12px;
+}
+
+.wc-seatwidth-native-select {
+  width: 100%;
+}
+
 body.wc-config-active .model-viewer {
   min-height: min(56vh, 580px);
 }
