@@ -276,6 +276,7 @@
     viewerRuntime: null,
     viewerModulePromise: null,
     syntheticSeatWidthMarkup: "",
+    seatWidthDesktopGuardTimer: 0,
     observers: [],
   };
 
@@ -877,6 +878,21 @@
         }, 80);
       });
     }
+  }
+
+  function ensureSeatWidthDesktopGuard() {
+    if (state.seatWidthDesktopGuardTimer) {
+      return;
+    }
+    state.seatWidthDesktopGuardTimer = window.setInterval(function () {
+      if (!document.body.classList.contains("wc-config-active")) {
+        return;
+      }
+      if (isMobileViewport()) {
+        return;
+      }
+      normalizeDesktopSeatWidthControl();
+    }, 200);
   }
 
   function renderSyntheticSeatWidthGroup() {
@@ -2554,6 +2570,7 @@
     syncSummaryExtras();
     syncRuntimeViewer();
     attachObservers();
+    ensureSeatWidthDesktopGuard();
     scheduleDefaultSelections(false);
     window.setTimeout(enforceBilingualUi, 80);
     window.setTimeout(enforceBilingualUi, 260);
