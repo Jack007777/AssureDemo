@@ -3,7 +3,7 @@ import { OrbitControls } from "/assets/vendor/OrbitControls.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix3";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260618-frame90-runtime-fix4";
 
 function isMobileViewport() {
   return window.innerWidth <= 768;
@@ -279,34 +279,64 @@ class RuntimeModelViewer {
     return targets;
   }
 
+  ensureFrameAngleRig(frameObject) {
+    if (!frameObject) {
+      return null;
+    }
+
+    if (frameObject.userData.frameAngleRig) {
+      return frameObject.userData.frameAngleRig;
+    }
+
+    const targets = this.getFrameAngleTargets(frameObject);
+    if (!targets.length) {
+      return null;
+    }
+
+    const rig = new THREE.Group();
+    rig.name = "wc-frame-angle-rig";
+
+    const box = new THREE.Box3().setFromObject(frameObject);
+    const pivotWorld = new THREE.Vector3(
+      (box.min.x + box.max.x) * 0.5,
+      box.min.y + (box.max.y - box.min.y) * 0.22,
+      box.min.z + (box.max.z - box.min.z) * 0.72
+    );
+    const pivotLocal = frameObject.worldToLocal(pivotWorld.clone());
+
+    rig.position.copy(pivotLocal);
+    frameObject.add(rig);
+
+    targets.forEach((child) => {
+      rig.attach(child);
+    });
+
+    const rigData = { rig, pivotLocal };
+    frameObject.userData.frameAngleRig = rigData;
+    return rigData;
+  }
+
   applyFrameAngleFallback(frameObject, isFrontAngle90) {
     if (!frameObject) {
       return;
     }
 
-    const targets = this.getFrameAngleTargets(frameObject);
-    if (!targets.length) {
+    const rigData = this.ensureFrameAngleRig(frameObject);
+    if (!rigData || !rigData.rig) {
       return;
     }
 
-    targets.forEach((child) => {
-      if (child.userData.basePosition) {
-        child.position.copy(child.userData.basePosition);
-      }
-      if (child.userData.baseQuaternion) {
-        child.quaternion.copy(child.userData.baseQuaternion);
-      } else if (child.userData.baseRotation) {
-        child.rotation.copy(child.userData.baseRotation);
-      }
+    const rig = rigData.rig;
+    rig.rotation.set(0, 0, 0);
+    rig.position.copy(rigData.pivotLocal);
 
-      if (!isFrontAngle90) {
-        return;
-      }
+    if (!isFrontAngle90) {
+      return;
+    }
 
-      child.rotateX(THREE.MathUtils.degToRad(-9));
-      child.position.y += 0.012;
-      child.position.z += 0.018;
-    });
+    rig.rotation.x = THREE.MathUtils.degToRad(-9);
+    rig.position.y += 0.008;
+    rig.position.z += 0.012;
   }
 
   applyDimensionAdjustments(selection) {
