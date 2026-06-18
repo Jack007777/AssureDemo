@@ -39,6 +39,7 @@ class RuntimeModelViewer {
     this.partObjects = [];
     this.loadToken = 0;
     this.signature = "";
+    this.partsSignature = "";
     this.init();
   }
 
@@ -330,18 +331,31 @@ class RuntimeModelViewer {
 
   async update({ sourceModel, selection, frameColor }) {
     const parts = getModelPartsForSourceModel(sourceModel, selection || {});
+    const partsSignature = JSON.stringify({
+      sourceModel,
+      parts: parts.map((part) => `${part.key || ""}:${part.src}|${part.tint ? 1 : 0}`),
+    });
     const signature = JSON.stringify({
       sourceModel,
       frameColor,
       selection: selection || {},
-      parts: parts.map((part) => `${part.src}|${part.tint ? 1 : 0}`),
+      parts: parts.map((part) => `${part.key || ""}:${part.src}|${part.tint ? 1 : 0}`),
     });
 
     if (signature === this.signature) {
       return;
     }
 
+    if (partsSignature === this.partsSignature && this.modelRoot) {
+      this.signature = signature;
+      this.applyDimensionAdjustments(selection || {});
+      this.applyFrameColor(frameColor);
+      this.showStatus("");
+      return;
+    }
+
     this.signature = signature;
+    this.partsSignature = partsSignature;
     this.clearObject();
 
     if (!this.scene || !parts.length) {
@@ -403,6 +417,7 @@ class RuntimeModelViewer {
       if (currentToken !== this.loadToken) return;
       console.error("Runtime model load failed", error);
       this.showStatus("Model failed to load");
+      this.partsSignature = "";
     }
   }
 
@@ -446,5 +461,6 @@ class RuntimeModelViewer {
     this.renderer = null;
     this.root = null;
     this.statusNode = null;
+    this.partsSignature = "";
   }
 }

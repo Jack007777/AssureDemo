@@ -576,7 +576,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260617-s5-runtime-widthdepth-fix1");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-runtime-incremental-update1");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
