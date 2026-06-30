@@ -1,13 +1,64 @@
+const DEBUG_LEFT_FORK_ONLY = false;
+
 const S5_BASE_PARTS = [
   { key: "seat", src: "/models/S5/Sitzbespannung.glb", tint: false },
   { key: "backrest", src: "/models/S5/Ruecken.glb", tint: false },
   { key: "sideguards", src: "/models/S5/Seitenteilen-standard.glb", tint: false },
-  { key: "footrest", src: "/models/S5/Fussbrett.glb", tint: false },
-  { key: "frontCaster", src: "/models/S5/Lenkraerder-standard.glb", tint: false },
+  { key: "frontCasterLeft", src: "/models/S5/Lenkraerder-single.glb", tint: false },
+  { key: "frontCasterRight", src: "/models/S5/Lenkraerder-single.glb", tint: false },
 ];
 
-function getS5FramePart(selection) {
-  return { key: "frame", src: "/models/S5/Rahmen-standard.glb", tint: true };
+function getS5StepPart(selection = {}) {
+  const isFrontAngle90 = selection.frameAngle === "fa-90";
+  return {
+    key: "footrest",
+    src: isFrontAngle90
+      ? "/models/S5/frame-split/90 step.glb"
+      : "/models/S5/frame-split/100 step.glb",
+    tint: false,
+  };
+}
+
+function getS5ForkParts(selection = {}) {
+  const isFrontAngle90 = selection.frameAngle === "fa-90";
+  const isLongFrame = selection.frameLength === "fl-long";
+  const leftForkSrc = isFrontAngle90
+    ? (isLongFrame
+        ? "/models/S5/frame-split/90 left long fork .glb"
+        : "/models/S5/frame-split/90 left short fork .glb")
+    : (isLongFrame
+        ? "/models/S5/frame-split/100 left long fork.glb"
+        : "/models/S5/frame-split/100 left short fork.glb");
+  const rightForkSrc = isFrontAngle90
+    ? (isLongFrame
+        ? "/models/S5/frame-split/90 right long fork.glb"
+        : "/models/S5/frame-split/90 right short fork.glb")
+    : (isLongFrame
+        ? "/models/S5/frame-split/100 right long fork.glb"
+        : "/models/S5/frame-split/100 right short fork.glb");
+  const parts = [];
+  parts.push({
+    key: isFrontAngle90 ? "frame-left-fork-90" : "frame-left-fork-100",
+    src: leftForkSrc,
+    tint: true,
+  });
+  if (!DEBUG_LEFT_FORK_ONLY) {
+    parts.push({
+      key: isFrontAngle90 ? "frame-right-fork-90" : "frame-right-fork-100",
+      src: rightForkSrc,
+      tint: true,
+    });
+  }
+  return parts;
+}
+
+function getS5FrameParts(selection = {}) {
+  return [
+    { key: "frame-middle", src: "/models/S5/frame-split/middle body.glb", tint: true },
+    { key: "frame-left-body", src: "/models/S5/frame-split/left body.glb", tint: true },
+    { key: "frame-right-body", src: "/models/S5/frame-split/right body.glb", tint: true },
+    ...getS5ForkParts(selection),
+  ];
 }
 
 function getS5RearWheelPart(selection) {
@@ -26,7 +77,11 @@ function getS5RearWheelPart(selection) {
 
 function getS5HandrimPart(selection) {
   if (selection.handrim === "hr-big-24") {
-    return { key: "handrim", src: "/models/S5/S5异形手轮 _ S5 big ergonom handrail incl rubber strap.optimized.glb", tint: false };
+    return {
+      key: "handrim",
+      src: "/models/S5/S5异形手轮 _ S5 big ergonom handrail incl rubber strap.optimized.glb",
+      tint: false,
+    };
   }
   return null;
 }
@@ -36,9 +91,17 @@ function getS5BrakePart(selection) {
     case "brake-push-bent":
       return { key: "brake", src: "/models/S5/前倒刹车 _ push to brake bended lever.optimized.glb", tint: false };
     case "brake-push-folding":
-      return { key: "brake", src: "/models/S5/延长车柄刹车-推刹 _ push to brake folding extended lever.optimized.glb", tint: false };
+      return {
+        key: "brake",
+        src: "/models/S5/延长车柄刹车-推刹 _ push to brake folding extended lever.optimized.glb",
+        tint: false,
+      };
     case "brake-pull-folding":
-      return { key: "brake", src: "/models/S5/延长车柄刹车-拉刹 _ Pull to brake folding extended lever.optimized.glb", tint: false };
+      return {
+        key: "brake",
+        src: "/models/S5/延长车柄刹车-拉刹 _ Pull to brake folding extended lever.optimized.glb",
+        tint: false,
+      };
     case "brake-scissors":
       return { key: "brake", src: "/models/S5/剪刀款刹车scissors folding brak aluminum.optimized.glb", tint: false };
     case "brake-push-straight":
@@ -90,7 +153,8 @@ function getS5TransitWheelsPart(selection) {
 export function getModelPartsForSourceModel(sourceModel, selection = {}) {
   if ((sourceModel || "").toUpperCase() === "S5") {
     return [
-      getS5FramePart(selection),
+      ...getS5FrameParts(selection),
+      getS5StepPart(selection),
       ...S5_BASE_PARTS,
       getS5RearWheelPart(selection),
       getS5HandrimPart(selection),

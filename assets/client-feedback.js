@@ -70,6 +70,8 @@
       summaryLabel: "当前总金额",
       summaryButton: "查看明细",
       summaryClose: "收起",
+      desktopQuoteOpen: "展开报价",
+      desktopQuoteClose: "收起报价",
       weightLabel: "总重量",
       weightSuffix: "kg",
       weightMeta: "总重量",
@@ -86,6 +88,8 @@
       summaryLabel: "Current Total",
       summaryButton: "Details",
       summaryClose: "Close",
+      desktopQuoteOpen: "Show quote",
+      desktopQuoteClose: "Hide quote",
       weightLabel: "Total Weight",
       weightSuffix: "kg",
       weightMeta: "Total weight",
@@ -151,6 +155,8 @@
       summaryLabel: "\u603b\u91d1\u989d",
       summaryButton: "\u8ba2\u5355\u660e\u7ec6",
       summaryClose: "\u6536\u8d77\u660e\u7ec6",
+      desktopQuoteOpen: "\u5c55\u5f00\u62a5\u4ef7",
+      desktopQuoteClose: "\u6536\u8d77\u62a5\u4ef7",
       viewerMinimize: "\u6536\u8d77 3D",
       viewerRestore: "\u5c55\u5f00 3D",
       weightLabel: "\u603b\u91cd\u91cf",
@@ -166,6 +172,8 @@
       summaryLabel: "Total",
       summaryButton: "Order details",
       summaryClose: "Hide details",
+      desktopQuoteOpen: "Show quote",
+      desktopQuoteClose: "Hide quote",
       viewerMinimize: "Hide 3D",
       viewerRestore: "Show 3D",
       summarySpecEmpty: "Selected specifications will appear here",
@@ -257,6 +265,7 @@
     sourceModel: "",
     mounted: false,
     summaryOpen: false,
+    desktopSummaryOpen: false,
     viewerMinimized: false,
     applyingDefaults: false,
     defaultsAppliedKey: "",
@@ -578,7 +587,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260618-frame90-runtime-fix5");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260630-frame-split-forks-v2");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
@@ -1354,6 +1363,42 @@
     return { trigger: trigger, backdrop: backdrop };
   }
 
+  function ensureDesktopSummaryDrawer() {
+    let toggle = qs(".wc-desktop-summary-toggle");
+    if (!toggle) {
+      toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "wc-desktop-summary-toggle";
+      toggle.innerHTML =
+        '<span class="wc-desktop-summary-toggle-icon">' + summaryIconSvg() + "</span>" +
+        '<span class="wc-desktop-summary-toggle-text"></span>';
+      document.body.appendChild(toggle);
+    }
+    return toggle;
+  }
+
+  function renderDesktopSummaryDrawer() {
+    const toggle = ensureDesktopSummaryDrawer();
+    const isDesktop =
+      document.body.classList.contains("wc-config-active") &&
+      !isMobileViewport() &&
+      !!getSummaryCard();
+
+    document.body.classList.toggle("wc-desktop-summary-open", !!(isDesktop && state.desktopSummaryOpen));
+    toggle.hidden = !isDesktop;
+    if (toggle.hidden) {
+      return;
+    }
+    const textNode = qs(".wc-desktop-summary-toggle-text", toggle);
+    if (textNode) {
+      textNode.textContent = state.desktopSummaryOpen ? tr("desktopQuoteClose") : tr("desktopQuoteOpen");
+    }
+    toggle.setAttribute(
+      "aria-label",
+      state.desktopSummaryOpen ? tr("desktopQuoteClose") : tr("desktopQuoteOpen")
+    );
+  }
+
   function ensureMobileCategoryDock() {
     let dock = qs(".wc-mobile-category-dock");
     if (!dock) {
@@ -1711,6 +1756,7 @@
       : tr("summaryButton");
     ui.trigger.hidden = true;
     ui.backdrop.hidden = !isMobileViewport() || !document.body.classList.contains("wc-summary-open");
+    renderDesktopSummaryDrawer();
     renderMobileConfigBar();
     renderMobileCategoryDock();
   }
@@ -1720,6 +1766,12 @@
     document.body.classList.toggle("wc-summary-open", next);
     state.summaryOpen = next;
     renderSummaryTrigger();
+  }
+
+  function toggleDesktopSummaryDrawer(open) {
+    const next = typeof open === "boolean" ? open : !state.desktopSummaryOpen;
+    state.desktopSummaryOpen = !!next;
+    renderDesktopSummaryDrawer();
   }
 
   function toggleMobileViewer(force) {
@@ -1879,6 +1931,7 @@
     state.sourceModel = card.sourceModel;
     state.selectionLabels = {};
     state.selectionDetails = {};
+    state.desktopSummaryOpen = false;
     state.viewerMinimized = false;
     dispatchNativeSelect(select, card.sourceModel);
     document.body.classList.remove("wc-preselect");
@@ -1891,6 +1944,7 @@
     renderToolbar();
     renderMobileConfigBar();
     renderSummaryTrigger();
+    renderDesktopSummaryDrawer();
     renderMobileCategoryDock();
     ensureDesktopCategoryLayout();
     syncDesktopViewerSticky();
@@ -1906,6 +1960,7 @@
   function backToModelStage() {
     state.selectionLabels = {};
     state.selectionDetails = {};
+    state.desktopSummaryOpen = false;
     state.viewerMinimized = false;
     state.mobileCategoryTransitionDirection = "";
     toggleSummary(false);
@@ -1918,6 +1973,7 @@
     }
     renderMobileConfigBar();
     renderSummaryTrigger();
+    renderDesktopSummaryDrawer();
     renderMobileCategoryDock();
     syncDesktopViewerSticky();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2312,6 +2368,11 @@
         return;
       }
 
+      if (event.target.closest(".wc-desktop-summary-toggle")) {
+        toggleDesktopSummaryDrawer();
+        return;
+      }
+
       if (event.target.closest(".wc-summary-backdrop")) {
         toggleSummary(false);
         return;
@@ -2430,6 +2491,7 @@
       window.setTimeout(function () {
         renderMobileViewerState();
         renderSummaryTrigger();
+        renderDesktopSummaryDrawer();
       }, 60);
     });
   }
@@ -2498,12 +2560,14 @@
     renderToolbar();
     syncStageVisibility();
     ensureSummaryUI();
+    ensureDesktopSummaryDrawer();
     hideNativeControls();
     ensureDesktopCategoryLayout();
     bindDynamicControls();
     annotateVisibleOptionButtons();
     renderMobileConfigBar();
     renderMobileViewerState();
+    renderDesktopSummaryDrawer();
     renderMobileCategoryDock();
     reflectSelectionsFromStore();
     normalizeDesktopSeatWidthControl();
