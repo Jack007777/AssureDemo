@@ -21,17 +21,18 @@ function getLoadTimeoutMs() {
 
 function buildRenderFrameMaterial(colorValue) {
   const color = colorValue instanceof THREE.Color ? colorValue.clone() : new THREE.Color(colorValue || "#ffffff");
-  const emissive = color.clone().multiplyScalar(0.06);
+  const emissive = color.clone().multiplyScalar(0.02);
   return new THREE.MeshPhysicalMaterial({
     color,
     emissive,
-    emissiveIntensity: 0.22,
-    metalness: 0.34,
-    roughness: 0.42,
-    clearcoat: 0.38,
-    clearcoatRoughness: 0.2,
-    sheen: 0.08,
-    sheenRoughness: 0.55,
+    emissiveIntensity: 0.08,
+    metalness: 0.12,
+    roughness: 0.34,
+    clearcoat: 0.92,
+    clearcoatRoughness: 0.18,
+    sheen: 0.02,
+    sheenRoughness: 0.48,
+    specularIntensity: 0.88,
     side: THREE.DoubleSide,
   });
 }
@@ -79,8 +80,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
   },
   {
     sourceModel: "S5",
-    selectionKey:
-      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-std",
     objectName: "frontCasterLeft",
     mode: "absolute",
     position: { x: -0.366, y: 0, z: -0.04 },
@@ -88,8 +88,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
   },
   {
     sourceModel: "S5",
-    selectionKey:
-      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-long",
     objectName: "frontCasterLeft",
     mode: "absolute",
     position: { x: -0.366, y: 0.003, z: 0.01 },
@@ -97,8 +96,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
   },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-90&frameLength=fl-std",
       objectName: "frontCasterLeft",
       mode: "absolute",
       position: { x: -0.367, y: -0.005, z: -0.067 },
@@ -106,8 +104,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-90&frameLength=fl-long",
       objectName: "frontCasterLeft",
       mode: "absolute",
       position: { x: -0.366, y: 0, z: -0.018 },
@@ -115,8 +112,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
   {
     sourceModel: "S5",
-    selectionKey:
-      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-std",
     objectName: "frontCasterRight",
     mode: "absolute",
     position: { x: -0.243, y: 0, z: -0.04 },
@@ -124,8 +120,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
   },
   {
     sourceModel: "S5",
-    selectionKey:
-      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-long",
     objectName: "frontCasterRight",
     mode: "absolute",
     position: { x: -0.246, y: 0.003, z: 0.01 },
@@ -133,8 +128,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
   },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-90&frameLength=fl-std",
       objectName: "frontCasterRight",
       mode: "absolute",
       position: { x: -0.245, y: -0.02, z: -0.068 },
@@ -142,8 +136,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-90&frameLength=fl-long",
       objectName: "frontCasterRight",
       mode: "absolute",
       position: { x: -0.245, y: 0, z: -0.018 },
@@ -151,8 +144,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-90&frameLength=fl-std",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.03, y: -0.057, z: 0.092 },
@@ -160,8 +152,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-90&frameLength=fl-long",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.04, y: -0.033, z: 0.142 },
@@ -169,8 +160,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-100&frameLength=fl-std",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.03, y: 0, z: 0.028 },
@@ -178,8 +168,7 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey:
-        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      selectionKey: "frameAngle=fa-100&frameLength=fl-long",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.03, y: 0.005, z: 0.079 },
@@ -581,6 +570,31 @@ class RuntimeModelViewer {
       .join("&");
   }
 
+  parseAdjustmentSelectionPairs(selectionOrKey) {
+    const normalized = this.normalizeAdjustmentSelectionKey(selectionOrKey);
+    if (!normalized) {
+      return [];
+    }
+    return normalized
+      .split("&")
+      .map((entry) => entry.split("="))
+      .filter(([key]) => Boolean(key))
+      .map(([key, value]) => [key, value || ""]);
+  }
+
+  getAdjustmentSelectionSpecificity(selectionOrKey) {
+    return this.parseAdjustmentSelectionPairs(selectionOrKey).length;
+  }
+
+  doesAdjustmentMatchSelection(entrySelectionKey, activeSelection) {
+    const requiredPairs = this.parseAdjustmentSelectionPairs(entrySelectionKey);
+    if (!requiredPairs.length) {
+      return true;
+    }
+    const activePairs = new Map(this.parseAdjustmentSelectionPairs(activeSelection));
+    return requiredPairs.every(([key, value]) => activePairs.get(key) === value);
+  }
+
   getAdjustmentEntryId(sourceModel, selectionKey, objectName) {
     return [sourceModel || "", this.normalizeAdjustmentSelectionKey(selectionKey), objectName || ""].join("::");
   }
@@ -826,12 +840,20 @@ class RuntimeModelViewer {
     const selectionKey = this.normalizeAdjustmentSelectionKey(selection || this.lastSelection || {});
     const relevantEntries = [
       ...BUILT_IN_OBJECT_ADJUSTMENTS.filter(
-        (entry) => entry.sourceModel === sourceModel && entry.selectionKey === selectionKey
+        (entry) =>
+          entry.sourceModel === sourceModel &&
+          this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
       ).map((entry) => this.normalizeAdjustmentEntry(entry)),
       ...this.manualAdjustmentEntries.filter(
-        (entry) => entry.sourceModel === sourceModel && entry.selectionKey === selectionKey
+        (entry) =>
+          entry.sourceModel === sourceModel &&
+          this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
       ),
-    ];
+    ].sort(
+      (a, b) =>
+        this.getAdjustmentSelectionSpecificity(a.selectionKey) -
+        this.getAdjustmentSelectionSpecificity(b.selectionKey)
+    );
     const resolvedEntries = Array.from(
       relevantEntries.reduce((map, entry) => {
         map.set(entry.objectName, entry);
@@ -873,12 +895,20 @@ class RuntimeModelViewer {
     const selectionKey = this.normalizeAdjustmentSelectionKey(selection || this.lastSelection || {});
     const relevantEntries = [
       ...BUILT_IN_OBJECT_ADJUSTMENTS.filter(
-        (entry) => entry.sourceModel === sourceModel && entry.selectionKey === selectionKey
+        (entry) =>
+          entry.sourceModel === sourceModel &&
+          this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
       ).map((entry) => this.normalizeAdjustmentEntry(entry)),
       ...this.manualAdjustmentEntries.filter(
-        (entry) => entry.sourceModel === sourceModel && entry.selectionKey === selectionKey
+        (entry) =>
+          entry.sourceModel === sourceModel &&
+          this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
       ),
-    ];
+    ].sort(
+      (a, b) =>
+        this.getAdjustmentSelectionSpecificity(a.selectionKey) -
+        this.getAdjustmentSelectionSpecificity(b.selectionKey)
+    );
     return relevantEntries.reduce((map, entry) => {
       map.set(entry.objectName, entry);
       return map;
@@ -2906,28 +2936,31 @@ class RuntimeModelViewer {
               if (material && material.color) {
                 material.color.copy(color);
                 if ("emissive" in material && material.emissive) {
-                  material.emissive.copy(color).multiplyScalar(0.06);
+                  material.emissive.copy(color).multiplyScalar(0.02);
                 }
                 if ("emissiveIntensity" in material) {
-                  material.emissiveIntensity = 0.22;
+                  material.emissiveIntensity = 0.08;
                 }
                 if ("metalness" in material) {
-                  material.metalness = 0.34;
+                  material.metalness = 0.12;
                 }
                 if ("roughness" in material) {
-                  material.roughness = 0.42;
+                  material.roughness = 0.34;
                 }
                 if ("clearcoat" in material) {
-                  material.clearcoat = 0.38;
+                  material.clearcoat = 0.92;
                 }
                 if ("clearcoatRoughness" in material) {
-                  material.clearcoatRoughness = 0.2;
+                  material.clearcoatRoughness = 0.18;
                 }
                 if ("sheen" in material) {
-                  material.sheen = 0.08;
+                  material.sheen = 0.02;
                 }
                 if ("sheenRoughness" in material) {
-                  material.sheenRoughness = 0.55;
+                  material.sheenRoughness = 0.48;
+                }
+                if ("specularIntensity" in material) {
+                  material.specularIntensity = 0.88;
                 }
                 material.side = THREE.DoubleSide;
                 material.needsUpdate = true;
@@ -2968,22 +3001,25 @@ class RuntimeModelViewer {
                 material.vertexColors = false;
               }
               if ("emissive" in material && material.emissive) {
-                material.emissive.copy(color).multiplyScalar(0.04);
+                material.emissive.copy(color).multiplyScalar(0.02);
               }
               if ("emissiveIntensity" in material) {
-                material.emissiveIntensity = 0.16;
+                material.emissiveIntensity = 0.08;
               }
               if ("metalness" in material) {
-                material.metalness = 0.28;
+                material.metalness = 0.12;
               }
               if ("roughness" in material) {
-                material.roughness = 0.46;
+                material.roughness = 0.34;
               }
               if ("clearcoat" in material) {
-                material.clearcoat = 0.24;
+                material.clearcoat = 0.92;
               }
               if ("clearcoatRoughness" in material) {
-                material.clearcoatRoughness = 0.24;
+                material.clearcoatRoughness = 0.18;
+              }
+              if ("specularIntensity" in material) {
+                material.specularIntensity = 0.88;
               }
               material.side = THREE.DoubleSide;
               material.needsUpdate = true;
