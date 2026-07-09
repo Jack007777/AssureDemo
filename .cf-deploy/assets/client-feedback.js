@@ -587,7 +587,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260630-frame-split-forks-v2");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260710-render-sync-v1");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";

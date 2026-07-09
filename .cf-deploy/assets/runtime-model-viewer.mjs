@@ -19,6 +19,23 @@ function getLoadTimeoutMs() {
   return isMobileViewport() ? 60000 : 30000;
 }
 
+function buildRenderFrameMaterial(colorValue) {
+  const color = colorValue instanceof THREE.Color ? colorValue.clone() : new THREE.Color(colorValue || "#ffffff");
+  const emissive = color.clone().multiplyScalar(0.06);
+  return new THREE.MeshPhysicalMaterial({
+    color,
+    emissive,
+    emissiveIntensity: 0.22,
+    metalness: 0.34,
+    roughness: 0.42,
+    clearcoat: 0.38,
+    clearcoatRoughness: 0.2,
+    sheen: 0.08,
+    sheenRoughness: 0.55,
+    side: THREE.DoubleSide,
+  });
+}
+
 function isLocalDebugSession() {
   const host = (window.location.hostname || "").toLowerCase();
   return host === "localhost" || host === "127.0.0.1" || window.location.search.includes("debugObjects=1");
@@ -26,6 +43,10 @@ function isLocalDebugSession() {
 
 function getDebugApiBase() {
   return "http://localhost:4181/api/debug-adjustments";
+}
+
+function getLocalDebugAdjustmentStorageKey() {
+  return "wc_local_object_adjustments_v1";
 }
 
 const FRAME_LEFT_WIDTH_TARGETS = new Set(FRAME_WIDTH_GROUPS.left || []);
@@ -56,6 +77,114 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     position: { x: -0.01, y: 0, z: 0 },
     rotationDeg: { x: 0, y: 0, z: 0 },
   },
+  {
+    sourceModel: "S5",
+    selectionKey:
+      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    objectName: "frontCasterLeft",
+    mode: "absolute",
+    position: { x: -0.366, y: 0, z: -0.04 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey:
+      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    objectName: "frontCasterLeft",
+    mode: "absolute",
+    position: { x: -0.366, y: 0.003, z: 0.01 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "frontCasterLeft",
+      mode: "absolute",
+      position: { x: -0.367, y: -0.005, z: -0.067 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "frontCasterLeft",
+      mode: "absolute",
+      position: { x: -0.366, y: 0, z: -0.018 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
+  {
+    sourceModel: "S5",
+    selectionKey:
+      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    objectName: "frontCasterRight",
+    mode: "absolute",
+    position: { x: -0.243, y: 0, z: -0.04 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey:
+      "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+    objectName: "frontCasterRight",
+    mode: "absolute",
+    position: { x: -0.246, y: 0.003, z: 0.01 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "frontCasterRight",
+      mode: "absolute",
+      position: { x: -0.245, y: -0.02, z: -0.068 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "frontCasterRight",
+      mode: "absolute",
+      position: { x: -0.245, y: 0, z: -0.018 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "footrest",
+      mode: "absolute",
+      position: { x: -0.03, y: -0.057, z: 0.092 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "footrest",
+      mode: "absolute",
+      position: { x: -0.04, y: -0.033, z: 0.142 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "footrest",
+      mode: "absolute",
+      position: { x: -0.03, y: 0, z: 0.028 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
+    {
+      sourceModel: "S5",
+      selectionKey:
+        "accessoryAntitipp=antitipp-none&accessoryTippingHelp=tiphelp-none&accessoryTransitWheels=transit-none&axle=axle-std-stainless&backrestHandles=bh-std-bent&backrestHeight=bh-30-40&backrestTube=bt-std&brake=brake-push-bent&footrestSetting=foot-plastic&frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std&frontWheel=fw-3-solid&handrim=hr-al-silver-22&lateralFrame=lf-std&legLength=ll-38-43&rearWheel=rw-22-12&rearWheelsBar=camber-0&seatDepth=sd-37-5&seatSetting=seat-std&seatWidth=sw-36&skirtGuards=sg-none&tyre=tyre-pu",
+      objectName: "footrest",
+      mode: "absolute",
+      position: { x: -0.03, y: 0.005, z: 0.079 },
+      rotationDeg: { x: 0, y: 0, z: 0 },
+    },
 ];
 
 export function mountRuntimeModelViewer(container) {
@@ -221,6 +350,8 @@ class RuntimeModelViewer {
     this.renderer.domElement.className = `${this.renderer.domElement.className} wc-runtime-canvas`.trim();
     this.renderer.domElement.setAttribute("data-runtime-canvas", "true");
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.08;
     this.renderer.setPixelRatio(getRendererPixelRatio());
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.root.appendChild(this.renderer.domElement);
@@ -237,6 +368,10 @@ class RuntimeModelViewer {
     const ambient = new THREE.AmbientLight(0xffffff, 0.72);
     this.scene.add(ambient);
 
+    const hemi = new THREE.HemisphereLight(0xeaf4ff, 0x101a2b, 0.72);
+    hemi.position.set(0, 8, 0);
+    this.scene.add(hemi);
+
     const dir = new THREE.DirectionalLight(0xffffff, 0.95);
     dir.position.set(5, 6, 4);
     this.scene.add(dir);
@@ -244,6 +379,10 @@ class RuntimeModelViewer {
     const fill = new THREE.DirectionalLight(0xffffff, 0.28);
     fill.position.set(-4, 5, -3);
     this.scene.add(fill);
+
+    const rim = new THREE.DirectionalLight(0xcfe0ff, 0.36);
+    rim.position.set(-3, 3, 6);
+    this.scene.add(rim);
 
     const grid = new THREE.GridHelper(4, 20, 0x22304a, 0x22304a);
     this.scene.add(grid);
@@ -467,8 +606,62 @@ class RuntimeModelViewer {
     };
   }
 
+  readLocalManualAdjustments() {
+    try {
+      const raw = window.localStorage.getItem(getLocalDebugAdjustmentStorageKey());
+      if (!raw) {
+        return [];
+      }
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map((entry) => this.normalizeAdjustmentEntry(entry)) : [];
+    } catch (error) {
+      console.warn("Read local manual adjustments failed", error);
+      return [];
+    }
+  }
+
+  writeLocalManualAdjustments(entries) {
+    try {
+      const normalized = Array.isArray(entries) ? entries.map((entry) => this.normalizeAdjustmentEntry(entry)) : [];
+      window.localStorage.setItem(getLocalDebugAdjustmentStorageKey(), JSON.stringify(normalized));
+    } catch (error) {
+      console.warn("Write local manual adjustments failed", error);
+    }
+  }
+
+  upsertManualAdjustmentEntry(entry) {
+    const normalized = this.normalizeAdjustmentEntry(entry);
+    const normalizedId = this.getAdjustmentEntryId(
+      normalized.sourceModel,
+      normalized.selectionKey,
+      normalized.objectName
+    );
+    const next = this.manualAdjustmentEntries
+      .filter(
+        (item) =>
+          this.getAdjustmentEntryId(item.sourceModel, item.selectionKey, item.objectName) !== normalizedId
+      )
+      .concat(normalized);
+    this.manualAdjustmentEntries = next;
+    this.manualAdjustmentsLoaded = true;
+    this.writeLocalManualAdjustments(next);
+    return normalized;
+  }
+
+  removeManualAdjustmentEntry(entry) {
+    const entryId = this.getAdjustmentEntryId(entry.sourceModel, entry.selectionKey, entry.objectName);
+    const next = this.manualAdjustmentEntries.filter(
+      (item) => this.getAdjustmentEntryId(item.sourceModel, item.selectionKey, item.objectName) !== entryId
+    );
+    this.manualAdjustmentEntries = next;
+    this.manualAdjustmentsLoaded = true;
+    this.writeLocalManualAdjustments(next);
+  }
+
   async ensureManualAdjustmentsLoaded(force = false) {
     if (!this.isDebugApiEnabled()) {
+      this.manualAdjustmentEntries = this.readLocalManualAdjustments();
+      this.manualAdjustmentsLoaded = true;
       return;
     }
     if (this.manualAdjustmentsLoaded && !force) {
@@ -493,13 +686,18 @@ class RuntimeModelViewer {
         const entries = Array.isArray(payload && payload.entries) ? payload.entries : [];
         this.manualAdjustmentEntries = entries.map((entry) => this.normalizeAdjustmentEntry(entry));
         this.manualAdjustmentsLoaded = true;
+        this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
         this.setObjectDebugStatus(`已载入 ${this.manualAdjustmentEntries.length} 条调试记录`);
       })
       .catch((error) => {
         console.warn("Manual adjustment log unavailable", error);
-        this.manualAdjustmentEntries = [];
-        this.manualAdjustmentsLoaded = false;
-        this.setObjectDebugStatus("本地调试日志未连接");
+        this.manualAdjustmentEntries = this.readLocalManualAdjustments();
+        this.manualAdjustmentsLoaded = true;
+        this.setObjectDebugStatus(
+          this.manualAdjustmentEntries.length
+            ? `日志未连接，已载入本地 ${this.manualAdjustmentEntries.length} 条调试记录`
+            : "本地调试日志未连接"
+        );
       })
       .finally(() => {
         this.manualAdjustmentsLoadingPromise = null;
@@ -670,6 +868,23 @@ class RuntimeModelViewer {
     });
   }
 
+  getResolvedObjectAdjustments(selection) {
+    const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
+    const selectionKey = this.normalizeAdjustmentSelectionKey(selection || this.lastSelection || {});
+    const relevantEntries = [
+      ...BUILT_IN_OBJECT_ADJUSTMENTS.filter(
+        (entry) => entry.sourceModel === sourceModel && entry.selectionKey === selectionKey
+      ).map((entry) => this.normalizeAdjustmentEntry(entry)),
+      ...this.manualAdjustmentEntries.filter(
+        (entry) => entry.sourceModel === sourceModel && entry.selectionKey === selectionKey
+      ),
+    ];
+    return relevantEntries.reduce((map, entry) => {
+      map.set(entry.objectName, entry);
+      return map;
+    }, new Map());
+  }
+
   createObjectDebugPanel() {
     const panel = document.createElement("section");
     panel.className = "wc-runtime-object-debug-panel";
@@ -779,7 +994,7 @@ class RuntimeModelViewer {
     saveButton.textContent = "保存日志";
     this.styleDebugButton(saveButton);
     saveButton.addEventListener("click", () => {
-      this.saveSelectedObjectAdjustment();
+      this.saveSelectedObjectAdjustmentWithFallback();
     });
     actionRow.appendChild(saveButton);
 
@@ -799,7 +1014,7 @@ class RuntimeModelViewer {
     deleteButton.textContent = "删除当前";
     this.styleDebugButton(deleteButton);
     deleteButton.addEventListener("click", () => {
-      this.deleteSelectedObjectAdjustment();
+      this.deleteSelectedObjectAdjustmentWithFallback();
     });
     actionRow.appendChild(deleteButton);
     panel.appendChild(actionRow);
@@ -1050,7 +1265,11 @@ class RuntimeModelViewer {
     if (!hit || !hit.object || !hit.object.name) {
       return;
     }
-    this.selectDebugObjectByName(hit.object.name);
+    const partKey = this.resolveAdjustableObjectKeyFromObject(hit.object);
+    if (!partKey) {
+      return;
+    }
+    this.selectDebugObjectByName(partKey);
   }
 
   selectDebugObjectByName(objectName) {
@@ -1110,6 +1329,7 @@ class RuntimeModelViewer {
     if (!this.modelRoot) {
       return;
     }
+    const activeName = this.objectDebugTargetName || "";
     this.modelRoot.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) {
         return;
@@ -1125,7 +1345,7 @@ class RuntimeModelViewer {
         if (!material || !material.emissive) {
           return;
         }
-        if (child.name === activeName) {
+        if (this.resolveAdjustableObjectKeyFromObject(child) === activeName) {
           material.emissive.setHex(0x335ea8);
           material.emissiveIntensity = 0.6;
         } else {
@@ -1165,6 +1385,90 @@ class RuntimeModelViewer {
     });
 
     this.updateObjectDebugPanel();
+  }
+
+  async saveSelectedObjectAdjustmentWithFallback() {
+    const entry = this.getCurrentObjectAdjustmentEntry();
+    if (!entry) {
+      this.setObjectDebugStatus("没有可保存的对象");
+      return;
+    }
+
+    this.upsertManualAdjustmentEntry({ ...entry, updatedAt: new Date().toISOString() });
+    this.refreshCurrentModelState();
+    this.updateObjectDebugPanel();
+
+    if (!this.isDebugApiEnabled()) {
+      this.setObjectDebugStatus(`已保存到本地: ${entry.objectName}`);
+      return;
+    }
+
+    this.setObjectDebugStatus("写入日志中...");
+    try {
+      const response = await fetch(`${getDebugApiBase()}/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry),
+      });
+      if (!response.ok) {
+        throw new Error(`Save failed ${response.status}`);
+      }
+      const payload = await response.json();
+      const entries = Array.isArray(payload && payload.entries) ? payload.entries : [];
+      this.manualAdjustmentEntries = entries.map((item) => this.normalizeAdjustmentEntry(item));
+      this.manualAdjustmentsLoaded = true;
+      this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
+      this.setObjectDebugStatus(`已写入日志: ${entry.objectName}`);
+      this.refreshCurrentModelState();
+      this.updateObjectDebugPanel();
+    } catch (error) {
+      console.error("Save debug adjustment failed", error);
+      this.setObjectDebugStatus(`日志服务未连接，已保存到本地: ${entry.objectName}`);
+    }
+  }
+
+  async deleteSelectedObjectAdjustmentWithFallback() {
+    const entry = this.getCurrentObjectAdjustmentEntry();
+    if (!entry) {
+      this.setObjectDebugStatus("当前对象没有日志记录");
+      return;
+    }
+
+    this.removeManualAdjustmentEntry(entry);
+    this.refreshCurrentModelState();
+    this.updateObjectDebugPanel();
+
+    if (!this.isDebugApiEnabled()) {
+      this.setObjectDebugStatus(`已从本地删除: ${entry.objectName}`);
+      return;
+    }
+
+    this.setObjectDebugStatus("删除日志中...");
+    try {
+      const response = await fetch(`${getDebugApiBase()}/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sourceModel: entry.sourceModel,
+          selectionKey: entry.selectionKey,
+          objectName: entry.objectName,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Delete failed ${response.status}`);
+      }
+      const payload = await response.json();
+      const entries = Array.isArray(payload && payload.entries) ? payload.entries : [];
+      this.manualAdjustmentEntries = entries.map((item) => this.normalizeAdjustmentEntry(item));
+      this.manualAdjustmentsLoaded = true;
+      this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
+      this.setObjectDebugStatus(`已删除: ${entry.objectName}`);
+      this.refreshCurrentModelState();
+      this.updateObjectDebugPanel();
+    } catch (error) {
+      console.error("Delete debug adjustment failed", error);
+      this.setObjectDebugStatus(`日志服务未连接，已从本地删除: ${entry.objectName}`);
+    }
   }
 
   async saveSelectedObjectAdjustment() {
@@ -1728,8 +2032,30 @@ class RuntimeModelViewer {
     return loader;
   }
 
+  applySolidTintMaterials(object) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      const nextMaterial = buildRenderFrameMaterial("#ffffff");
+      child.material = nextMaterial;
+      child.userData.wcSolidTintMaterial = true;
+      child.visible = true;
+      child.frustumCulled = false;
+      child.renderOrder = 1;
+    });
+  }
+
   loadObject(part, onProgress) {
-    return this.loadGlb(part.src, onProgress);
+    return this.loadGlb(part.src, onProgress).then((object) => {
+      if (part && part.tint) {
+        this.applySolidTintMaterials(object);
+      }
+      return object;
+    });
   }
 
   getPreloadSourcesForModel(sourceModel) {
@@ -2438,6 +2764,8 @@ class RuntimeModelViewer {
     const frameLengthOffset = frameLengthMode ? LEFT_FORK_LONG_EXTENSION_M : 0;
     const activeFrameAdjust = isFrontAngle90 ? this.debugFrame90Adjust : this.debugFrame100Adjust;
     const hasSplitFrame = this.hasSplitFrameParts();
+    const resolvedAdjustments = this.getResolvedObjectAdjustments(selection || {});
+    const footrestAbsoluteAdjust = resolvedAdjustments.get("footrest");
 
     this.partObjects.forEach(({ key, object }) => {
       const preserveSplitFrameBase = hasSplitFrame && this.isFramePartKey(key);
@@ -2478,8 +2806,10 @@ class RuntimeModelViewer {
         case "footrest":
           object.scale.x = widthScale;
           object.scale.z = depthScale;
-          object.position.z += frameLengthOffset;
-          if (!isFrontAngle90) {
+          if (!footrestAbsoluteAdjust) {
+            object.position.z += frameLengthOffset;
+          }
+          if (isFrontAngle90 && !footrestAbsoluteAdjust) {
             object.rotation.x = THREE.MathUtils.degToRad(
               this.debugFootrest90Adjust.rotationDeg + activeFrameAdjust.rotationDeg
             );
@@ -2572,24 +2902,94 @@ class RuntimeModelViewer {
           child.renderOrder = 1;
           const materials = Array.isArray(child.material) ? child.material : [child.material];
           const nextMaterials = materials.map((material) => {
+            if (child.userData && child.userData.wcSolidTintMaterial) {
+              if (material && material.color) {
+                material.color.copy(color);
+                if ("emissive" in material && material.emissive) {
+                  material.emissive.copy(color).multiplyScalar(0.06);
+                }
+                if ("emissiveIntensity" in material) {
+                  material.emissiveIntensity = 0.22;
+                }
+                if ("metalness" in material) {
+                  material.metalness = 0.34;
+                }
+                if ("roughness" in material) {
+                  material.roughness = 0.42;
+                }
+                if ("clearcoat" in material) {
+                  material.clearcoat = 0.38;
+                }
+                if ("clearcoatRoughness" in material) {
+                  material.clearcoatRoughness = 0.2;
+                }
+                if ("sheen" in material) {
+                  material.sheen = 0.08;
+                }
+                if ("sheenRoughness" in material) {
+                  material.sheenRoughness = 0.55;
+                }
+                material.side = THREE.DoubleSide;
+                material.needsUpdate = true;
+                return material;
+              }
+              return buildRenderFrameMaterial(color);
+            }
             if (material && material.color) {
               material.color.copy(color);
+              if ("map" in material) {
+                material.map = null;
+              }
+              if ("aoMap" in material) {
+                material.aoMap = null;
+              }
+              if ("lightMap" in material) {
+                material.lightMap = null;
+              }
+              if ("emissiveMap" in material) {
+                material.emissiveMap = null;
+              }
+              if ("metalnessMap" in material) {
+                material.metalnessMap = null;
+              }
+              if ("roughnessMap" in material) {
+                material.roughnessMap = null;
+              }
+              if ("normalMap" in material) {
+                material.normalMap = null;
+              }
+              if ("bumpMap" in material) {
+                material.bumpMap = null;
+              }
+              if ("alphaMap" in material) {
+                material.alphaMap = null;
+              }
+              if ("vertexColors" in material) {
+                material.vertexColors = false;
+              }
+              if ("emissive" in material && material.emissive) {
+                material.emissive.copy(color).multiplyScalar(0.04);
+              }
+              if ("emissiveIntensity" in material) {
+                material.emissiveIntensity = 0.16;
+              }
               if ("metalness" in material) {
-                material.metalness = 0.15;
+                material.metalness = 0.28;
               }
               if ("roughness" in material) {
-                material.roughness = 0.55;
+                material.roughness = 0.46;
+              }
+              if ("clearcoat" in material) {
+                material.clearcoat = 0.24;
+              }
+              if ("clearcoatRoughness" in material) {
+                material.clearcoatRoughness = 0.24;
               }
               material.side = THREE.DoubleSide;
               material.needsUpdate = true;
               return material;
             }
-            return new THREE.MeshStandardMaterial({
-              color,
-              metalness: 0.15,
-              roughness: 0.55,
-              side: THREE.DoubleSide,
-            });
+            return buildRenderFrameMaterial(color);
           });
           child.material = Array.isArray(child.material) ? nextMaterials : nextMaterials[0];
         }
