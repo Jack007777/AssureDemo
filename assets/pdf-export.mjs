@@ -2,7 +2,7 @@ import * as THREE from "/assets/vendor/three.module.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260615-s5-runtime";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260619-frame-split-s5";
 import html2canvas from "/assets/html2canvas.esm-CBrSDip1.js";
 
 const TEXT = {

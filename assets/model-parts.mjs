@@ -15,7 +15,7 @@ function getS5StepPart(selection = {}) {
     src: isFrontAngle90
       ? "/models/S5/frame-split/90 step.glb"
       : "/models/S5/frame-split/100 step.glb",
-    tint: false,
+    tint: true,
   };
 }
 
