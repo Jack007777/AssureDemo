@@ -1,5 +1,5 @@
 const DEBUG_LEFT_FORK_ONLY = false;
-const S5_MODEL_CACHE_BUSTER = "v=20260710-wheel-step-sync-v7";
+const S5_MODEL_CACHE_BUSTER = "v=20260715-lite-first-load-v1";
 
 function withS5ModelVersion(path) {
   return `${path}?${S5_MODEL_CACHE_BUSTER}`;
@@ -31,27 +31,27 @@ function getS5BaseParts(selection = {}) {
   return [
   {
     key: "seat",
-    src: withS5ModelVersion("/models/S5/Sitzbespannung.glb"),
+    src: withS5ModelVersion("/models/S5/Sitzbespannung.lite.glb"),
     tint: false,
     seatStyle: selection.seatSetting || "seat-std",
   },
   {
     key: "backrest",
-    src: withS5ModelVersion("/models/S5/Ruecken.glb"),
+    src: withS5ModelVersion("/models/S5/Ruecken.lite.glb"),
     tint: false,
     backrestStyle: "black-fabric",
   },
   ...getS5SideguardParts(skirtGuardStyle),
   {
     key: "frontCasterLeft",
-    src: withS5ModelVersion("/models/S5/Lenkraerder-single.glb"),
+    src: withS5ModelVersion("/models/S5/Lenkraerder-single.lite.glb"),
     tint: false,
     blackWheel: true,
     mirrorX: true,
   },
   {
     key: "frontCasterRight",
-    src: withS5ModelVersion("/models/S5/Lenkraerder-single.glb"),
+    src: withS5ModelVersion("/models/S5/Lenkraerder-single.lite.glb"),
     tint: false,
     blackWheel: true,
     mirrorX: false,
@@ -65,8 +65,8 @@ function getS5StepPart(selection = {}) {
     key: "footrest",
     src: withS5ModelVersion(
       isFrontAngle90
-        ? "/models/S5/frame-split/90 step.glb"
-        : "/models/S5/frame-split/100 step.glb"
+        ? "/models/S5/frame-split/90 step.lite.glb"
+        : "/models/S5/frame-split/100 step.lite.glb"
     ),
     tint: true,
   };
@@ -90,18 +90,18 @@ function getS5ForkParts(selection = {}) {
   const isLongFrame = selection.frameLength === "fl-long";
   const leftForkSrc = withS5ModelVersion(isFrontAngle90
     ? (isLongFrame
-        ? "/models/S5/frame-split/90 left long fork .glb"
-        : "/models/S5/frame-split/90 left short fork .glb")
+        ? "/models/S5/frame-split/90 left long fork .lite.glb"
+        : "/models/S5/frame-split/90 left short fork .lite.glb")
     : (isLongFrame
-        ? "/models/S5/frame-split/100 left long fork.glb"
-        : "/models/S5/frame-split/100 left short fork.glb"));
+        ? "/models/S5/frame-split/100 left long fork.lite.glb"
+        : "/models/S5/frame-split/100 left short fork.lite.glb"));
   const rightForkSrc = withS5ModelVersion(isFrontAngle90
     ? (isLongFrame
-        ? "/models/S5/frame-split/90 right long fork.glb"
-        : "/models/S5/frame-split/90 right short fork.glb")
+        ? "/models/S5/frame-split/90 right long fork.lite.glb"
+        : "/models/S5/frame-split/90 right short fork.lite.glb")
     : (isLongFrame
-        ? "/models/S5/frame-split/100 right long fork.glb"
-        : "/models/S5/frame-split/100 right short fork.glb"));
+        ? "/models/S5/frame-split/100 right long fork.lite.glb"
+        : "/models/S5/frame-split/100 right short fork.lite.glb"));
   const parts = [];
   parts.push({
     key: isFrontAngle90 ? "frame-left-fork-90" : "frame-left-fork-100",
@@ -120,9 +120,9 @@ function getS5ForkParts(selection = {}) {
 
 function getS5FrameParts(selection = {}) {
   return [
-    { key: "frame-middle", src: withS5ModelVersion("/models/S5/frame-split/middle body.glb"), tint: true },
-    { key: "frame-left-body", src: withS5ModelVersion("/models/S5/frame-split/left body.glb"), tint: true },
-    { key: "frame-right-body", src: withS5ModelVersion("/models/S5/frame-split/right body.glb"), tint: true },
+    { key: "frame-middle", src: withS5ModelVersion("/models/S5/frame-split/middle body.lite.glb"), tint: true },
+    { key: "frame-left-body", src: withS5ModelVersion("/models/S5/frame-split/left body.lite.glb"), tint: true },
+    { key: "frame-right-body", src: withS5ModelVersion("/models/S5/frame-split/right body.lite.glb"), tint: true },
     ...getS5ForkParts(selection),
   ];
 }
