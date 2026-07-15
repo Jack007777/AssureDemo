@@ -226,10 +226,17 @@
   };
 
   const FRAME_COLOR_HEX = {
-    "color-red": "#ff3b30",
-    "color-green": "#34c759",
-    "color-yellow": "#ffd60a",
-    "color-blue": "#0a84ff",
+    "color-red": "#9b2731",
+    "color-green": "#354a46",
+    "color-yellow": "#ba7640",
+    "color-blue": "#313c5a",
+  };
+
+  const FRAME_COLOR_SWATCH = {
+    "color-red": "linear-gradient(145deg, #c96d75 0%, #9b2731 42%, #61171c 100%)",
+    "color-green": "linear-gradient(145deg, #708b83 0%, #354a46 40%, #202b29 100%)",
+    "color-yellow": "linear-gradient(145deg, #d9aa77 0%, #ba7640 42%, #7d4d26 100%)",
+    "color-blue": "linear-gradient(145deg, #7582a6 0%, #313c5a 44%, #1e2640 100%)",
   };
 
   const MODULE_ORDER = [
@@ -578,6 +585,49 @@
     return FRAME_COLOR_HEX[(selection && selection.frameColor) || ""] || "#9aa6bd";
   }
 
+  function buildRuntimeSelection(store, sourceModel) {
+    const selection = Object.assign({}, (store && store.selection) || {});
+    const modelId = sourceModel || (store && store.modelId) || state.sourceModel || "S5";
+    const modules = (((store || {}).catalog || {}).models || []).find(function (item) {
+      return item.id === modelId;
+    });
+    const moduleIds = Array.isArray(modules && modules.modules) ? modules.modules : [];
+    const modulesById = new Map((((store || {}).catalog || {}).modules || []).map(function (module) {
+      return [module.id, module];
+    }));
+
+    moduleIds.forEach(function (moduleId) {
+      if (selection[moduleId]) {
+        return;
+      }
+      const labeledValue = state.selectionLabels[moduleId];
+      if (labeledValue) {
+        const option = findOptionByLabel(moduleId, labeledValue);
+        if (option && option.id) {
+          selection[moduleId] = option.id;
+          return;
+        }
+      }
+      const module = modulesById.get(moduleId);
+      const firstOption = module && module.options && module.options[0];
+      if (firstOption && firstOption.id) {
+        selection[moduleId] = firstOption.id;
+      }
+    });
+
+    Object.keys(state.selectionLabels || {}).forEach(function (moduleId) {
+      if (selection[moduleId]) {
+        return;
+      }
+      const option = findOptionByLabel(moduleId, state.selectionLabels[moduleId]);
+      if (option && option.id) {
+        selection[moduleId] = option.id;
+      }
+    });
+
+    return selection;
+  }
+
   function syncRuntimeViewer() {
     const card = getConfiguratorCard();
     const viewer = qs(".model-viewer", card);
@@ -587,11 +637,11 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260710-render-sync-v2");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260715-desktop-preview-v1");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
-    const selection = Object.assign({}, store.selection || {});
+    const selection = buildRuntimeSelection(store, sourceModel);
     const frameColor = getFrameColorHex(selection);
 
     state.viewerModulePromise
@@ -683,6 +733,25 @@
     }
   }
 
+  function applyRealisticFrameColorSwatches(scope) {
+    const root = scope || getConfiguratorCard() || document;
+    qsa('.option-group[data-module-id="frameColor"] .choice-btn', root).forEach(function (button) {
+      const optionId = button.dataset.optionId || "";
+      const swatch = qs(".chip-swatch", button);
+      if (!swatch) {
+        return;
+      }
+      const background = FRAME_COLOR_SWATCH[optionId];
+      const solid = FRAME_COLOR_HEX[optionId];
+      if (background) {
+        swatch.style.background = background;
+      } else {
+        swatch.style.background = solid || "#9aa6bd";
+      }
+      swatch.style.backgroundColor = solid || "#9aa6bd";
+    });
+  }
+
   function reflectSelectionsFromStore() {
     const store = getConfigStore();
     if (!store || !store.selection) {
@@ -705,6 +774,7 @@
         setGroupSelectionVisual(group, selectedOption.label, selectedOption.id);
       }
     });
+    applyRealisticFrameColorSwatches();
   }
 
   function getActiveCategoryIndex() {
@@ -2093,9 +2163,11 @@
 
       model.modules.forEach(function (moduleId) {
         const module = modulesById.get(moduleId);
-        const firstOption = module && module.options && module.options[0];
-        if (firstOption && typeof store.setOption === "function") {
-          store.setOption(moduleId, firstOption.id);
+        const defaultOptionId = moduleId === "skirtGuards"
+          ? "sg-plastic-straight"
+          : module && module.options && module.options[0] && module.options[0].id;
+        if (defaultOptionId && typeof store.setOption === "function") {
+          store.setOption(moduleId, defaultOptionId);
         }
       });
 
@@ -2263,7 +2335,7 @@
       },
       getSelection: function () {
         const store = getConfigStore();
-        return Object.assign({}, (store && store.selection) || {});
+        return buildRuntimeSelection(store, state.sourceModel || state.cardId || "");
       },
       getSummaryRows: function () {
         return qsa("table tbody tr", summaryCard)

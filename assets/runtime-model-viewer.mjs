@@ -4,7 +4,7 @@ import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
 import { FRAME_WIDTH_GROUPS } from "/assets/frame-width-groups.mjs";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260630-frame-split-forks-v2";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260715-desktop-preview-v1";
 
 function isMobileViewport() {
   return window.innerWidth <= 768;
@@ -21,20 +21,200 @@ function getLoadTimeoutMs() {
 
 function buildRenderFrameMaterial(colorValue) {
   const color = colorValue instanceof THREE.Color ? colorValue.clone() : new THREE.Color(colorValue || "#ffffff");
-  const emissive = color.clone().multiplyScalar(0.02);
+  const emissive = color.clone().multiplyScalar(0.01);
   return new THREE.MeshPhysicalMaterial({
     color,
     emissive,
-    emissiveIntensity: 0.08,
-    metalness: 0.12,
-    roughness: 0.34,
-    clearcoat: 0.92,
-    clearcoatRoughness: 0.18,
-    sheen: 0.02,
-    sheenRoughness: 0.48,
-    specularIntensity: 0.88,
+    emissiveIntensity: 0.05,
+    metalness: 0.18,
+    roughness: 0.24,
+    clearcoat: 1,
+    clearcoatRoughness: 0.08,
+    sheen: 0.08,
+    sheenRoughness: 0.42,
+    specularIntensity: 1,
+    envMapIntensity: 1.18,
     side: THREE.DoubleSide,
   });
+}
+
+function buildBlackWheelMaterial() {
+  return new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color("#111419"),
+    emissive: new THREE.Color("#000000"),
+    metalness: 0.48,
+    roughness: 0.3,
+    clearcoat: 0.18,
+    clearcoatRoughness: 0.2,
+    envMapIntensity: 1.3,
+    side: THREE.DoubleSide,
+  });
+}
+
+function buildSeatTexture(style) {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  if (style === "seat-carbon") {
+    ctx.fillStyle = "#12171b";
+    ctx.fillRect(0, 0, size, size);
+    for (let row = -size; row < size * 2; row += 16) {
+      ctx.strokeStyle = "rgba(160, 178, 188, 0.22)";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(row, 0);
+      ctx.lineTo(row + size, size);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.36)";
+      ctx.beginPath();
+      ctx.moveTo(row + 8, 0);
+      ctx.lineTo(row + size + 8, size);
+      ctx.stroke();
+    }
+    for (let row = 0; row < size * 2; row += 16) {
+      ctx.strokeStyle = "rgba(8, 10, 12, 0.44)";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(row, 0);
+      ctx.lineTo(row - size, size);
+      ctx.stroke();
+    }
+  } else if (style === "seat-crossed") {
+    ctx.fillStyle = "#20262b";
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = "#697178";
+    for (let x = 0; x < size; x += 38) {
+      ctx.fillRect(x, 0, 17, size);
+    }
+    ctx.fillStyle = "rgba(16, 20, 23, 0.7)";
+    for (let y = 0; y < size; y += 38) {
+      ctx.fillRect(0, y, size, 17);
+    }
+    ctx.strokeStyle = "rgba(214, 222, 225, 0.24)";
+    ctx.lineWidth = 2;
+    for (let x = 1; x < size; x += 38) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, size);
+      ctx.stroke();
+    }
+  } else {
+    ctx.fillStyle = "#1b2024";
+    ctx.fillRect(0, 0, size, size);
+    for (let x = 0; x < size; x += 8) {
+      ctx.fillStyle = x % 16 === 0 ? "rgba(154, 164, 169, 0.16)" : "rgba(0, 0, 0, 0.16)";
+      ctx.fillRect(x, 0, 3, size);
+    }
+    for (let y = 0; y < size; y += 8) {
+      ctx.fillStyle = y % 16 === 0 ? "rgba(221, 226, 229, 0.1)" : "rgba(0, 0, 0, 0.14)";
+      ctx.fillRect(0, y, size, 3);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(style === "seat-crossed" ? 2 : 3, style === "seat-crossed" ? 2 : 3);
+  texture.anisotropy = 4;
+  return texture;
+}
+
+function buildSeatMaterial(style) {
+  const isCarbon = style === "seat-carbon";
+  const isCrossed = style === "seat-crossed";
+  return new THREE.MeshPhysicalMaterial({
+    color: isCrossed ? "#9aa0a4" : isCarbon ? "#20262c" : "#343a3e",
+    map: buildSeatTexture(style),
+    metalness: isCarbon ? 0.56 : 0.05,
+    roughness: isCarbon ? 0.2 : isCrossed ? 0.52 : 0.67,
+    clearcoat: isCarbon ? 0.45 : 0.06,
+    clearcoatRoughness: isCarbon ? 0.14 : 0.35,
+    side: THREE.DoubleSide,
+  });
+}
+
+function buildFootrestPlateMaterial(style) {
+  const isCarbon = style === "foot-carbon";
+  const isMetal = style === "foot-magnesium" || style === "foot-aluminium";
+  return new THREE.MeshPhysicalMaterial({
+    color: isMetal ? "#16191d" : isCarbon ? "#15191d" : "#111315",
+    roughness: isMetal ? 0.24 : isCarbon ? 0.28 : 0.52,
+    metalness: isMetal ? 0.62 : isCarbon ? 0.32 : 0.03,
+    clearcoat: isMetal ? 0.32 : isCarbon ? 0.22 : 0.06,
+    clearcoatRoughness: 0.2,
+    side: THREE.DoubleSide,
+  });
+}
+
+function buildBlackFabricMaterial() {
+  return new THREE.MeshPhysicalMaterial({
+    color: "#171b1e",
+    map: buildSeatTexture("seat-std"),
+    metalness: 0,
+    roughness: 0.76,
+    clearcoat: 0,
+    side: THREE.DoubleSide,
+  });
+}
+
+function buildSideguardMaterial(style) {
+  const isCarbon = style === "sg-carbon-straight" || style === "sg-carbon-mudguard";
+  return new THREE.MeshPhysicalMaterial({
+    color: isCarbon ? "#1a1f24" : "#101214",
+    map: isCarbon ? buildSeatTexture("seat-carbon") : null,
+    metalness: isCarbon ? 0.42 : 0.03,
+    roughness: isCarbon ? 0.24 : 0.48,
+    clearcoat: isCarbon ? 0.34 : 0.08,
+    clearcoatRoughness: isCarbon ? 0.14 : 0.26,
+    side: THREE.DoubleSide,
+  });
+}
+
+function buildStudioEnvironment(renderer) {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+
+  const envScene = new THREE.Scene();
+  envScene.background = new THREE.Color(0x0b1220);
+
+  const makePanel = (width, height, color, intensity, position, rotation) => {
+    const panelColor = new THREE.Color(color).multiplyScalar(intensity);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({
+        color: panelColor,
+        toneMapped: false,
+      })
+    );
+    mesh.position.copy(position);
+    mesh.rotation.set(rotation.x, rotation.y, rotation.z);
+    envScene.add(mesh);
+  };
+
+  makePanel(8, 8, 0xf8fbff, 1.1, new THREE.Vector3(0, 4.5, -2), new THREE.Euler(-0.65, 0, 0));
+  makePanel(5, 7, 0xffffff, 0.9, new THREE.Vector3(4.2, 2.2, 1.6), new THREE.Euler(0, -1.05, 0));
+  makePanel(4, 6, 0xd7e5ff, 0.72, new THREE.Vector3(-3.8, 1.8, 2.6), new THREE.Euler(0, 0.92, 0));
+  makePanel(10, 10, 0x0f1728, 0.35, new THREE.Vector3(0, -4, 0), new THREE.Euler(Math.PI / 2, 0, 0));
+
+  const sky = new THREE.HemisphereLight(0xf1f7ff, 0x111827, 1.1);
+  envScene.add(sky);
+
+  const key = new THREE.DirectionalLight(0xffffff, 2.4);
+  key.position.set(3.2, 5.6, 4.5);
+  envScene.add(key);
+
+  const fill = new THREE.DirectionalLight(0xdce8ff, 1.35);
+  fill.position.set(-4.8, 2.6, 3.8);
+  envScene.add(fill);
+
+  const texture = pmrem.fromScene(envScene, 0.05).texture;
+  pmrem.dispose();
+  envScene.clear();
+  return texture;
 }
 
 function isLocalDebugSession() {
@@ -80,71 +260,80 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
   },
   {
     sourceModel: "S5",
-    selectionKey: "frameAngle=fa-100&frameLength=fl-std",
+    selectionKey:
+      "frameAngle=fa-100&frameLength=fl-std",
     objectName: "frontCasterLeft",
     mode: "absolute",
-    position: { x: -0.366, y: 0, z: -0.04 },
+    position: { x: -0.5302156201109316, y: -0.2299719881569695, z: 0.3011313935454938 },
     rotationDeg: { x: 0, y: 0, z: 0 },
   },
   {
     sourceModel: "S5",
-    selectionKey: "frameAngle=fa-100&frameLength=fl-long",
+    selectionKey:
+      "frameAngle=fa-100&frameLength=fl-long",
     objectName: "frontCasterLeft",
     mode: "absolute",
-    position: { x: -0.366, y: 0.003, z: 0.01 },
+    position: { x: -0.5302156201109316, y: -0.2269719881569695, z: 0.3811313935454938 },
     rotationDeg: { x: 0, y: 0, z: 0 },
   },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-90&frameLength=fl-std",
+      selectionKey:
+        "frameAngle=fa-90&frameLength=fl-std",
       objectName: "frontCasterLeft",
       mode: "absolute",
-      position: { x: -0.367, y: -0.005, z: -0.067 },
+      position: { x: -0.5312156201109316, y: -0.2349719881569695, z: 0.27413139354549375 },
       rotationDeg: { x: 0, y: 0, z: 0 },
     },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-90&frameLength=fl-long",
+      selectionKey:
+        "frameAngle=fa-90&frameLength=fl-long",
       objectName: "frontCasterLeft",
       mode: "absolute",
-      position: { x: -0.366, y: 0, z: -0.018 },
+      position: { x: -0.5302156201109316, y: -0.2299719881569695, z: 0.3531313935454938 },
       rotationDeg: { x: 0, y: 0, z: 0 },
     },
   {
     sourceModel: "S5",
-    selectionKey: "frameAngle=fa-100&frameLength=fl-std",
+    selectionKey:
+      "frameAngle=fa-100&frameLength=fl-std",
     objectName: "frontCasterRight",
     mode: "absolute",
-    position: { x: -0.243, y: 0, z: -0.04 },
+    position: { x: -0.07878437988906839, y: -0.2299719881569695, z: 0.3011313935454938 },
     rotationDeg: { x: 0, y: 0, z: 0 },
   },
   {
     sourceModel: "S5",
-    selectionKey: "frameAngle=fa-100&frameLength=fl-long",
+    selectionKey:
+      "frameAngle=fa-100&frameLength=fl-long",
     objectName: "frontCasterRight",
     mode: "absolute",
-    position: { x: -0.246, y: 0.003, z: 0.01 },
+    position: { x: -0.08178437988906839, y: -0.2269719881569695, z: 0.3811313935454938 },
     rotationDeg: { x: 0, y: 0, z: 0 },
   },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-90&frameLength=fl-std",
+      selectionKey:
+        "frameAngle=fa-90&frameLength=fl-std",
       objectName: "frontCasterRight",
       mode: "absolute",
-      position: { x: -0.245, y: -0.02, z: -0.068 },
+      position: { x: -0.08078437988906839, y: -0.2499719881569695, z: 0.27313139354549375 },
       rotationDeg: { x: 0, y: 0, z: 0 },
     },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-90&frameLength=fl-long",
+      selectionKey:
+        "frameAngle=fa-90&frameLength=fl-long",
       objectName: "frontCasterRight",
       mode: "absolute",
-      position: { x: -0.245, y: 0, z: -0.018 },
+      position: { x: -0.08078437988906839, y: -0.2299719881569695, z: 0.3531313935454938 },
       rotationDeg: { x: 0, y: 0, z: 0 },
     },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-90&frameLength=fl-std",
+      selectionKey:
+        "frameAngle=fa-90&frameLength=fl-std",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.03, y: -0.057, z: 0.092 },
@@ -152,7 +341,8 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-90&frameLength=fl-long",
+      selectionKey:
+        "frameAngle=fa-90&frameLength=fl-long",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.04, y: -0.033, z: 0.142 },
@@ -160,7 +350,8 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-100&frameLength=fl-std",
+      selectionKey:
+        "frameAngle=fa-100&frameLength=fl-std",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.03, y: 0, z: 0.028 },
@@ -168,12 +359,50 @@ const BUILT_IN_OBJECT_ADJUSTMENTS = [
     },
     {
       sourceModel: "S5",
-      selectionKey: "frameAngle=fa-100&frameLength=fl-long",
+      selectionKey:
+        "frameAngle=fa-100&frameLength=fl-long",
       objectName: "footrest",
       mode: "absolute",
       position: { x: -0.03, y: 0.005, z: 0.079 },
       rotationDeg: { x: 0, y: 0, z: 0 },
     },
+];
+
+// Final fit values for the separate footrest plate. Deliberately keyed only by
+// front angle and frame length, so changing plate material never moves it.
+const FOOTREST_PLATE_FINAL_ADJUSTMENTS = [
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-std",
+    objectName: "footrestPlate",
+    mode: "delta",
+    position: { x: -0.03, y: 0, z: -0.93 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-long",
+    objectName: "footrestPlate",
+    mode: "delta",
+    position: { x: -0.03, y: 0.003, z: -0.876 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-90&frameLength=fl-std",
+    objectName: "footrestPlate",
+    mode: "delta",
+    position: { x: -0.03, y: -0.018, z: -0.975 },
+    rotationDeg: { x: 10, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-90&frameLength=fl-long",
+    objectName: "footrestPlate",
+    mode: "delta",
+    position: { x: -0.03, y: 0.004, z: -0.926 },
+    rotationDeg: { x: 10, y: 0, z: 0 },
+  },
 ];
 
 export function mountRuntimeModelViewer(container) {
@@ -302,7 +531,7 @@ class RuntimeModelViewer {
     root.style.position = "absolute";
     root.style.inset = "0";
     root.style.zIndex = "1";
-    root.style.background = "transparent";
+    root.style.background = "#e8eef3";
     root.style.overflow = "visible";
     this.container.style.overflow = "visible";
 
@@ -312,7 +541,7 @@ class RuntimeModelViewer {
     statusNode.style.left = "50%";
     statusNode.style.top = "50%";
     statusNode.style.transform = "translate(-50%, -50%)";
-    statusNode.style.color = "rgba(230, 238, 255, 0.82)";
+    statusNode.style.color = "rgba(33, 48, 68, 0.78)";
     statusNode.style.fontSize = isMobileViewport() ? "14px" : "15px";
     statusNode.style.pointerEvents = "none";
     statusNode.style.textAlign = "center";
@@ -333,17 +562,21 @@ class RuntimeModelViewer {
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: !isMobileViewport(),
-      alpha: true,
+      alpha: false,
       powerPreference: "high-performance",
     });
     this.renderer.domElement.className = `${this.renderer.domElement.className} wc-runtime-canvas`.trim();
     this.renderer.domElement.setAttribute("data-runtime-canvas", "true");
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.toneMappingExposure = 1.14;
     this.renderer.setPixelRatio(getRendererPixelRatio());
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.root.appendChild(this.renderer.domElement);
+
+    this.scene.background = new THREE.Color(0xe8eef3);
+    this.environmentMap = buildStudioEnvironment(this.renderer);
+    this.scene.environment = this.environmentMap;
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
@@ -354,26 +587,28 @@ class RuntimeModelViewer {
     this.pointerNdc = new THREE.Vector2();
     this.bindDebugObjectPicking();
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.72);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.58);
     this.scene.add(ambient);
 
-    const hemi = new THREE.HemisphereLight(0xeaf4ff, 0x101a2b, 0.72);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x93a4b5, 1.0);
     hemi.position.set(0, 8, 0);
     this.scene.add(hemi);
 
-    const dir = new THREE.DirectionalLight(0xffffff, 0.95);
-    dir.position.set(5, 6, 4);
+    const dir = new THREE.DirectionalLight(0xffffff, 1.35);
+    dir.position.set(4.8, 6.2, 5.1);
     this.scene.add(dir);
 
-    const fill = new THREE.DirectionalLight(0xffffff, 0.28);
-    fill.position.set(-4, 5, -3);
+    const fill = new THREE.DirectionalLight(0xdce8ff, 0.58);
+    fill.position.set(-4.6, 4.5, -1.8);
     this.scene.add(fill);
 
-    const rim = new THREE.DirectionalLight(0xcfe0ff, 0.36);
-    rim.position.set(-3, 3, 6);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.62);
+    rim.position.set(-2.2, 2.8, 6.8);
     this.scene.add(rim);
 
-    const grid = new THREE.GridHelper(4, 20, 0x22304a, 0x22304a);
+    const grid = new THREE.GridHelper(4, 20, 0x7790a9, 0xb4c3d0);
+    grid.material.opacity = 0.62;
+    grid.material.transparent = true;
     this.scene.add(grid);
 
     this.initAxesOverlay();
@@ -635,6 +870,9 @@ class RuntimeModelViewer {
   }
 
   writeLocalManualAdjustments(entries) {
+    if (!isLocalDebugSession()) {
+      return;
+    }
     try {
       const normalized = Array.isArray(entries) ? entries.map((entry) => this.normalizeAdjustmentEntry(entry)) : [];
       window.localStorage.setItem(getLocalDebugAdjustmentStorageKey(), JSON.stringify(normalized));
@@ -673,6 +911,11 @@ class RuntimeModelViewer {
   }
 
   async ensureManualAdjustmentsLoaded(force = false) {
+    if (!isLocalDebugSession()) {
+      this.manualAdjustmentEntries = [];
+      this.manualAdjustmentsLoaded = true;
+      return;
+    }
     if (!this.isDebugApiEnabled()) {
       this.manualAdjustmentEntries = this.readLocalManualAdjustments();
       this.manualAdjustmentsLoaded = true;
@@ -748,10 +991,15 @@ class RuntimeModelViewer {
       (item) => this.getAdjustmentEntryId(item.sourceModel, item.selectionKey, item.objectName) === entryId
     );
     if (!entry) {
+      // Preserve any less-specific preview delta when creating the first
+      // per-configuration adjustment, so the part does not jump on first edit.
+      const inherited = this.getResolvedObjectAdjustments(this.lastSelection || {}).get(objectName);
       entry = this.normalizeAdjustmentEntry({
         sourceModel,
         selectionKey,
         objectName,
+        position: inherited && inherited.mode === "delta" ? inherited.position : undefined,
+        rotationDeg: inherited && inherited.mode === "delta" ? inherited.rotationDeg : undefined,
       });
       this.manualAdjustmentEntries.push(entry);
     }
@@ -829,6 +1077,31 @@ class RuntimeModelViewer {
     });
   }
 
+  getManualRotationPivotLocal(object) {
+    if (!object) {
+      return new THREE.Vector3();
+    }
+    if (object.userData.manualRotationPivotLocal) {
+      return object.userData.manualRotationPivotLocal.clone();
+    }
+    object.updateWorldMatrix(true, true);
+    const centerWorld = new THREE.Box3().setFromObject(object).getCenter(new THREE.Vector3());
+    const centerLocal = object.worldToLocal(centerWorld.clone());
+    object.userData.manualRotationPivotLocal = centerLocal.clone();
+    return centerLocal;
+  }
+
+  applyRotationAroundGeometryCenter(object, basePosition, baseRotation, targetRotation) {
+    const pivot = this.getManualRotationPivotLocal(object).multiply(object.scale);
+    const baseQuaternion = new THREE.Quaternion().setFromEuler(baseRotation);
+    const targetQuaternion = new THREE.Quaternion().setFromEuler(targetRotation);
+    const basePivotPosition = pivot.clone().applyQuaternion(baseQuaternion);
+    const targetPivotPosition = pivot.clone().applyQuaternion(targetQuaternion);
+
+    object.rotation.copy(targetRotation);
+    object.position.copy(basePosition).add(basePivotPosition).sub(targetPivotPosition);
+  }
+
   applyManualObjectAdjustments(selection) {
     if (!this.modelRoot) {
       return;
@@ -839,7 +1112,7 @@ class RuntimeModelViewer {
     const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
     const selectionKey = this.normalizeAdjustmentSelectionKey(selection || this.lastSelection || {});
     const relevantEntries = [
-      ...BUILT_IN_OBJECT_ADJUSTMENTS.filter(
+      ...[...BUILT_IN_OBJECT_ADJUSTMENTS, ...FOOTREST_PLATE_FINAL_ADJUSTMENTS].filter(
         (entry) =>
           entry.sourceModel === sourceModel &&
           this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
@@ -869,23 +1142,34 @@ class RuntimeModelViewer {
         }
 
         if (entry.mode === "absolute") {
-          object.position.set(entry.position.x, entry.position.y, entry.position.z);
-          object.rotation.set(
+          const targetRotation = new THREE.Euler(
             THREE.MathUtils.degToRad(entry.rotationDeg.x),
             THREE.MathUtils.degToRad(entry.rotationDeg.y),
-            THREE.MathUtils.degToRad(entry.rotationDeg.z)
+            THREE.MathUtils.degToRad(entry.rotationDeg.z),
+            object.userData.baseManualAdjustRotation.order
+          );
+          this.applyRotationAroundGeometryCenter(
+            object,
+            new THREE.Vector3(entry.position.x, entry.position.y, entry.position.z),
+            object.userData.baseManualAdjustRotation,
+            targetRotation
           );
           return;
         }
 
-        object.position.copy(object.userData.baseManualAdjustPosition);
-        object.rotation.copy(object.userData.baseManualAdjustRotation);
+        const targetRotation = object.userData.baseManualAdjustRotation.clone();
+        targetRotation.x += THREE.MathUtils.degToRad(entry.rotationDeg.x);
+        targetRotation.y += THREE.MathUtils.degToRad(entry.rotationDeg.y);
+        targetRotation.z += THREE.MathUtils.degToRad(entry.rotationDeg.z);
+        this.applyRotationAroundGeometryCenter(
+          object,
+          object.userData.baseManualAdjustPosition,
+          object.userData.baseManualAdjustRotation,
+          targetRotation
+        );
         object.position.x += entry.position.x;
         object.position.y += entry.position.y;
         object.position.z += entry.position.z;
-        object.rotation.x += THREE.MathUtils.degToRad(entry.rotationDeg.x);
-        object.rotation.y += THREE.MathUtils.degToRad(entry.rotationDeg.y);
-        object.rotation.z += THREE.MathUtils.degToRad(entry.rotationDeg.z);
       });
     });
   }
@@ -894,7 +1178,7 @@ class RuntimeModelViewer {
     const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
     const selectionKey = this.normalizeAdjustmentSelectionKey(selection || this.lastSelection || {});
     const relevantEntries = [
-      ...BUILT_IN_OBJECT_ADJUSTMENTS.filter(
+      ...[...BUILT_IN_OBJECT_ADJUSTMENTS, ...FOOTREST_PLATE_FINAL_ADJUSTMENTS].filter(
         (entry) =>
           entry.sourceModel === sourceModel &&
           this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
@@ -1396,24 +1680,7 @@ class RuntimeModelViewer {
     const precision = group === "position" ? 4 : 2;
     entry[group][key] = Number((entry[group][key] + delta).toFixed(precision));
 
-    this.getObjectsByAdjustableName(this.objectDebugTargetName || "").forEach((object) => {
-      if (!object) {
-        return;
-      }
-      if (!object.userData.baseManualAdjustPosition) {
-        object.userData.baseManualAdjustPosition = object.position.clone();
-      }
-      if (!object.userData.baseManualAdjustRotation) {
-        object.userData.baseManualAdjustRotation = object.rotation.clone();
-      }
-
-      if (group === "position") {
-        object.position[key] += delta;
-      } else if (group === "rotationDeg") {
-        object.rotation[key] += THREE.MathUtils.degToRad(delta);
-      }
-    });
-
+    this.refreshCurrentModelState();
     this.updateObjectDebugPanel();
   }
 
@@ -2079,10 +2346,103 @@ class RuntimeModelViewer {
     });
   }
 
+  applyBlackWheelMaterials(object) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      child.material = buildBlackWheelMaterial();
+      child.visible = true;
+      child.frustumCulled = false;
+    });
+  }
+
+  applySeatStyle(object, style) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      const previous = Array.isArray(child.material) ? child.material : [child.material];
+      previous.forEach((material) => material && material.dispose && material.dispose());
+      child.material = buildSeatMaterial(style || "seat-std");
+      child.visible = true;
+      child.frustumCulled = false;
+    });
+  }
+
+  applyFootrestPlateStyle(object, style) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      const previous = Array.isArray(child.material) ? child.material : [child.material];
+      previous.forEach((material) => material && material.dispose && material.dispose());
+      child.material = buildFootrestPlateMaterial(style);
+      child.visible = true;
+      child.frustumCulled = false;
+    });
+  }
+
+  applyBackrestStyle(object) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      const previous = Array.isArray(child.material) ? child.material : [child.material];
+      previous.forEach((material) => material && material.dispose && material.dispose());
+      child.material = buildBlackFabricMaterial();
+      child.visible = true;
+      child.frustumCulled = false;
+    });
+  }
+
+  applySideguardStyle(object, style) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      const previous = Array.isArray(child.material) ? child.material : [child.material];
+      previous.forEach((material) => material && material.dispose && material.dispose());
+      child.material = buildSideguardMaterial(style);
+      child.visible = true;
+      child.frustumCulled = false;
+    });
+  }
+
   loadObject(part, onProgress) {
     return this.loadGlb(part.src, onProgress).then((object) => {
       if (part && part.tint) {
         this.applySolidTintMaterials(object);
+      }
+      if (part && part.blackWheel) {
+        this.applyBlackWheelMaterials(object);
+      }
+      if (part && part.seatStyle) {
+        this.applySeatStyle(object, part.seatStyle);
+      }
+      if (part && part.footrestPlateStyle) {
+        this.applyFootrestPlateStyle(object, part.footrestPlateStyle);
+      }
+      if (part && part.backrestStyle) {
+        this.applyBackrestStyle(object);
+      }
+      if (part && part.sideguardStyle) {
+        this.applySideguardStyle(object, part.sideguardStyle);
       }
       return object;
     });
@@ -2637,31 +2997,33 @@ class RuntimeModelViewer {
     object.position.x += direction * halfOffsetMeters;
   }
 
-  applyFrontCasterInstancePlacement(object, side, seatWidthCm, depthDelta, activeAdjust, frameLengthOffset = 0) {
+  applyFrontCasterInstancePlacement(
+    object,
+    side,
+    seatWidthCm,
+    depthDelta,
+    activeAdjust,
+    frameLengthOffset = 0,
+    absoluteAdjust = null
+  ) {
     if (!object) {
       return;
     }
 
     const halfOffsetMeters = ((seatWidthCm - FRAME_BASE_SEAT_WIDTH_CM) * 0.01) * 0.5;
     const direction = side < 0 ? -1 : 1;
+    const mirrorX = !!(object.userData && object.userData.partMirrorX);
 
     object.position.set(0, 0, 0);
     object.rotation.set(0, 0, 0);
-    object.scale.set(direction, 1, 1);
-    object.position.x = direction * (FRONT_CASTER_BASE_HALF_SPAN_M + halfOffsetMeters) + (activeAdjust.x || 0);
-    object.position.y = activeAdjust.y || 0;
-    object.position.z = (activeAdjust.z || 0) - depthDelta * 0.7 + frameLengthOffset;
-    object.rotation.x = THREE.MathUtils.degToRad(activeAdjust.rotationDeg || 0);
-
-    // Neutralize the baked local offset inside Lenkraerder-single.glb.
-    object.position.x -= direction * FRONT_CASTER_MODEL_OFFSET.x;
-    object.position.y -= FRONT_CASTER_MODEL_OFFSET.y;
-    object.position.z -= FRONT_CASTER_MODEL_OFFSET.z;
+    object.scale.set(mirrorX ? -1 : 1, 1, 1);
 
     object.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) {
         return;
       }
+      child.visible = true;
+      child.frustumCulled = false;
       if (Array.isArray(child.material)) {
         child.material.forEach((material) => {
           if (material) material.side = THREE.DoubleSide;
@@ -2672,6 +3034,31 @@ class RuntimeModelViewer {
         child.material.side = THREE.DoubleSide;
       }
     });
+
+    if (absoluteAdjust && absoluteAdjust.mode === "absolute") {
+      object.position.set(
+        absoluteAdjust.position.x,
+        absoluteAdjust.position.y,
+        absoluteAdjust.position.z
+      );
+      object.rotation.set(
+        THREE.MathUtils.degToRad(absoluteAdjust.rotationDeg.x || 0),
+        THREE.MathUtils.degToRad(absoluteAdjust.rotationDeg.y || 0),
+        THREE.MathUtils.degToRad(absoluteAdjust.rotationDeg.z || 0)
+      );
+      return;
+    }
+
+    object.position.x = direction * (FRONT_CASTER_BASE_HALF_SPAN_M + halfOffsetMeters) + (activeAdjust.x || 0);
+    object.position.y = activeAdjust.y || 0;
+    object.position.z = (activeAdjust.z || 0) - depthDelta * 0.7 + frameLengthOffset;
+    object.rotation.x = THREE.MathUtils.degToRad(activeAdjust.rotationDeg || 0);
+
+    // Neutralize the baked local offset inside Lenkraerder-single.glb.
+    object.position.x -= direction * FRONT_CASTER_MODEL_OFFSET.x;
+    object.position.y -= FRONT_CASTER_MODEL_OFFSET.y;
+    object.position.z -= FRONT_CASTER_MODEL_OFFSET.z;
+
   }
 
   applySharedFrontDeltaFromFrame(object, frameObject, offsets = null) {
@@ -2796,6 +3183,8 @@ class RuntimeModelViewer {
     const hasSplitFrame = this.hasSplitFrameParts();
     const resolvedAdjustments = this.getResolvedObjectAdjustments(selection || {});
     const footrestAbsoluteAdjust = resolvedAdjustments.get("footrest");
+    const frontCasterLeftAbsoluteAdjust = resolvedAdjustments.get("frontCasterLeft");
+    const frontCasterRightAbsoluteAdjust = resolvedAdjustments.get("frontCasterRight");
 
     this.partObjects.forEach(({ key, object }) => {
       const preserveSplitFrameBase = hasSplitFrame && this.isFramePartKey(key);
@@ -2833,9 +3222,32 @@ class RuntimeModelViewer {
             object.position.z += 0.01;
           }
           break;
+        case "sideguardLeft":
+        case "sideguardRight":
+          object.scale.x = object.userData.partMirrorX ? -widthScale : widthScale;
+          object.scale.z = depthScale;
+          if (isFrontAngle90) {
+            object.position.y += 0.003;
+            object.position.z += 0.01;
+          }
+          break;
         case "footrest":
+        case "footrestPlate":
           object.scale.x = widthScale;
           object.scale.z = depthScale;
+          if (footrestAbsoluteAdjust && footrestAbsoluteAdjust.mode === "absolute") {
+            object.position.set(
+              footrestAbsoluteAdjust.position.x,
+              footrestAbsoluteAdjust.position.y,
+              footrestAbsoluteAdjust.position.z
+            );
+            object.rotation.set(
+              THREE.MathUtils.degToRad(footrestAbsoluteAdjust.rotationDeg.x || 0),
+              THREE.MathUtils.degToRad(footrestAbsoluteAdjust.rotationDeg.y || 0),
+              THREE.MathUtils.degToRad(footrestAbsoluteAdjust.rotationDeg.z || 0)
+            );
+            break;
+          }
           if (!footrestAbsoluteAdjust) {
             object.position.z += frameLengthOffset;
           }
@@ -2855,7 +3267,8 @@ class RuntimeModelViewer {
             seatWidthCm,
             depthDelta,
             isFrontAngle90 ? this.debugFrontCaster90Adjust : activeFrameAdjust,
-            frameLengthOffset
+            frameLengthOffset,
+            frontCasterLeftAbsoluteAdjust
           );
           break;
         case "frontCasterRight":
@@ -2865,7 +3278,8 @@ class RuntimeModelViewer {
             seatWidthCm,
             depthDelta,
             isFrontAngle90 ? this.debugFrontCaster90Adjust : activeFrameAdjust,
-            frameLengthOffset
+            frameLengthOffset,
+            frontCasterRightAbsoluteAdjust
           );
           break;
         case "rearWheel":
@@ -2936,31 +3350,34 @@ class RuntimeModelViewer {
               if (material && material.color) {
                 material.color.copy(color);
                 if ("emissive" in material && material.emissive) {
-                  material.emissive.copy(color).multiplyScalar(0.02);
+                  material.emissive.copy(color).multiplyScalar(0.01);
                 }
                 if ("emissiveIntensity" in material) {
-                  material.emissiveIntensity = 0.08;
+                  material.emissiveIntensity = 0.05;
                 }
                 if ("metalness" in material) {
-                  material.metalness = 0.12;
+                  material.metalness = 0.18;
                 }
                 if ("roughness" in material) {
-                  material.roughness = 0.34;
+                  material.roughness = 0.24;
                 }
                 if ("clearcoat" in material) {
-                  material.clearcoat = 0.92;
+                  material.clearcoat = 1;
                 }
                 if ("clearcoatRoughness" in material) {
-                  material.clearcoatRoughness = 0.18;
+                  material.clearcoatRoughness = 0.08;
                 }
                 if ("sheen" in material) {
-                  material.sheen = 0.02;
+                  material.sheen = 0.08;
                 }
                 if ("sheenRoughness" in material) {
-                  material.sheenRoughness = 0.48;
+                  material.sheenRoughness = 0.42;
                 }
                 if ("specularIntensity" in material) {
-                  material.specularIntensity = 0.88;
+                  material.specularIntensity = 1;
+                }
+                if ("envMapIntensity" in material) {
+                  material.envMapIntensity = 1.18;
                 }
                 material.side = THREE.DoubleSide;
                 material.needsUpdate = true;
@@ -3001,25 +3418,34 @@ class RuntimeModelViewer {
                 material.vertexColors = false;
               }
               if ("emissive" in material && material.emissive) {
-                material.emissive.copy(color).multiplyScalar(0.02);
+                material.emissive.copy(color).multiplyScalar(0.01);
               }
               if ("emissiveIntensity" in material) {
-                material.emissiveIntensity = 0.08;
+                material.emissiveIntensity = 0.05;
               }
               if ("metalness" in material) {
-                material.metalness = 0.12;
+                material.metalness = 0.18;
               }
               if ("roughness" in material) {
-                material.roughness = 0.34;
+                material.roughness = 0.24;
               }
               if ("clearcoat" in material) {
-                material.clearcoat = 0.92;
+                material.clearcoat = 1;
               }
               if ("clearcoatRoughness" in material) {
-                material.clearcoatRoughness = 0.18;
+                material.clearcoatRoughness = 0.08;
+              }
+              if ("sheen" in material) {
+                material.sheen = 0.08;
+              }
+              if ("sheenRoughness" in material) {
+                material.sheenRoughness = 0.42;
               }
               if ("specularIntensity" in material) {
-                material.specularIntensity = 0.88;
+                material.specularIntensity = 1;
+              }
+              if ("envMapIntensity" in material) {
+                material.envMapIntensity = 1.18;
               }
               material.side = THREE.DoubleSide;
               material.needsUpdate = true;
@@ -3037,7 +3463,7 @@ class RuntimeModelViewer {
     if (!entry) {
       return "";
     }
-    return `${entry.src || ""}|${entry.object && entry.object.userData && entry.object.userData.partTint ? 1 : 0}`;
+    return `${entry.src || ""}|${entry.object && entry.object.userData && entry.object.userData.partTint ? 1 : 0}|${entry.object && entry.object.userData && entry.object.userData.partBlackWheel ? 1 : 0}|${entry.object && entry.object.userData && entry.object.userData.partSeatStyle ? entry.object.userData.partSeatStyle : ""}|${entry.object && entry.object.userData && entry.object.userData.partFootrestPlateStyle ? entry.object.userData.partFootrestPlateStyle : ""}|${entry.object && entry.object.userData && entry.object.userData.partBackrestStyle ? entry.object.userData.partBackrestStyle : ""}|${entry.object && entry.object.userData && entry.object.userData.partSideguardStyle ? entry.object.userData.partSideguardStyle : ""}|${entry.object && entry.object.userData && entry.object.userData.partMirrorX ? 1 : 0}`;
   }
 
   setObjectOpacity(object, opacity) {
@@ -3100,13 +3526,13 @@ class RuntimeModelViewer {
     const parts = getModelPartsForSourceModel(sourceModel, selection || {});
     const partsSignature = JSON.stringify({
       sourceModel,
-      parts: parts.map((part) => `${part.key || ""}:${part.src}|${part.tint ? 1 : 0}`),
+      parts: parts.map((part) => `${part.key || ""}:${part.src}|${part.tint ? 1 : 0}|${part.blackWheel ? 1 : 0}|${part.seatStyle || ""}|${part.footrestPlateStyle || ""}|${part.backrestStyle || ""}|${part.sideguardStyle || ""}`),
     });
     const signature = JSON.stringify({
       sourceModel,
       frameColor,
       selection: selection || {},
-      parts: parts.map((part) => `${part.key || ""}:${part.src}|${part.tint ? 1 : 0}`),
+      parts: parts.map((part) => `${part.key || ""}:${part.src}|${part.tint ? 1 : 0}|${part.blackWheel ? 1 : 0}|${part.seatStyle || ""}|${part.footrestPlateStyle || ""}|${part.backrestStyle || ""}|${part.sideguardStyle || ""}`),
     });
 
     if (signature === this.signature) {
@@ -3118,6 +3544,9 @@ class RuntimeModelViewer {
     if (partsSignature === this.partsSignature && this.modelRoot) {
       this.signature = signature;
       this.applyDimensionAdjustments(selection || {});
+      // A configuration change can reuse the same GLB files. Re-apply saved
+      // per-configuration placement after the base dimension transform.
+      this.applyManualObjectAdjustments(selection || {});
       this.applyFrameColor(frameColor);
       this.refreshObjectDebugOptions();
       this.highlightDebugTargetObject();
@@ -3155,7 +3584,7 @@ class RuntimeModelViewer {
         for (let index = 0; index < parts.length; index += 1) {
           const part = parts[index];
           const partKey = part.key || "";
-          const desiredSignature = `${part.src}|${part.tint ? 1 : 0}`;
+          const desiredSignature = `${part.src}|${part.tint ? 1 : 0}|${part.blackWheel ? 1 : 0}|${part.seatStyle || ""}|${part.footrestPlateStyle || ""}|${part.backrestStyle || ""}|${part.sideguardStyle || ""}|${part.mirrorX ? 1 : 0}`;
           const existingEntry = existingByKey.get(partKey);
 
           if (existingEntry && this.getPartEntrySignature(existingEntry) === desiredSignature) {
@@ -3183,6 +3612,12 @@ class RuntimeModelViewer {
           object.userData.partKey = partKey;
           object.userData.partSrc = part.src;
           object.userData.partTint = !!part.tint;
+          object.userData.partBlackWheel = !!part.blackWheel;
+          object.userData.partSeatStyle = part.seatStyle || "";
+          object.userData.partFootrestPlateStyle = part.footrestPlateStyle || "";
+          object.userData.partBackrestStyle = part.backrestStyle || "";
+          object.userData.partSideguardStyle = part.sideguardStyle || "";
+          object.userData.partMirrorX = !!part.mirrorX;
           this.setObjectOpacity(object, 0);
 
           if (existingEntry) {
@@ -3216,6 +3651,7 @@ class RuntimeModelViewer {
         this.colorTargets = nextColorTargets;
         this.currentSourceModel = sourceModel;
         this.applyDimensionAdjustments(selection || {});
+        this.applyManualObjectAdjustments(selection || {});
         this.applyFrameColor(frameColor);
         this.refreshObjectDebugOptions();
         this.highlightDebugTargetObject();
@@ -3250,6 +3686,12 @@ class RuntimeModelViewer {
         object.userData.partKey = part.key || "";
         object.userData.partSrc = part.src;
         object.userData.partTint = !!part.tint;
+        object.userData.partBlackWheel = !!part.blackWheel;
+        object.userData.partSeatStyle = part.seatStyle || "";
+        object.userData.partFootrestPlateStyle = part.footrestPlateStyle || "";
+        object.userData.partBackrestStyle = part.backrestStyle || "";
+        object.userData.partSideguardStyle = part.sideguardStyle || "";
+        object.userData.partMirrorX = !!part.mirrorX;
         this.partObjects.push({
           key: part.key || "",
           src: part.src,
@@ -3269,6 +3711,7 @@ class RuntimeModelViewer {
       this.scene.add(group);
       this.currentSourceModel = sourceModel;
       this.applyDimensionAdjustments(selection || {});
+      this.applyManualObjectAdjustments(selection || {});
       this.fitCameraToObject(group);
       this.applyFrameColor(frameColor);
       this.refreshObjectDebugOptions();
@@ -3437,6 +3880,10 @@ class RuntimeModelViewer {
     this.controls && this.controls.dispose();
     this.dracoLoader && this.dracoLoader.dispose();
     this.dracoLoader = null;
+    if (this.environmentMap) {
+      this.environmentMap.dispose && this.environmentMap.dispose();
+      this.environmentMap = null;
+    }
     if (this.renderer) {
       this.renderer.dispose();
       this.renderer.domElement.remove();

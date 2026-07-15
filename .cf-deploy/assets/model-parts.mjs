@@ -1,41 +1,107 @@
 const DEBUG_LEFT_FORK_ONLY = false;
+const S5_MODEL_CACHE_BUSTER = "v=20260710-wheel-step-sync-v7";
 
-const S5_BASE_PARTS = [
-  { key: "seat", src: "/models/S5/Sitzbespannung.glb", tint: false },
-  { key: "backrest", src: "/models/S5/Ruecken.glb", tint: false },
-  { key: "sideguards", src: "/models/S5/Seitenteilen-standard.glb", tint: false },
-  { key: "frontCasterLeft", src: "/models/S5/Lenkraerder-single.glb", tint: false },
-  { key: "frontCasterRight", src: "/models/S5/Lenkraerder-single.glb", tint: false },
-];
+function withS5ModelVersion(path) {
+  return `${path}?${S5_MODEL_CACHE_BUSTER}`;
+}
+
+function getS5SideguardParts(style) {
+  if (style === "sg-none") {
+    return [];
+  }
+  if (style === "sg-plastic-straight" || style === "sg-carbon-straight") {
+    const src = withS5ModelVersion("/models/S5/seitenteile-simple.glb");
+    return [
+      { key: "sideguardLeft", src, tint: false, sideguardStyle: style, mirrorX: true },
+      { key: "sideguardRight", src, tint: false, sideguardStyle: style, mirrorX: false },
+    ];
+  }
+  return [
+    {
+      key: "sideguards",
+      src: withS5ModelVersion("/models/S5/Seitenteilen-standard.glb"),
+      tint: false,
+      sideguardStyle: style,
+    },
+  ];
+}
+
+function getS5BaseParts(selection = {}) {
+  const skirtGuardStyle = selection.skirtGuards || "sg-none";
+  return [
+  {
+    key: "seat",
+    src: withS5ModelVersion("/models/S5/Sitzbespannung.glb"),
+    tint: false,
+    seatStyle: selection.seatSetting || "seat-std",
+  },
+  {
+    key: "backrest",
+    src: withS5ModelVersion("/models/S5/Ruecken.glb"),
+    tint: false,
+    backrestStyle: "black-fabric",
+  },
+  ...getS5SideguardParts(skirtGuardStyle),
+  {
+    key: "frontCasterLeft",
+    src: withS5ModelVersion("/models/S5/Lenkraerder-single.glb"),
+    tint: false,
+    blackWheel: true,
+    mirrorX: true,
+  },
+  {
+    key: "frontCasterRight",
+    src: withS5ModelVersion("/models/S5/Lenkraerder-single.glb"),
+    tint: false,
+    blackWheel: true,
+    mirrorX: false,
+  },
+  ];
+}
 
 function getS5StepPart(selection = {}) {
   const isFrontAngle90 = selection.frameAngle === "fa-90";
   return {
     key: "footrest",
-    src: isFrontAngle90
-      ? "/models/S5/frame-split/90 step.glb"
-      : "/models/S5/frame-split/100 step.glb",
+    src: withS5ModelVersion(
+      isFrontAngle90
+        ? "/models/S5/frame-split/90 step.glb"
+        : "/models/S5/frame-split/100 step.glb"
+    ),
     tint: true,
+  };
+}
+
+function getS5FootrestPlatePart(selection = {}) {
+  const setting = selection.footrestSetting || "foot-plastic";
+  if (setting === "foot-none") {
+    return null;
+  }
+  return {
+    key: "footrestPlate",
+    src: withS5ModelVersion("/models/S5/FootrestPlate.glb"),
+    tint: false,
+    footrestPlateStyle: setting,
   };
 }
 
 function getS5ForkParts(selection = {}) {
   const isFrontAngle90 = selection.frameAngle === "fa-90";
   const isLongFrame = selection.frameLength === "fl-long";
-  const leftForkSrc = isFrontAngle90
+  const leftForkSrc = withS5ModelVersion(isFrontAngle90
     ? (isLongFrame
         ? "/models/S5/frame-split/90 left long fork .glb"
         : "/models/S5/frame-split/90 left short fork .glb")
     : (isLongFrame
         ? "/models/S5/frame-split/100 left long fork.glb"
-        : "/models/S5/frame-split/100 left short fork.glb");
-  const rightForkSrc = isFrontAngle90
+        : "/models/S5/frame-split/100 left short fork.glb"));
+  const rightForkSrc = withS5ModelVersion(isFrontAngle90
     ? (isLongFrame
         ? "/models/S5/frame-split/90 right long fork.glb"
         : "/models/S5/frame-split/90 right short fork.glb")
     : (isLongFrame
         ? "/models/S5/frame-split/100 right long fork.glb"
-        : "/models/S5/frame-split/100 right short fork.glb");
+        : "/models/S5/frame-split/100 right short fork.glb"));
   const parts = [];
   parts.push({
     key: isFrontAngle90 ? "frame-left-fork-90" : "frame-left-fork-100",
@@ -54,9 +120,9 @@ function getS5ForkParts(selection = {}) {
 
 function getS5FrameParts(selection = {}) {
   return [
-    { key: "frame-middle", src: "/models/S5/frame-split/middle body.glb", tint: true },
-    { key: "frame-left-body", src: "/models/S5/frame-split/left body.glb", tint: true },
-    { key: "frame-right-body", src: "/models/S5/frame-split/right body.glb", tint: true },
+    { key: "frame-middle", src: withS5ModelVersion("/models/S5/frame-split/middle body.glb"), tint: true },
+    { key: "frame-left-body", src: withS5ModelVersion("/models/S5/frame-split/left body.glb"), tint: true },
+    { key: "frame-right-body", src: withS5ModelVersion("/models/S5/frame-split/right body.glb"), tint: true },
     ...getS5ForkParts(selection),
   ];
 }
@@ -64,14 +130,14 @@ function getS5FrameParts(selection = {}) {
 function getS5RearWheelPart(selection) {
   switch (selection.rearWheel) {
     case "rw-22-18":
-      return { key: "rearWheel", src: "/models/S5/22寸18辐后轮 _ light wheel.optimized.glb", tint: false };
+      return { key: "rearWheel", src: "/models/S5/22寸18辐后轮 _ light wheel.optimized.glb", tint: false, blackWheel: true };
     case "rw-24-12":
     case "rw-24-18":
-      return { key: "rearWheel", src: "/models/S5/24寸12辐条后轮 _ ultra light wheel.optimized.glb", tint: false };
+      return { key: "rearWheel", src: "/models/S5/24寸12辐条后轮 _ ultra light wheel.optimized.glb", tint: false, blackWheel: true };
     case "rw-24-big":
-      return { key: "rearWheel", src: "/models/S5/S5加强后轮 _ S5 large hub rear wheels.optimized.glb", tint: false };
+      return { key: "rearWheel", src: "/models/S5/S5加强后轮 _ S5 large hub rear wheels.optimized.glb", tint: false, blackWheel: true };
     default:
-      return { key: "rearWheel", src: "/models/S5/Antriebsraede-Klein.glb", tint: false };
+      return { key: "rearWheel", src: "/models/S5/Antriebsraede-Klein.glb", tint: false, blackWheel: true };
   }
 }
 
@@ -155,7 +221,8 @@ export function getModelPartsForSourceModel(sourceModel, selection = {}) {
     return [
       ...getS5FrameParts(selection),
       getS5StepPart(selection),
-      ...S5_BASE_PARTS,
+      getS5FootrestPlatePart(selection),
+      ...getS5BaseParts(selection),
       getS5RearWheelPart(selection),
       getS5HandrimPart(selection),
       getS5BrakePart(selection),
