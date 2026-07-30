@@ -637,7 +637,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260715-desktop-preview-v1");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260730-centered-backrest-v4");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
@@ -806,6 +806,21 @@
     }
 
     const existing = qs(".wc-synthetic-seat-width", groupsWrap);
+    const nativeSeatWidthGroup = qsa(".option-group", groupsWrap).find(function (group) {
+      return (
+        group !== existing &&
+        !group.classList.contains("wc-synthetic-seat-width") &&
+        getGroupModuleId(group) === "seatWidth"
+      );
+    });
+    if (nativeSeatWidthGroup) {
+      if (existing) {
+        existing.remove();
+      }
+      state.syntheticSeatWidthMarkup = "";
+      return;
+    }
+
     if (!isSeatUpholsteryCategoryActive()) {
       if (existing) {
         existing.remove();
@@ -911,6 +926,21 @@
     }
 
     const existing = qs(".wc-synthetic-seat-width", groupsWrap);
+    const nativeSeatWidthGroup = qsa(".option-group", groupsWrap).find(function (group) {
+      return (
+        group !== existing &&
+        !group.classList.contains("wc-synthetic-seat-width") &&
+        getGroupModuleId(group) === "seatWidth"
+      );
+    });
+    if (nativeSeatWidthGroup) {
+      if (existing) {
+        existing.remove();
+      }
+      state.syntheticSeatWidthMarkup = "";
+      return;
+    }
+
     if (!isSeatUpholsteryCategoryActive()) {
       if (existing) {
         existing.remove();

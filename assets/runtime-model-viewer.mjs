@@ -235,6 +235,19 @@ const FRAME_MIDDLE_WIDTH_TARGETS = new Set(FRAME_WIDTH_GROUPS.middle || []);
 const FRAME_RIGHT_WIDTH_TARGETS = new Set(FRAME_WIDTH_GROUPS.right || []);
 
 const FRAME_BASE_SEAT_WIDTH_CM = 40;
+const S5_WHEEL_FOOTREST_REFERENCE_SEAT_WIDTH_CM = 36;
+const S5_POSITION_REFERENCE_SEAT_DEPTH_ID = "sd-37-5";
+const S5_POSITION_REFERENCE_SEAT_WIDTH_ID = "sw-36";
+const S5_POSITION_REFERENCE_OBJECTS = new Set([
+  "frontCasterLeft",
+  "frontCasterRight",
+  "footrest",
+  "footrestPlate",
+]);
+// The assembled S5 model was aligned against the 37.5 cm seat-depth setup.
+// Keep every non-seat component on this fixed reference geometry.
+const S5_SEAT_DEPTH_REFERENCE_CM = 37.5;
+const LEGACY_SEAT_DEPTH_REFERENCE_CM = 40;
 const FRONT_CASTER_BASE_HALF_SPAN_M = 0.244422;
 const FRONT_CASTER_MODEL_OFFSET = {
   x: 0.06020637988906841,
@@ -404,6 +417,39 @@ const FOOTREST_PLATE_FINAL_ADJUSTMENTS = [
     rotationDeg: { x: 10, y: 0, z: 0 },
   },
 ];
+
+// Verified reference fit: seat width 36 cm, seat depth 37.5 cm. These values
+// deliberately omit seat width/depth so wheels and footrest retain the same
+// placement while the seat itself is resized.
+const S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS = [
+  ["fa-100", "fl-std", "frontCasterLeft", -0.366, 0, -0.04],
+  ["fa-100", "fl-std", "frontCasterRight", -0.243, 0, -0.04],
+  ["fa-90", "fl-std", "frontCasterLeft", -0.367, -0.005, -0.067],
+  ["fa-90", "fl-std", "frontCasterRight", -0.245, -0.02, -0.068],
+  ["fa-100", "fl-long", "frontCasterLeft", -0.366, 0.003, 0.01],
+  ["fa-100", "fl-long", "frontCasterRight", -0.246, 0.003, 0.01],
+  ["fa-90", "fl-long", "frontCasterLeft", -0.366, 0, -0.018],
+  ["fa-90", "fl-long", "frontCasterRight", -0.245, 0, -0.018],
+  ["fa-100", "fl-std", "footrest", -0.03, 0, 0.028],
+  ["fa-100", "fl-long", "footrest", -0.03, 0.005, 0.079],
+  ["fa-90", "fl-std", "footrest", -0.03, -0.057, 0.092],
+  ["fa-90", "fl-long", "footrest", -0.04, -0.033, 0.142],
+  ["fa-100", "fl-std", "footrestPlate", -0.004, 0, -0.96],
+  ["fa-100", "fl-long", "footrestPlate", 0.01, 0.003, -0.906],
+  ["fa-90", "fl-std", "footrestPlate", 0, -0.018, -1.005],
+  ["fa-90", "fl-long", "footrestPlate", 0, 0.007, -0.956],
+].map(([frameAngle, frameLength, objectName, x, y, z]) => ({
+  sourceModel: "S5",
+  selectionKey: `frameAngle=${frameAngle}&frameLength=${frameLength}`,
+  objectName,
+  mode: "delta",
+  position: { x, y, z },
+  rotationDeg: {
+    x: objectName === "footrestPlate" && frameAngle === "fa-90" ? 10 : 0,
+    y: 0,
+    z: 0,
+  },
+}));
 
 export function mountRuntimeModelViewer(container) {
   return new RuntimeModelViewer(container);
@@ -900,6 +946,38 @@ class RuntimeModelViewer {
     return normalized;
   }
 
+  mergeManualAdjustmentEntries(remoteEntries, protectedEntry = null) {
+    const merged = new Map();
+    const add = (entry) => {
+      const normalized = this.normalizeAdjustmentEntry(entry);
+      const id = this.getAdjustmentEntryId(
+        normalized.sourceModel,
+        normalized.selectionKey,
+        normalized.objectName
+      );
+      const current = merged.get(id);
+      const currentTime = Date.parse(current && current.updatedAt ? current.updatedAt : "") || 0;
+      const nextTime = Date.parse(normalized.updatedAt || "") || 0;
+      if (!current || nextTime >= currentTime) {
+        merged.set(id, normalized);
+      }
+    };
+
+    (Array.isArray(remoteEntries) ? remoteEntries : []).forEach(add);
+    (Array.isArray(this.manualAdjustmentEntries) ? this.manualAdjustmentEntries : []).forEach(add);
+    if (protectedEntry) {
+      // A just-saved value must never be replaced by a stale API response.
+      const normalized = this.normalizeAdjustmentEntry(protectedEntry);
+      const id = this.getAdjustmentEntryId(
+        normalized.sourceModel,
+        normalized.selectionKey,
+        normalized.objectName
+      );
+      merged.set(id, normalized);
+    }
+    return Array.from(merged.values());
+  }
+
   removeManualAdjustmentEntry(entry) {
     const entryId = this.getAdjustmentEntryId(entry.sourceModel, entry.selectionKey, entry.objectName);
     const next = this.manualAdjustmentEntries.filter(
@@ -941,7 +1019,7 @@ class RuntimeModelViewer {
       })
       .then((payload) => {
         const entries = Array.isArray(payload && payload.entries) ? payload.entries : [];
-        this.manualAdjustmentEntries = entries.map((entry) => this.normalizeAdjustmentEntry(entry));
+        this.manualAdjustmentEntries = this.mergeManualAdjustmentEntries(entries);
         this.manualAdjustmentsLoaded = true;
         this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
         this.setObjectDebugStatus(`已载入 ${this.manualAdjustmentEntries.length} 条调试记录`);
@@ -1037,6 +1115,93 @@ class RuntimeModelViewer {
     return this.partObjects.find((entry) => entry && entry.key === objectName) || null;
   }
 
+  getFrameCenterWorldX() {
+    const leftFrame = this.getPartEntryByObjectName("frame-left-body");
+    const rightFrame = this.getPartEntryByObjectName("frame-right-body");
+    if (leftFrame && leftFrame.object && rightFrame && rightFrame.object) {
+      leftFrame.object.updateWorldMatrix(true, true);
+      rightFrame.object.updateWorldMatrix(true, true);
+      const leftCenter = new THREE.Box3()
+        .setFromObject(leftFrame.object)
+        .getCenter(new THREE.Vector3());
+      const rightCenter = new THREE.Box3()
+        .setFromObject(rightFrame.object)
+        .getCenter(new THREE.Vector3());
+      return (leftCenter.x + rightCenter.x) * 0.5;
+    }
+
+    const middleFrame = this.getPartEntryByObjectName("frame-middle");
+    if (middleFrame && middleFrame.object) {
+      middleFrame.object.updateWorldMatrix(true, true);
+      const box = new THREE.Box3().setFromObject(middleFrame.object);
+      if (!box.isEmpty()) {
+        return box.getCenter(new THREE.Vector3()).x;
+      }
+    }
+
+    return null;
+  }
+
+  translateObjectAlongWorldX(object, distance) {
+    if (!object || !Number.isFinite(distance) || Math.abs(distance) < 1e-8) {
+      return;
+    }
+
+    if (!object.parent) {
+      object.position.x += distance;
+      object.updateWorldMatrix(true, true);
+      return;
+    }
+
+    object.parent.updateWorldMatrix(true, false);
+    const worldOrigin = object.parent.localToWorld(new THREE.Vector3());
+    const worldTarget = worldOrigin.clone().add(new THREE.Vector3(distance, 0, 0));
+    const localOrigin = object.parent.worldToLocal(worldOrigin.clone());
+    const localTarget = object.parent.worldToLocal(worldTarget);
+    object.position.add(localTarget.sub(localOrigin));
+    object.updateWorldMatrix(true, true);
+  }
+
+  alignCenteredFootrestAssembly() {
+    const targetCenterX = this.getFrameCenterWorldX();
+    if (!Number.isFinite(targetCenterX)) {
+      return;
+    }
+
+    ["footrest", "footrestPlate"].forEach((partKey) => {
+      const entry = this.getPartEntryByObjectName(partKey);
+      const object = entry && entry.object;
+      if (!object || object.visible === false) {
+        return;
+      }
+
+      object.updateWorldMatrix(true, true);
+      const box = new THREE.Box3().setFromObject(object);
+      if (box.isEmpty()) {
+        return;
+      }
+      const objectCenterX = box.getCenter(new THREE.Vector3()).x;
+      this.translateObjectAlongWorldX(object, targetCenterX - objectCenterX);
+    });
+  }
+
+  alignCenteredBackrest() {
+    const targetCenterX = this.getFrameCenterWorldX();
+    const entry = this.getPartEntryByObjectName("backrest");
+    const object = entry && entry.object;
+    if (!Number.isFinite(targetCenterX) || !object || object.visible === false) {
+      return;
+    }
+
+    object.updateWorldMatrix(true, true);
+    const box = new THREE.Box3().setFromObject(object);
+    if (box.isEmpty()) {
+      return;
+    }
+    const objectCenterX = box.getCenter(new THREE.Vector3()).x;
+    this.translateObjectAlongWorldX(object, targetCenterX - objectCenterX);
+  }
+
   resolveAdjustableObjectKeyFromObject(object) {
     let current = object || null;
     while (current) {
@@ -1112,7 +1277,11 @@ class RuntimeModelViewer {
     const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
     const selectionKey = this.normalizeAdjustmentSelectionKey(selection || this.lastSelection || {});
     const relevantEntries = [
-      ...[...BUILT_IN_OBJECT_ADJUSTMENTS, ...FOOTREST_PLATE_FINAL_ADJUSTMENTS].filter(
+      ...[
+        ...BUILT_IN_OBJECT_ADJUSTMENTS,
+        ...FOOTREST_PLATE_FINAL_ADJUSTMENTS,
+        ...S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS,
+      ].filter(
         (entry) =>
           entry.sourceModel === sourceModel &&
           this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
@@ -1127,12 +1296,17 @@ class RuntimeModelViewer {
         this.getAdjustmentSelectionSpecificity(a.selectionKey) -
         this.getAdjustmentSelectionSpecificity(b.selectionKey)
     );
-    const resolvedEntries = Array.from(
-      relevantEntries.reduce((map, entry) => {
+    const resolvedMap = relevantEntries.reduce((map, entry) => {
         map.set(entry.objectName, entry);
         return map;
-      }, new Map()).values()
-    );
+      }, new Map());
+    S5_POSITION_REFERENCE_OBJECTS.forEach((objectName) => {
+      const referenceEntry = this.getS5PositionReferenceAdjustment(objectName, selection);
+      if (referenceEntry) {
+        resolvedMap.set(objectName, referenceEntry);
+      }
+    });
+    const resolvedEntries = Array.from(resolvedMap.values());
 
     resolvedEntries.forEach((entry) => {
       this.getObjectsByAdjustableName(entry.objectName).forEach((object) => {
@@ -1142,18 +1316,17 @@ class RuntimeModelViewer {
         }
 
         if (entry.mode === "absolute") {
-          const targetRotation = new THREE.Euler(
+          // Spreadsheet values are the object's final local transform. Applying
+          // geometry-center compensation here changes the exported position a
+          // second time, so absolute imports must be assigned verbatim.
+          object.position.set(entry.position.x, entry.position.y, entry.position.z);
+          object.rotation.set(
             THREE.MathUtils.degToRad(entry.rotationDeg.x),
             THREE.MathUtils.degToRad(entry.rotationDeg.y),
             THREE.MathUtils.degToRad(entry.rotationDeg.z),
             object.userData.baseManualAdjustRotation.order
           );
-          this.applyRotationAroundGeometryCenter(
-            object,
-            new THREE.Vector3(entry.position.x, entry.position.y, entry.position.z),
-            object.userData.baseManualAdjustRotation,
-            targetRotation
-          );
+          this.applySeatWidthRootOffset(entry.objectName, object, selection);
           return;
         }
 
@@ -1170,15 +1343,66 @@ class RuntimeModelViewer {
         object.position.x += entry.position.x;
         object.position.y += entry.position.y;
         object.position.z += entry.position.z;
+        this.applySeatWidthRootOffset(entry.objectName, object, selection);
       });
     });
+
+    // The footplate and its supporting frame are fixed-width center assemblies.
+    // Saved per-configuration offsets must not move them away from the frame center.
+    this.alignCenteredFootrestAssembly();
+    this.alignCenteredBackrest();
+  }
+
+  getS5PositionReferenceAdjustment(objectName, selection) {
+    if (!S5_POSITION_REFERENCE_OBJECTS.has(objectName)) {
+      return null;
+    }
+    const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
+    const frameAngle = (selection && selection.frameAngle) || "";
+    const frameLength = (selection && selection.frameLength) || "";
+
+    for (let index = this.manualAdjustmentEntries.length - 1; index >= 0; index -= 1) {
+      const entry = this.manualAdjustmentEntries[index];
+      if (!entry || entry.sourceModel !== sourceModel || entry.objectName !== objectName) {
+        continue;
+      }
+      const pairs = new Map(this.parseAdjustmentSelectionPairs(entry.selectionKey));
+      if (pairs.has("frameAngle") && pairs.get("frameAngle") !== frameAngle) {
+        continue;
+      }
+      if (pairs.has("frameLength") && pairs.get("frameLength") !== frameLength) {
+        continue;
+      }
+      if (pairs.has("seatWidth") && pairs.get("seatWidth") !== S5_POSITION_REFERENCE_SEAT_WIDTH_ID) {
+        continue;
+      }
+      if (pairs.has("seatDepth") && pairs.get("seatDepth") !== S5_POSITION_REFERENCE_SEAT_DEPTH_ID) {
+        continue;
+      }
+      return entry;
+    }
+    return null;
+  }
+
+  applySeatWidthRootOffset(objectName, object, selection) {
+    if (!object || (objectName !== "sideguardLeft" && objectName !== "sideguardRight")) {
+      return;
+    }
+    const seatWidthCm = this.getSeatWidthCm(selection);
+    const halfDeltaMeters =
+      ((seatWidthCm - S5_WHEEL_FOOTREST_REFERENCE_SEAT_WIDTH_CM) * 0.01) * 0.5;
+    object.position.x += (objectName === "sideguardLeft" ? 1 : -1) * halfDeltaMeters;
   }
 
   getResolvedObjectAdjustments(selection) {
     const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
     const selectionKey = this.normalizeAdjustmentSelectionKey(selection || this.lastSelection || {});
     const relevantEntries = [
-      ...[...BUILT_IN_OBJECT_ADJUSTMENTS, ...FOOTREST_PLATE_FINAL_ADJUSTMENTS].filter(
+      ...[
+        ...BUILT_IN_OBJECT_ADJUSTMENTS,
+        ...FOOTREST_PLATE_FINAL_ADJUSTMENTS,
+        ...S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS,
+      ].filter(
         (entry) =>
           entry.sourceModel === sourceModel &&
           this.doesAdjustmentMatchSelection(entry.selectionKey, selectionKey)
@@ -1193,10 +1417,17 @@ class RuntimeModelViewer {
         this.getAdjustmentSelectionSpecificity(a.selectionKey) -
         this.getAdjustmentSelectionSpecificity(b.selectionKey)
     );
-    return relevantEntries.reduce((map, entry) => {
+    const resolvedMap = relevantEntries.reduce((map, entry) => {
       map.set(entry.objectName, entry);
       return map;
     }, new Map());
+    S5_POSITION_REFERENCE_OBJECTS.forEach((objectName) => {
+      const referenceEntry = this.getS5PositionReferenceAdjustment(objectName, selection);
+      if (referenceEntry) {
+        resolvedMap.set(objectName, referenceEntry);
+      }
+    });
+    return resolvedMap;
   }
 
   createObjectDebugPanel() {
@@ -1300,17 +1531,26 @@ class RuntimeModelViewer {
 
     const actionRow = document.createElement("div");
     actionRow.style.display = "grid";
-    actionRow.style.gridTemplateColumns = "1fr 1fr 1fr";
+    actionRow.style.gridTemplateColumns = "1fr 1fr";
     actionRow.style.gap = "6px";
 
     const saveButton = document.createElement("button");
     saveButton.type = "button";
-    saveButton.textContent = "保存日志";
+    saveButton.textContent = "保存并固化";
     this.styleDebugButton(saveButton);
     saveButton.addEventListener("click", () => {
       this.saveSelectedObjectAdjustmentWithFallback();
     });
     actionRow.appendChild(saveButton);
+
+    const applyAllButton = document.createElement("button");
+    applyAllButton.type = "button";
+    applyAllButton.textContent = "应用全部并固化";
+    this.styleDebugButton(applyAllButton);
+    applyAllButton.addEventListener("click", () => {
+      this.applySelectedObjectAdjustmentToAllConfigurations();
+    });
+    actionRow.appendChild(applyAllButton);
 
     const reloadButton = document.createElement("button");
     reloadButton.type = "button";
@@ -1332,6 +1572,40 @@ class RuntimeModelViewer {
     });
     actionRow.appendChild(deleteButton);
     panel.appendChild(actionRow);
+
+    const spreadsheetRow = document.createElement("div");
+    spreadsheetRow.style.display = "grid";
+    spreadsheetRow.style.gridTemplateColumns = "1fr 1fr";
+    spreadsheetRow.style.gap = "6px";
+
+    const exportSpreadsheetButton = document.createElement("button");
+    exportSpreadsheetButton.type = "button";
+    exportSpreadsheetButton.textContent = "导出零件 Excel";
+    this.styleDebugButton(exportSpreadsheetButton);
+    exportSpreadsheetButton.addEventListener("click", () => {
+      this.exportSelectedObjectSpreadsheet();
+    });
+    spreadsheetRow.appendChild(exportSpreadsheetButton);
+
+    const importSpreadsheetButton = document.createElement("button");
+    importSpreadsheetButton.type = "button";
+    importSpreadsheetButton.textContent = "导入 Excel 并固化";
+    this.styleDebugButton(importSpreadsheetButton);
+    const spreadsheetInput = document.createElement("input");
+    spreadsheetInput.type = "file";
+    spreadsheetInput.accept = ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    spreadsheetInput.style.display = "none";
+    spreadsheetInput.addEventListener("change", () => {
+      const [file] = Array.from(spreadsheetInput.files || []);
+      if (file) {
+        this.importObjectSpreadsheet(file);
+      }
+      spreadsheetInput.value = "";
+    });
+    importSpreadsheetButton.addEventListener("click", () => spreadsheetInput.click());
+    spreadsheetRow.appendChild(importSpreadsheetButton);
+    panel.appendChild(spreadsheetRow);
+    panel.appendChild(spreadsheetInput);
 
     const statusNode = document.createElement("div");
     statusNode.style.minHeight = "16px";
@@ -1691,7 +1965,10 @@ class RuntimeModelViewer {
       return;
     }
 
-    this.upsertManualAdjustmentEntry({ ...entry, updatedAt: new Date().toISOString() });
+    const finalizedEntry = this.upsertManualAdjustmentEntry({
+      ...entry,
+      updatedAt: new Date().toISOString(),
+    });
     this.refreshCurrentModelState();
     this.updateObjectDebugPanel();
 
@@ -1705,14 +1982,14 @@ class RuntimeModelViewer {
       const response = await fetch(`${getDebugApiBase()}/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(entry),
+        body: JSON.stringify(finalizedEntry),
       });
       if (!response.ok) {
         throw new Error(`Save failed ${response.status}`);
       }
       const payload = await response.json();
       const entries = Array.isArray(payload && payload.entries) ? payload.entries : [];
-      this.manualAdjustmentEntries = entries.map((item) => this.normalizeAdjustmentEntry(item));
+      this.manualAdjustmentEntries = this.mergeManualAdjustmentEntries(entries, finalizedEntry);
       this.manualAdjustmentsLoaded = true;
       this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
       this.setObjectDebugStatus(`已写入日志: ${entry.objectName}`);
@@ -1721,6 +1998,219 @@ class RuntimeModelViewer {
     } catch (error) {
       console.error("Save debug adjustment failed", error);
       this.setObjectDebugStatus(`日志服务未连接，已保存到本地: ${entry.objectName}`);
+    }
+  }
+
+  getCurrentObjectAdjustmentAsGlobalDelta() {
+    const entry = this.getCurrentObjectAdjustmentEntry();
+    if (!entry) {
+      return null;
+    }
+    const object = this.getObjectsByAdjustableName(entry.objectName)[0];
+    if (!object || !object.userData.baseManualAdjustPosition || !object.userData.baseManualAdjustRotation) {
+      return this.normalizeAdjustmentEntry({
+        ...entry,
+        selectionKey: "",
+        mode: "delta",
+      });
+    }
+
+    const basePosition = object.userData.baseManualAdjustPosition;
+    const baseRotation = object.userData.baseManualAdjustRotation;
+    return this.normalizeAdjustmentEntry({
+      sourceModel: entry.sourceModel,
+      selectionKey: "",
+      objectName: entry.objectName,
+      mode: "delta",
+      position: {
+        x: object.position.x - basePosition.x,
+        y: object.position.y - basePosition.y,
+        z: object.position.z - basePosition.z,
+      },
+      rotationDeg: {
+        x: THREE.MathUtils.radToDeg(object.rotation.x - baseRotation.x),
+        y: THREE.MathUtils.radToDeg(object.rotation.y - baseRotation.y),
+        z: THREE.MathUtils.radToDeg(object.rotation.z - baseRotation.z),
+      },
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  async applySelectedObjectAdjustmentToAllConfigurations() {
+    const globalEntry = this.getCurrentObjectAdjustmentAsGlobalDelta();
+    if (!globalEntry) {
+      this.setObjectDebugStatus("没有可应用的对象位置");
+      return;
+    }
+
+    // Replace every configuration-specific override for this part with one
+    // global delta. The part keeps each configuration's own base geometry.
+    this.manualAdjustmentEntries = this.manualAdjustmentEntries.filter(
+      (item) => !(item.sourceModel === globalEntry.sourceModel && item.objectName === globalEntry.objectName)
+    );
+    this.manualAdjustmentEntries.push(globalEntry);
+    this.manualAdjustmentsLoaded = true;
+    this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
+    this.refreshCurrentModelState();
+    this.updateObjectDebugPanel();
+
+    if (!this.isDebugApiEnabled()) {
+      this.setObjectDebugStatus(`已应用全部配置并固化到本地: ${globalEntry.objectName}`);
+      return;
+    }
+
+    this.setObjectDebugStatus("正在应用到全部配置...");
+    try {
+      const response = await fetch(`${getDebugApiBase()}/replace-object`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entry: globalEntry }),
+      });
+      if (!response.ok) {
+        throw new Error(`Replace failed ${response.status}`);
+      }
+      const payload = await response.json();
+      const entries = Array.isArray(payload && payload.entries) ? payload.entries : [];
+      this.manualAdjustmentEntries = entries.map((item) => this.normalizeAdjustmentEntry(item));
+      this.manualAdjustmentsLoaded = true;
+      this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
+      this.refreshCurrentModelState();
+      this.updateObjectDebugPanel();
+      this.setObjectDebugStatus(`已应用全部配置并固化: ${globalEntry.objectName}`);
+    } catch (error) {
+      console.error("Apply adjustment to all configurations failed", error);
+      this.setObjectDebugStatus(`日志服务未连接，已应用全部配置并固化到本地: ${globalEntry.objectName}`);
+    }
+  }
+
+  getPositionSpreadsheetVariants() {
+    return {
+      frameAngle: ["fa-100", "fa-90"],
+      frameLength: ["fl-std", "fl-long"],
+      seatWidth: ["sw-36", "sw-39", "sw-42", "sw-45", "sw-48"],
+      seatDepth: ["sd-37-5", "sd-40", "sd-42-5", "sd-45", "sd-47-5"],
+    };
+  }
+
+  collectSelectedObjectSpreadsheetRows() {
+    const objectName = this.objectDebugTargetName || "";
+    const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
+    if (!objectName || !sourceModel) {
+      return [];
+    }
+
+    const originalSelection = { ...(this.lastSelection || {}) };
+    const variants = this.getPositionSpreadsheetVariants();
+    const rows = [];
+    try {
+      variants.frameAngle.forEach((frameAngle) => {
+        variants.frameLength.forEach((frameLength) => {
+          variants.seatWidth.forEach((seatWidth) => {
+            variants.seatDepth.forEach((seatDepth) => {
+              const selection = {
+                ...originalSelection,
+                frameAngle,
+                frameLength,
+                seatWidth,
+                seatDepth,
+              };
+              this.applyDimensionAdjustments(selection);
+              const object = this.getObjectsByAdjustableName(objectName)[0];
+              if (!object) {
+                return;
+              }
+              rows.push({
+                sourceModel,
+                objectName,
+                frameAngle,
+                frameLength,
+                seatWidth,
+                seatDepth,
+                selectionKey: this.normalizeAdjustmentSelectionKey(selection),
+                mode: "absolute",
+                x: Number(object.position.x.toFixed(4)),
+                y: Number(object.position.y.toFixed(4)),
+                z: Number(object.position.z.toFixed(4)),
+                rx: Number(THREE.MathUtils.radToDeg(object.rotation.x).toFixed(2)),
+                ry: Number(THREE.MathUtils.radToDeg(object.rotation.y).toFixed(2)),
+                rz: Number(THREE.MathUtils.radToDeg(object.rotation.z).toFixed(2)),
+              });
+            });
+          });
+        });
+      });
+    } finally {
+      this.applyDimensionAdjustments(originalSelection);
+    }
+    return rows;
+  }
+
+  async exportSelectedObjectSpreadsheet() {
+    if (!this.isDebugApiEnabled()) {
+      this.setObjectDebugStatus("Excel 导出仅在本地调试服务中可用");
+      return;
+    }
+    const rows = this.collectSelectedObjectSpreadsheetRows();
+    if (!rows.length) {
+      this.setObjectDebugStatus("当前没有可导出的零件定位数据");
+      return;
+    }
+
+    this.setObjectDebugStatus(`正在导出 ${rows.length} 条绝对定位数据...`);
+    try {
+      const response = await fetch(`${getDebugApiBase()}/export-xlsx`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ objectName: this.objectDebugTargetName, rows }),
+      });
+      if (!response.ok) {
+        throw new Error(`Export failed ${response.status}`);
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `S5_${this.objectDebugTargetName}_absolute_positions.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      this.setObjectDebugStatus(`已导出 ${rows.length} 条绝对定位数据`);
+    } catch (error) {
+      console.error("Export spreadsheet failed", error);
+      this.setObjectDebugStatus("Excel 导出失败，请确认本地调试服务已启动");
+    }
+  }
+
+  async importObjectSpreadsheet(file) {
+    if (!this.isDebugApiEnabled()) {
+      this.setObjectDebugStatus("Excel 导入仅在本地调试服务中可用");
+      return;
+    }
+    this.setObjectDebugStatus(`正在导入 ${file.name}...`);
+    try {
+      const response = await fetch(`${getDebugApiBase()}/import-xlsx`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+        body: await file.arrayBuffer(),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Import failed ${response.status}`);
+      }
+      const payload = await response.json();
+      const entries = Array.isArray(payload && payload.entries) ? payload.entries : [];
+      this.manualAdjustmentEntries = entries.map((entry) => this.normalizeAdjustmentEntry(entry));
+      this.manualAdjustmentsLoaded = true;
+      this.writeLocalManualAdjustments(this.manualAdjustmentEntries);
+      this.refreshCurrentModelState();
+      this.updateObjectDebugPanel();
+      this.setObjectDebugStatus(`已导入并固化 ${payload.imported || 0} 条定位数据`);
+    } catch (error) {
+      console.error("Import spreadsheet failed", error);
+      this.setObjectDebugStatus("Excel 导入失败，请检查表头和本地调试服务");
     }
   }
 
@@ -2824,6 +3314,13 @@ class RuntimeModelViewer {
 
     applyForkTransform(leftFork, -1);
     applyForkTransform(rightFork, 1);
+    if (middle && middle.object) {
+      this.resetSeatWidthGeometry(middle.object);
+      this.applyCenteredGeometryWidthDelta(
+        middle.object,
+        (seatWidthCm - FRAME_BASE_SEAT_WIDTH_CM) * 0.01
+      );
+    }
 
     return true;
   }
@@ -2938,7 +3435,7 @@ class RuntimeModelViewer {
     }
 
     const halfOffsetMeters = ((seatWidthCm - FRAME_BASE_SEAT_WIDTH_CM) * 0.01) * 0.5;
-    const widthScale = seatWidthCm / FRAME_BASE_SEAT_WIDTH_CM;
+    const widthDeltaMeters = (seatWidthCm - FRAME_BASE_SEAT_WIDTH_CM) * 0.01;
 
     frameObject.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) {
@@ -2973,8 +3470,194 @@ class RuntimeModelViewer {
       }
 
       if (isMiddle) {
-        child.scale.x *= widthScale;
+        this.resetSeatWidthGeometry(child);
+        this.applyCenteredGeometryWidthDelta(child, widthDeltaMeters);
       }
+    });
+  }
+
+  clearManualAdjustmentBases() {
+    this.partObjects.forEach(({ object }) => {
+      if (!object || !object.userData) {
+        return;
+      }
+      delete object.userData.baseManualAdjustPosition;
+      delete object.userData.baseManualAdjustRotation;
+      delete object.userData.manualRotationPivotLocal;
+    });
+  }
+
+  ensureMutableSeatWidthGeometry(mesh) {
+    if (!(mesh instanceof THREE.Mesh) || !mesh.geometry) {
+      return null;
+    }
+    if (!mesh.userData.seatWidthGeometryBase) {
+      mesh.geometry = mesh.geometry.clone();
+      let position = mesh.geometry.getAttribute("position");
+      if (!position) {
+        return null;
+      }
+      if (position.normalized || !(position.array instanceof Float32Array)) {
+        const floatPositions = new Float32Array(position.count * 3);
+        for (let index = 0; index < position.count; index += 1) {
+          const offset = index * 3;
+          floatPositions[offset] = position.getX(index);
+          floatPositions[offset + 1] = position.getY(index);
+          floatPositions[offset + 2] = position.getZ(index);
+        }
+        mesh.geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(floatPositions, 3)
+        );
+        position = mesh.geometry.getAttribute("position");
+      }
+      mesh.geometry.computeBoundingBox();
+      const box = mesh.geometry.boundingBox;
+      const base = new Float32Array(position.count * 3);
+      for (let index = 0; index < position.count; index += 1) {
+        const offset = index * 3;
+        base[offset] = position.getX(index);
+        base[offset + 1] = position.getY(index);
+        base[offset + 2] = position.getZ(index);
+      }
+      mesh.userData.seatWidthGeometryBase = base;
+      mesh.userData.seatWidthGeometryCenterX = (box.min.x + box.max.x) * 0.5;
+      mesh.userData.seatWidthGeometrySpanX = box.max.x - box.min.x;
+    }
+    return {
+      position: mesh.geometry.getAttribute("position"),
+      base: mesh.userData.seatWidthGeometryBase,
+      centerX: mesh.userData.seatWidthGeometryCenterX,
+      spanX: mesh.userData.seatWidthGeometrySpanX,
+    };
+  }
+
+  finishSeatWidthGeometryUpdate(mesh, position) {
+    position.needsUpdate = true;
+    mesh.geometry.computeBoundingBox();
+    mesh.geometry.computeBoundingSphere();
+  }
+
+  resetSeatWidthGeometry(object) {
+    if (!object) {
+      return;
+    }
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh) || !child.geometry || !child.userData.seatWidthGeometryBase) {
+        return;
+      }
+      const position = child.geometry.getAttribute("position");
+      for (let index = 0; index < position.count; index += 1) {
+        const offset = index * 3;
+        position.setXYZ(
+          index,
+          child.userData.seatWidthGeometryBase[offset],
+          child.userData.seatWidthGeometryBase[offset + 1],
+          child.userData.seatWidthGeometryBase[offset + 2]
+        );
+      }
+      this.finishSeatWidthGeometryUpdate(child, position);
+    });
+  }
+
+  applyCenteredGeometryWidthDelta(object, widthDeltaMeters) {
+    if (!object) {
+      return;
+    }
+    object.updateMatrixWorld(true);
+    const bounds = new THREE.Box3().setFromObject(object);
+    const centerX = (bounds.min.x + bounds.max.x) * 0.5;
+    const halfDeltaMeters = widthDeltaMeters * 0.5;
+    const worldVertex = new THREE.Vector3();
+    const localVertex = new THREE.Vector3();
+    object.traverse((child) => {
+      const geometryData = this.ensureMutableSeatWidthGeometry(child);
+      if (!geometryData) {
+        return;
+      }
+      child.updateMatrixWorld(true);
+      const inverseWorld = child.matrixWorld.clone().invert();
+      for (let index = 0; index < geometryData.position.count; index += 1) {
+        const offset = index * 3;
+        worldVertex
+          .set(
+            geometryData.base[offset],
+            geometryData.base[offset + 1],
+            geometryData.base[offset + 2]
+          )
+          .applyMatrix4(child.matrixWorld);
+        if (worldVertex.x < centerX - 1e-7) {
+          worldVertex.x -= halfDeltaMeters;
+        } else if (worldVertex.x > centerX + 1e-7) {
+          worldVertex.x += halfDeltaMeters;
+        }
+        localVertex.copy(worldVertex).applyMatrix4(inverseWorld);
+        geometryData.position.setXYZ(index, localVertex.x, localVertex.y, localVertex.z);
+      }
+      this.finishSeatWidthGeometryUpdate(child, geometryData.position);
+    });
+  }
+
+  applyPairedAssemblyWidthOffset(object, seatWidthCm, referenceWidthCm = FRAME_BASE_SEAT_WIDTH_CM) {
+    if (!object) {
+      return;
+    }
+    object.updateMatrixWorld(true);
+    if (!object.userData.seatWidthAssemblyCenterX) {
+      const bounds = new THREE.Box3().setFromObject(object);
+      object.userData.seatWidthAssemblyCenterX = (bounds.min.x + bounds.max.x) * 0.5;
+    }
+    const assemblyCenterX = object.userData.seatWidthAssemblyCenterX;
+    const halfDeltaMeters = ((seatWidthCm - referenceWidthCm) * 0.01) * 0.5;
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+      if (!child.userData.baseSeatWidthPartPosition) {
+        child.userData.baseSeatWidthPartPosition = child.position.clone();
+        const bounds = new THREE.Box3().setFromObject(child);
+        const centerX = (bounds.min.x + bounds.max.x) * 0.5;
+        child.userData.seatWidthPartDirection =
+          centerX < assemblyCenterX - 0.005 ? -1 : centerX > assemblyCenterX + 0.005 ? 1 : 0;
+      }
+      child.position.copy(child.userData.baseSeatWidthPartPosition);
+      child.position.x += child.userData.seatWidthPartDirection * halfDeltaMeters;
+    });
+  }
+
+  applyPairedWheelGeometryWidthOffset(
+    object,
+    seatWidthCm,
+    referenceWidthCm = S5_WHEEL_FOOTREST_REFERENCE_SEAT_WIDTH_CM
+  ) {
+    if (!object) {
+      return;
+    }
+    object.updateMatrixWorld(true);
+    object.traverse((child) => {
+      const geometryData = this.ensureMutableSeatWidthGeometry(child);
+      if (!geometryData) {
+        return;
+      }
+      const worldScale = child.getWorldScale(new THREE.Vector3());
+      const worldSpanX = geometryData.spanX * Math.abs(worldScale.x);
+      if (worldSpanX < 0.25) {
+        return;
+      }
+      const localHalfDelta =
+        (((seatWidthCm - referenceWidthCm) * 0.01) * 0.5) /
+        Math.max(Math.abs(worldScale.x), 1e-8);
+      for (let index = 0; index < geometryData.position.count; index += 1) {
+        const offset = index * 3;
+        const baseX = geometryData.base[offset];
+        geometryData.position.setXYZ(
+          index,
+          baseX + (baseX < geometryData.centerX ? -localHalfDelta : localHalfDelta),
+          geometryData.base[offset + 1],
+          geometryData.base[offset + 2]
+        );
+      }
+      this.finishSeatWidthGeometryUpdate(child, geometryData.position);
     });
   }
 
@@ -3170,12 +3853,17 @@ class RuntimeModelViewer {
     }
 
     const baseSeatWidthCm = 40;
-    const baseSeatDepthCm = 40;
     const seatWidthCm = this.getSeatWidthCm(selection);
     const seatDepthCm = this.getSeatDepthCm(selection);
-    const widthScale = seatWidthCm / baseSeatWidthCm;
-    const depthScale = seatDepthCm / baseSeatDepthCm;
-    const depthDelta = (seatDepthCm - baseSeatDepthCm) * 0.01;
+    // Only Sitzbespannung follows the selected seat depth. The rest of the
+    // assembly stays at the verified 37.5 cm reference placement.
+    // The GLB seat mesh itself is authored at 40 cm. Keeping this scale base
+    // restores the verified 37.5 cm assembly while only the seat changes for
+    // the remaining depth options.
+    const seatDepthScale = seatDepthCm / LEGACY_SEAT_DEPTH_REFERENCE_CM;
+    const fixedReferenceDepthScale = S5_SEAT_DEPTH_REFERENCE_CM / LEGACY_SEAT_DEPTH_REFERENCE_CM;
+    const fixedReferenceDepthDelta =
+      (S5_SEAT_DEPTH_REFERENCE_CM - LEGACY_SEAT_DEPTH_REFERENCE_CM) * 0.01;
     const isFrontAngle90 = (selection && selection.frameAngle) === "fa-90";
     const frameLengthMode = this.getFrameLengthMode(selection);
     const frameLengthOffset = frameLengthMode ? LEFT_FORK_LONG_EXTENSION_M : 0;
@@ -3185,6 +3873,10 @@ class RuntimeModelViewer {
     const footrestAbsoluteAdjust = resolvedAdjustments.get("footrest");
     const frontCasterLeftAbsoluteAdjust = resolvedAdjustments.get("frontCasterLeft");
     const frontCasterRightAbsoluteAdjust = resolvedAdjustments.get("frontCasterRight");
+
+    // Manual deltas must be based on the current parametric assembly, not on a
+    // position cached by the previously selected width.
+    this.clearManualAdjustmentBases();
 
     this.partObjects.forEach(({ key, object }) => {
       const preserveSplitFrameBase = hasSplitFrame && this.isFramePartKey(key);
@@ -3197,7 +3889,7 @@ class RuntimeModelViewer {
       switch (key) {
         case "frame":
           if (!this.applyFrameParametricControls(object, selection)) {
-            object.scale.z = depthScale;
+            object.scale.z = fixedReferenceDepthScale;
             this.applyFrameAngleFallback(object, isFrontAngle90);
           }
           break;
@@ -3210,13 +3902,24 @@ class RuntimeModelViewer {
         case "frame-right-fork-90":
           break;
         case "seat":
+          object.scale.z = seatDepthScale;
+          this.resetSeatWidthGeometry(object);
+          this.applyCenteredGeometryWidthDelta(
+            object,
+            (seatWidthCm - baseSeatWidthCm) * 0.01
+          );
+          break;
         case "backrest":
-          object.scale.x = widthScale;
-          object.scale.z = depthScale;
+          object.scale.z = fixedReferenceDepthScale;
+          this.resetSeatWidthGeometry(object);
+          this.applyCenteredGeometryWidthDelta(
+            object,
+            (seatWidthCm - baseSeatWidthCm) * 0.01
+          );
           break;
         case "sideguards":
-          object.scale.x = widthScale;
-          object.scale.z = depthScale;
+          object.scale.x = 1;
+          object.scale.z = fixedReferenceDepthScale;
           if (isFrontAngle90) {
             object.position.y += 0.003;
             object.position.z += 0.01;
@@ -3224,17 +3927,16 @@ class RuntimeModelViewer {
           break;
         case "sideguardLeft":
         case "sideguardRight":
-          object.scale.x = object.userData.partMirrorX ? -widthScale : widthScale;
-          object.scale.z = depthScale;
+          object.scale.x = object.userData.partMirrorX ? -1 : 1;
+          object.scale.z = fixedReferenceDepthScale;
           if (isFrontAngle90) {
             object.position.y += 0.003;
             object.position.z += 0.01;
           }
           break;
         case "footrest":
-        case "footrestPlate":
-          object.scale.x = widthScale;
-          object.scale.z = depthScale;
+          object.scale.x = 1;
+          object.scale.z = fixedReferenceDepthScale;
           if (footrestAbsoluteAdjust && footrestAbsoluteAdjust.mode === "absolute") {
             object.position.set(
               footrestAbsoluteAdjust.position.x,
@@ -3260,12 +3962,17 @@ class RuntimeModelViewer {
             object.position.z += this.debugFootrest90Adjust.z + activeFrameAdjust.z;
           }
           break;
+        case "footrestPlate":
+          object.scale.x = 1;
+          object.scale.z = fixedReferenceDepthScale;
+          this.resetSeatWidthGeometry(object);
+          break;
         case "frontCasterLeft":
           this.applyFrontCasterInstancePlacement(
             object,
             -1,
             seatWidthCm,
-            depthDelta,
+            fixedReferenceDepthDelta,
             isFrontAngle90 ? this.debugFrontCaster90Adjust : activeFrameAdjust,
             frameLengthOffset,
             frontCasterLeftAbsoluteAdjust
@@ -3276,7 +3983,7 @@ class RuntimeModelViewer {
             object,
             1,
             seatWidthCm,
-            depthDelta,
+            fixedReferenceDepthDelta,
             isFrontAngle90 ? this.debugFrontCaster90Adjust : activeFrameAdjust,
             frameLengthOffset,
             frontCasterRightAbsoluteAdjust
@@ -3284,6 +3991,9 @@ class RuntimeModelViewer {
           break;
         case "rearWheel":
         case "handrim":
+          this.applySeatWidthLateralOffset(object, S5_WHEEL_FOOTREST_REFERENCE_SEAT_WIDTH_CM);
+          this.applyPairedWheelGeometryWidthOffset(object, seatWidthCm);
+          break;
         case "axle":
         case "brake":
           this.applySeatWidthLateralOffset(object, seatWidthCm);
@@ -3293,7 +4003,7 @@ class RuntimeModelViewer {
         case "tippingHelp":
         case "transitWheels":
           if (key === "antiTip" || key === "tippingHelp" || key === "transitWheels") {
-            object.position.z -= depthDelta * 0.45;
+            object.position.z -= fixedReferenceDepthDelta * 0.45;
           }
           break;
         default:
