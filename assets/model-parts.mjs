@@ -120,7 +120,11 @@ function getS5ForkParts(selection = {}) {
 
 function getS5FrameParts(selection = {}) {
   return [
-    { key: "frame-middle", src: withS5ModelVersion("/models/S5/frame-split/middle body.lite.glb"), tint: true },
+    {
+      key: "frame-middle",
+      src: `${withS5ModelVersion("/models/S5/frame-split/middle body.lite.glb")}&middleTrim=20260730-v1`,
+      tint: true,
+    },
     { key: "frame-left-body", src: withS5ModelVersion("/models/S5/frame-split/left body.lite.glb"), tint: true },
     { key: "frame-right-body", src: withS5ModelVersion("/models/S5/frame-split/right body.lite.glb"), tint: true },
     ...getS5ForkParts(selection),

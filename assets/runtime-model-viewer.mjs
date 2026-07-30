@@ -4,7 +4,7 @@ import { DRACOLoader } from "/assets/vendor/DRACOLoader.js";
 import { GLTFLoader } from "/assets/vendor/GLTFLoader.js";
 import { MeshoptDecoder } from "/assets/vendor/meshopt_decoder.module.js";
 import { FRAME_WIDTH_GROUPS } from "/assets/frame-width-groups.mjs";
-import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260715-desktop-preview-v1";
+import { getModelPartsForSourceModel } from "/assets/model-parts.mjs?v=20260730-middle-trim-v1";
 
 function isMobileViewport() {
   return window.innerWidth <= 768;
