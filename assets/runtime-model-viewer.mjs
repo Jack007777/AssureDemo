@@ -451,6 +451,59 @@ const S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS = [
   },
 }));
 
+// Values approved in the local configurator. These are part of the production
+// assembly definition and must not depend on localhost debug logs.
+const S5_FINAL_PUBLIC_OBJECT_ADJUSTMENTS = [
+  {
+    sourceModel: "S5",
+    selectionKey: "",
+    objectName: "sideguardLeft",
+    mode: "delta",
+    position: { x: -0.118, y: -0.154, z: 0.346 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "",
+    objectName: "sideguardRight",
+    mode: "delta",
+    position: { x: -0.488, y: -0.153, z: 0.345 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-std",
+    objectName: "footrestPlate",
+    mode: "absolute",
+    position: { x: -0.024, y: 0, z: -0.92 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-100&frameLength=fl-long",
+    objectName: "footrestPlate",
+    mode: "absolute",
+    position: { x: -0.03, y: 0.003, z: -0.876 },
+    rotationDeg: { x: 0, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-90&frameLength=fl-std",
+    objectName: "footrestPlate",
+    mode: "absolute",
+    position: { x: -0.026, y: 0.2108, z: -0.919 },
+    rotationDeg: { x: 10, y: 0, z: 0 },
+  },
+  {
+    sourceModel: "S5",
+    selectionKey: "frameAngle=fa-90&frameLength=fl-long",
+    objectName: "footrestPlate",
+    mode: "absolute",
+    position: { x: -0.03, y: 0.2358, z: -0.87 },
+    rotationDeg: { x: 10, y: 0, z: 0 },
+  },
+];
+
 export function mountRuntimeModelViewer(container) {
   return new RuntimeModelViewer(container);
 }
@@ -1281,6 +1334,7 @@ class RuntimeModelViewer {
         ...BUILT_IN_OBJECT_ADJUSTMENTS,
         ...FOOTREST_PLATE_FINAL_ADJUSTMENTS,
         ...S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS,
+        ...S5_FINAL_PUBLIC_OBJECT_ADJUSTMENTS,
       ].filter(
         (entry) =>
           entry.sourceModel === sourceModel &&
@@ -1402,6 +1456,7 @@ class RuntimeModelViewer {
         ...BUILT_IN_OBJECT_ADJUSTMENTS,
         ...FOOTREST_PLATE_FINAL_ADJUSTMENTS,
         ...S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS,
+        ...S5_FINAL_PUBLIC_OBJECT_ADJUSTMENTS,
       ].filter(
         (entry) =>
           entry.sourceModel === sourceModel &&

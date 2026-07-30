@@ -637,7 +637,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260730-centered-backrest-v4");
+      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260730-public-position-sync-v5");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
