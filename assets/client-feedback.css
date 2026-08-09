@@ -2,6 +2,291 @@ body.wc-preselect .grid.grid-2 {
   display: none !important;
 }
 
+.wc-drive-wheel-component {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(243, 201, 107, 0.34);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(243, 201, 107, 0.08), transparent 38%),
+    rgba(8, 19, 37, 0.54);
+}
+
+.wc-drive-wheel-component[hidden] {
+  display: none !important;
+}
+
+.wc-drive-wheel-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 2px 4px 4px;
+}
+
+.wc-drive-wheel-kicker {
+  color: #f3c96b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.wc-drive-wheel-title {
+  color: #f4f7fb;
+  font-size: 17px;
+}
+
+.wc-drive-wheel-copy {
+  grid-column: 1 / -1;
+  color: #9ba9bc;
+  font-size: 12px;
+}
+
+.wc-drive-wheel-parts {
+  display: grid;
+  gap: 10px;
+}
+
+.wc-drive-wheel-part {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(8, 17, 32, 0.66);
+}
+
+.choice-btn.wc-handrim-choice {
+  position: relative;
+  min-height: 132px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.choice-btn.wc-tyre-choice {
+  min-height: 118px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+}
+
+.wc-tyre-diagram {
+  display: block;
+  width: min(112px, 78%);
+  height: 64px;
+  margin: 0 auto 2px;
+  color: #222932;
+}
+
+.wc-tyre-diagram svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.wc-tyre-body {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.wc-tyre-tread {
+  fill: none;
+  stroke: #9aa9bb;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wc-tyre-diagram.is-offroad .wc-tyre-tread {
+  stroke-width: 5;
+}
+
+.choice-btn.wc-tyre-choice.active .wc-tyre-tread {
+  stroke: #f3c96b;
+}
+
+.wc-handrim-diagram {
+  display: block;
+  width: min(104px, 76%);
+  height: 72px;
+  margin: 0 auto 2px;
+}
+
+.wc-handrim-diagram svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.wc-handrim-arc {
+  fill: none;
+  stroke: #b9c4d2;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.wc-handrim-section {
+  fill: #aeb9c8;
+  stroke: #e0e6ee;
+  stroke-width: 2;
+}
+
+.wc-handrim-diagram.is-black .wc-handrim-arc,
+.wc-handrim-diagram.is-black .wc-handrim-section,
+.wc-handrim-diagram.is-pvc .wc-handrim-arc,
+.wc-handrim-diagram.is-pvc .wc-handrim-section,
+.wc-handrim-diagram.is-rubber .wc-handrim-arc,
+.wc-handrim-diagram.is-rubber .wc-handrim-section {
+  fill: #161b22;
+  stroke: #262e39;
+}
+
+.wc-handrim-diagram.is-titanium .wc-handrim-arc,
+.wc-handrim-diagram.is-titanium .wc-handrim-section {
+  fill: #777f88;
+  stroke: #aeb5bd;
+}
+
+.wc-handrim-diagram text {
+  fill: #f3c96b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.choice-btn.wc-handrim-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.choice-btn.wc-rear-wheel-choice {
+  position: relative;
+  min-height: 158px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.wc-rear-wheel-diagram {
+  display: block;
+  width: min(104px, 72%);
+  height: 94px;
+  margin: 0 auto 2px;
+}
+
+.wc-rear-wheel-diagram svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wc-wheel-tyre,
+.wc-wheel-rim,
+.wc-wheel-spokes,
+.wc-wheel-hub {
+  vector-effect: non-scaling-stroke;
+}
+
+.wc-wheel-tyre {
+  fill: none;
+  stroke: #111820;
+  stroke-width: 7;
+}
+
+.wc-wheel-tyre.is-offroad {
+  stroke-dasharray: 3 2;
+  stroke-width: 9;
+}
+
+.wc-wheel-rim {
+  fill: none;
+  stroke: #d8dee8;
+  stroke-width: 2;
+}
+
+.wc-wheel-spokes {
+  fill: none;
+  stroke: #9aa9bc;
+  stroke-width: 0.8;
+}
+
+.wc-wheel-hub {
+  fill: #dbe2ec;
+  stroke: #66758a;
+  stroke-width: 1.5;
+}
+
+.wc-wheel-code {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  padding: 3px 6px;
+  border: 1px solid rgba(243, 201, 107, 0.55);
+  border-radius: 7px;
+  color: #f3c96b;
+  background: rgba(8, 19, 37, 0.88);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.wc-wheel-pending {
+  color: #8b99ac;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.choice-btn.wc-rear-wheel-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  filter: saturate(0.45);
+}
+
+.choice-btn.wc-rear-wheel-choice.active .wc-wheel-code {
+  color: #111827;
+  background: #f3c96b;
+  border-color: #f3c96b;
+}
+
+@media (max-width: 760px) {
+  .wc-drive-wheel-component {
+    padding: 9px;
+    border-radius: 14px;
+  }
+
+  .wc-drive-wheel-title {
+    font-size: 14px;
+  }
+
+  .wc-drive-wheel-copy {
+    font-size: 10px;
+  }
+
+  .choice-btn.wc-rear-wheel-choice {
+    min-height: 126px;
+  }
+
+  .wc-rear-wheel-diagram {
+    height: 68px;
+  }
+
+  .choice-btn.wc-handrim-choice {
+    min-height: 112px;
+  }
+
+  .wc-handrim-diagram {
+    height: 58px;
+  }
+
+  .choice-btn.wc-tyre-choice {
+    min-height: 102px;
+  }
+
+  .wc-tyre-diagram {
+    height: 52px;
+  }
+}
+
 body.wc-preselect .wc-inline-toolbar {
   display: none !important;
 }
@@ -120,8 +405,41 @@ body.wc-config-active .wc-summary-backdrop {
   display: none !important;
 }
 
+/* Keep viewport gestures inside OrbitControls instead of handing them to the page. */
+body.wc-config-active .model-viewer,
+body.wc-config-active .wc-runtime-canvas {
+  touch-action: none !important;
+  overscroll-behavior: contain;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .choice-meta {
   display: none !important;
+}
+
+.choice-btn.wc-option-unavailable {
+  opacity: 0.42;
+  filter: grayscale(0.82);
+  border-style: dashed;
+  background: rgba(9, 16, 29, 0.72) !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+
+.choice-btn.wc-option-unavailable:hover,
+.choice-btn.wc-option-unavailable:focus,
+.choice-btn.wc-option-unavailable:focus-visible {
+  border-color: rgba(128, 145, 169, 0.42) !important;
+  background: rgba(9, 16, 29, 0.72) !important;
+}
+
+.wc-seat-depth-rule-note,
+.wc-front-fork-wheel-rule-note {
+  margin: 10px 2px 0;
+  color: #9aabc1;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .choice-btn {
@@ -163,6 +481,182 @@ body.wc-config-active .wc-summary-backdrop {
 
 .choice-btn.active .choice-label {
   color: #fff2c4;
+}
+
+.wc-price-type {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  z-index: 2;
+  padding: 3px 7px;
+  border: 1px solid rgba(139, 166, 205, 0.34);
+  border-radius: 999px;
+  background: rgba(101, 125, 157, 0.14);
+  color: #b7c6da;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.wc-price-type.is-extra {
+  border-color: rgba(237, 176, 63, 0.5);
+  background: rgba(237, 176, 63, 0.14);
+  color: #f1c568;
+}
+
+.wc-order-form-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin: 0 0 10px;
+  color: #aab9cc;
+  font-size: 11px;
+}
+
+.wc-order-form-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wc-order-form-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(139,166,205,.5);
+  background: rgba(101,125,157,.22);
+}
+
+.wc-order-form-legend .is-extra i {
+  border-color: rgba(237,176,63,.66);
+  background: #dba83d;
+}
+
+.wc-option-schematic {
+  display: block;
+  width: 84px;
+  max-width: 46%;
+  height: 50px;
+  margin: 1px 0 7px;
+  color: #aebed4;
+  pointer-events: none;
+}
+
+.wc-option-schematic svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.wc-option-schematic g {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wc-option-schematic text {
+  fill: currentColor;
+  stroke: none;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.choice-btn.active .wc-option-schematic {
+  color: #f3c96b;
+}
+
+.choice-btn.wc-frame-color-choice {
+  min-height: 76px;
+  padding-top: 16px;
+}
+
+.choice-btn.wc-frame-color-choice .chip-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.36), 0 4px 12px rgba(0,0,0,.24);
+}
+
+.choice-btn.wc-camber-choice {
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.wc-camber-choice .choice-label {
+  display: block;
+  text-align: center;
+}
+
+.wc-camber-diagram {
+  display: block;
+  width: min(100%, 190px);
+  height: 64px;
+  margin: 0 auto;
+  color: #b7c5d8;
+  pointer-events: none;
+}
+
+.wc-camber-diagram svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.wc-camber-ground,
+.wc-camber-axle,
+.wc-camber-wheel,
+.wc-camber-frame {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wc-camber-ground {
+  stroke-width: 1;
+  opacity: 0.28;
+}
+
+.wc-camber-axle {
+  stroke-width: 2;
+  opacity: 0.72;
+}
+
+.wc-camber-wheel {
+  stroke-width: 6;
+}
+
+.wc-camber-frame {
+  stroke-width: 2.4;
+  opacity: 0.82;
+}
+
+.wc-camber-hub {
+  fill: #0e1626;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.wc-camber-angle {
+  fill: currentColor;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.choice-btn.wc-camber-choice.active .wc-camber-diagram {
+  color: #f3c96b;
 }
 
 .choice-btn.active .chip-swatch {
@@ -315,6 +809,29 @@ body.wc-config-active .wc-summary-backdrop {
   margin-top: 6px;
   color: rgba(232, 237, 247, 0.72);
   line-height: 1.55;
+}
+
+body.wc-config-active .card.header .wc-inline-toolbar {
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: transparent;
+}
+
+body.wc-config-active .card.header .wc-inline-copy-wrap {
+  min-width: 0;
+  flex: 1 1 560px;
+}
+
+body.wc-config-active .card.header .wc-inline-title {
+  font-size: clamp(20px, 2vw, 28px);
+}
+
+body.wc-config-active .card.header .wc-inline-copy {
+  margin-top: 4px;
 }
 
 .wc-mobile-lang-switch {
@@ -492,18 +1009,21 @@ body.wc-summary-open .wc-summary-backdrop {
 
 .wc-desktop-config-shell {
   display: grid;
-  grid-template-columns: 156px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   align-items: start;
   margin-top: 12px;
 }
 
 .wc-desktop-category-rail {
-  position: sticky;
-  top: 18px;
+  position: static;
   display: grid;
-  gap: 12px;
+  gap: 8px;
   align-self: start;
+  min-width: 0;
+  padding: 10px 12px 12px;
+  border-top: 1px solid rgba(67, 85, 118, 0.55);
+  background: rgba(8, 15, 29, 0.94);
 }
 
 .wc-desktop-category-rail .section-title {
@@ -511,26 +1031,67 @@ body.wc-summary-open .wc-summary-backdrop {
 }
 
 .wc-desktop-category-rail .category-grid {
-  grid-template-columns: 1fr;
-  gap: 10px;
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 8px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  padding-bottom: 0;
 }
 
 .wc-desktop-category-rail .category-btn {
-  min-height: 88px;
-  padding: 12px 14px;
-  align-items: flex-start;
+  min-height: 74px;
+  padding: 8px 10px;
+  align-items: center;
   justify-content: center;
-  text-align: left;
+  gap: 5px;
+  text-align: center;
+  white-space: normal;
 }
 
 .wc-desktop-category-rail .category-icon {
-  width: 54px;
-  height: 46px;
+  width: 42px;
+  height: 34px;
 }
 
 .wc-desktop-category-rail .category-icon svg {
-  width: 46px;
-  height: 46px;
+  width: 36px;
+  height: 36px;
+}
+
+.wc-desktop-category-rail .category-icon svg .base,
+.wc-mobile-category-icon svg .base {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.3;
+}
+
+.wc-desktop-category-rail .category-icon svg .accent,
+.wc-mobile-category-icon svg .accent {
+  fill: none;
+  stroke: #dce5f2;
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wc-desktop-category-rail .category-icon svg .accent-fill,
+.wc-mobile-category-icon svg .accent-fill {
+  fill: #dce5f2;
+}
+
+.wc-desktop-category-rail .category-btn.active .category-icon svg .accent,
+.wc-mobile-category-chip.active .wc-mobile-category-icon svg .accent {
+  stroke: #f3c96b;
+}
+
+.wc-desktop-category-rail .category-btn.active .category-icon svg .accent-fill,
+.wc-mobile-category-chip.active .wc-mobile-category-icon svg .accent-fill {
+  fill: #f3c96b;
 }
 
 .wc-desktop-config-main {
@@ -599,13 +1160,25 @@ body.wc-config-active .model-viewer {
   }
 
   body.wc-config-active .wc-desktop-config-main {
-    position: relative;
+    position: sticky;
+    top: 12px;
+    height: calc(100vh - 24px);
+    min-height: 620px;
+    grid-template-rows: minmax(280px, 46vh) minmax(180px, 1fr) auto;
+    gap: 12px;
+    overflow: hidden;
     isolation: isolate;
   }
 
   body.wc-config-active .wc-desktop-viewer-panel {
-    position: sticky !important;
-    top: 18px !important;
+    position: relative !important;
+    top: auto !important;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
     z-index: 8 !important;
   }
 
@@ -614,6 +1187,53 @@ body.wc-config-active .model-viewer {
     z-index: 2 !important;
     margin-top: 0;
     width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding: 0 10px 28px 0;
+    scroll-behavior: smooth;
+    scrollbar-color: #6c7d99 rgba(8, 15, 28, 0.72);
+    scrollbar-width: thin;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel .wc-config-section-heading {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    margin: 0 0 10px;
+    padding: 12px 8px 10px;
+    border-bottom: 1px solid rgba(108, 125, 153, 0.28);
+    background: rgba(10, 18, 34, 0.98);
+    box-shadow: 0 10px 18px rgba(4, 9, 18, 0.16);
+    backdrop-filter: blur(10px);
+  }
+
+  body.wc-config-active .wc-desktop-category-rail {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: rgba(8, 15, 28, 0.72);
+  }
+
+  body.wc-config-active .wc-desktop-options-panel::-webkit-scrollbar-thumb {
+    min-height: 48px;
+    border: 2px solid rgba(8, 15, 28, 0.72);
+    border-radius: 999px;
+    background: #6c7d99;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel::-webkit-scrollbar-thumb:hover {
+    background: #f3c96b;
   }
 
   body.wc-config-active .wc-desktop-options-panel .option-group,
@@ -638,8 +1258,12 @@ body.wc-config-active .model-viewer {
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer {
     position: relative !important;
     top: auto !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
     z-index: 9 !important;
-    margin-bottom: 16px;
+    margin-bottom: 0;
   }
 
   body.wc-config-active .wc-desktop-viewer-panel .model-viewer,
@@ -647,6 +1271,72 @@ body.wc-config-active .model-viewer {
   body.wc-config-active .wc-desktop-viewer-panel .wc-runtime-canvas {
     pointer-events: auto !important;
     cursor: grab !important;
+  }
+}
+
+/*
+ * A wheelchair has a near-square visual footprint. On wide desktop screens a
+ * full-width preview becomes a letterbox with large unused areas, so place the
+ * configuration controls beside a compact preview instead of below it.
+ */
+@media (min-width: 1280px) {
+  body.wc-config-active.wc-desktop-header-space-reused .card.header .wc-inline-toolbar {
+    width: min(var(--wc-desktop-header-left-width), 100%);
+    margin-right: auto;
+    margin-left: 0;
+  }
+
+  body.wc-config-active .wc-desktop-config-main {
+    grid-template-columns: minmax(520px, 0.92fr) minmax(560px, 1.08fr);
+    grid-template-rows: auto auto;
+    align-items: stretch;
+    align-content: start;
+  }
+
+  body.wc-config-active.wc-desktop-header-space-reused .wc-desktop-config-main {
+    overflow: visible;
+  }
+
+  body.wc-config-active .wc-desktop-viewer-panel,
+  body.wc-config-active .wc-desktop-options-panel {
+    grid-row: 1;
+    min-height: 0;
+  }
+
+
+  body.wc-config-active .wc-desktop-category-rail {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    position: relative;
+    z-index: 12;
+  }
+
+  body.wc-config-active .wc-desktop-viewer-panel {
+    grid-column: 1;
+    align-self: start;
+    height: auto;
+    grid-template-rows: auto auto auto;
+    z-index: 4 !important;
+  }
+
+  body.wc-config-active .wc-desktop-options-panel {
+    grid-column: 2;
+    height: 0;
+    min-height: 100%;
+    padding: 0 10px 28px 2px;
+  }
+
+  body.wc-config-active.wc-desktop-header-space-reused .wc-desktop-options-panel {
+    height: var(--wc-desktop-options-expanded-height) !important;
+    min-height: var(--wc-desktop-options-expanded-height) !important;
+    margin-bottom: calc(-1 * var(--wc-desktop-options-lift));
+    transform: translateY(calc(-1 * var(--wc-desktop-options-lift)));
+  }
+
+  body.wc-config-active .wc-desktop-viewer-panel .model-viewer {
+    height: auto !important;
+    aspect-ratio: 4 / 3;
   }
 }
 
@@ -1566,6 +2256,14 @@ body.wc-config-active .model-viewer {
     min-height: 54px;
     padding: 8px;
     border-radius: 10px;
+  }
+
+  .choice-btn.wc-camber-choice {
+    min-height: 96px;
+  }
+
+  .wc-camber-diagram {
+    height: 50px;
   }
 
   .choice-label {

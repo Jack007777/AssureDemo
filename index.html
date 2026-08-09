@@ -18,14 +18,36 @@
         }
       }
     </script>
+    <script>
+      // The legacy hidden preview remains mounted for application state, but its
+      // seven obsolete S5 meshes must not be downloaded before the live viewer.
+      (() => {
+        const legacyS5Models = new Set([
+          "/models/S5/Rahmen-standard.glb",
+          "/models/S5/Sitzbespannung.glb",
+          "/models/S5/Ruecken.glb",
+          "/models/S5/Seitenteilen-standard.glb",
+          "/models/S5/Fussbrett.glb",
+          "/models/S5/Lenkraerder-standard.glb",
+          "/models/S5/Antriebsraede-Klein.glb",
+        ]);
+        const placeholder = "/models/S5/frame-split/middle%20body.lite.glb?legacy-preview-placeholder=v30";
+        const nativeFetch = window.fetch.bind(window);
+        window.fetch = (input, init) => {
+          const source = input instanceof Request ? input.url : String(input);
+          const url = new URL(source, window.location.href);
+          return nativeFetch(legacyS5Models.has(url.pathname) ? placeholder : input, init);
+        };
+      })();
+    </script>
     <script type="module" crossorigin src="/assets/index-Cw2Er8vd.js"></script>
-    <script type="module" src="/assets/pdf-export.mjs?v=20260710-render-sync-v3"></script>
-    <script defer src="/assets/i18n-runtime.js?v=20260618-seatwidth-move-fix1"></script>
-    <script defer src="/assets/client-feedback.js?v=20260730-middle-trim-v6"></script>
+    <script type="module" src="/assets/pdf-export.mjs?v=20260731-rear-wheel-direction-v2"></script>
+    <script defer src="/assets/i18n-runtime.js?v=20260731-rear-wheel-direction-v2"></script>
+  <script defer src="/assets/client-feedback.js?v=20260809-one-arm-sync-v126"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CP_32-ho.css">
-    <link rel="stylesheet" href="/assets/client-feedback.css?v=20260715-desktop-preview-v1">
+    <link rel="stylesheet" href="/assets/client-feedback.css?v=20260808-viewer-controls-v44">
   </head>
-  <body>
+  <body class="wc-preselect">
     <div id="app"></div>
   </body>
 </html>

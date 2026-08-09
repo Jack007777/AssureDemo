@@ -1,8 +1,23 @@
 const DEBUG_LEFT_FORK_ONLY = false;
-const S5_MODEL_CACHE_BUSTER = "v=20260715-lite-first-load-v1";
+const S5_MODEL_CACHE_BUSTER = "v=20260808-local-options-v44";
 
 function withS5ModelVersion(path) {
   return `${path}?${S5_MODEL_CACHE_BUSTER}`;
+}
+
+function getS5SeatPart(selection = {}) {
+  const seatStyle = selection.seatSetting || "seat-std";
+  const sourceByStyle = {
+    "seat-std": "/models/S5/Standard%20Seat%20with%20underseat%20pouch.web.glb",
+    "seat-carbon": "/models/S5/Sitzbespannung.lite.glb",
+    "seat-crossed": "/models/S5/crossed%20band%20seat.glb",
+  };
+  return {
+    key: "seat",
+    src: withS5ModelVersion(sourceByStyle[seatStyle] || sourceByStyle["seat-std"]),
+    tint: false,
+    seatStyle,
+  };
 }
 
 function getS5SideguardParts(style) {
@@ -19,7 +34,7 @@ function getS5SideguardParts(style) {
   return [
     {
       key: "sideguards",
-      src: withS5ModelVersion("/models/S5/Seitenteilen-standard.glb"),
+      src: withS5ModelVersion("/models/S5/Seitenteilen-standard.lite.glb"),
       tint: false,
       sideguardStyle: style,
     },
@@ -28,13 +43,20 @@ function getS5SideguardParts(style) {
 
 function getS5BaseParts(selection = {}) {
   const skirtGuardStyle = selection.skirtGuards || "sg-none";
+  const frontWheelSource = selection.frontWheel === "fw-3-alu"
+    ? "/models/S5/front-wheel-3-inch-alu-single.glb"
+    : selection.frontWheel === "fw-4-alu" || selection.frontWheel === "fw-4-plastic"
+      ? "/models/S5/front-wheel-4-inch-alu-single.glb"
+      : "/models/S5/front-wheel-5-inch-alu-single.glb";
+  const plasticFrontWheel = selection.frontWheel === "fw-4-plastic"
+    || selection.frontWheel === "fw-5-plastic";
+  const frontForkSource = selection.frontFork === "ff-std"
+    ? "/models/S5/front-fork-standard-alu-single.glb"
+    : selection.frontFork === "ff-one-arm"
+      ? "/models/S5/front-fork-one-arm-alu-single.glb"
+      : "/models/S5/front-fork-long-alu-single.glb";
   return [
-  {
-    key: "seat",
-    src: withS5ModelVersion("/models/S5/Sitzbespannung.lite.glb"),
-    tint: false,
-    seatStyle: selection.seatSetting || "seat-std",
-  },
+  getS5SeatPart(selection),
   {
     key: "backrest",
     src: withS5ModelVersion("/models/S5/Ruecken.lite.glb"),
@@ -44,18 +66,39 @@ function getS5BaseParts(selection = {}) {
   ...getS5SideguardParts(skirtGuardStyle),
   {
     key: "frontCasterLeft",
-    src: withS5ModelVersion("/models/S5/Lenkraerder-single.lite.glb"),
+    src: withS5ModelVersion(frontWheelSource),
     tint: false,
-    blackWheel: true,
+    blackWheel: plasticFrontWheel,
     mirrorX: true,
   },
   {
     key: "frontCasterRight",
-    src: withS5ModelVersion("/models/S5/Lenkraerder-single.lite.glb"),
+    src: withS5ModelVersion(frontWheelSource),
     tint: false,
-    blackWheel: true,
+    blackWheel: plasticFrontWheel,
     mirrorX: false,
   },
+  {
+    key: "frontForkLeft",
+    src: withS5ModelVersion(frontForkSource),
+    tint: false,
+    mirrorX: true,
+  },
+  {
+    key: "frontForkRight",
+    src: withS5ModelVersion(frontForkSource),
+    tint: false,
+    mirrorX: false,
+  },
+  ];
+}
+
+function getS5LateralFrameParts(selection = {}) {
+  if (selection.lateralFrame !== "lf-extended") return [];
+  const src = withS5ModelVersion("/models/S5/Extend%20length%20lateral%20frame%20carbon.glb");
+  return [
+    { key: "lateralFrameLeft", src, tint: true },
+    { key: "lateralFrameRight", src, tint: true },
   ];
 }
 
@@ -122,7 +165,9 @@ function getS5FrameParts(selection = {}) {
   return [
     {
       key: "frame-middle",
-      src: `${withS5ModelVersion("/models/S5/frame-split/middle body.lite.glb")}&middleTrim=20260730-v1`,
+      // The merged lightweight mesh has missing triangles along both crossbars.
+      // Keep the original clean meshes; runtime width adjustment handles both.
+      src: `${withS5ModelVersion("/models/S5/frame-split/middle body.glb")}&middleMesh=20260806-v1`,
       tint: true,
     },
     { key: "frame-left-body", src: withS5ModelVersion("/models/S5/frame-split/left body.lite.glb"), tint: true },
@@ -131,72 +176,180 @@ function getS5FrameParts(selection = {}) {
   ];
 }
 
-function getS5RearWheelPart(selection) {
-  switch (selection.rearWheel) {
-    case "rw-22-18":
-      return { key: "rearWheel", src: "/models/S5/22寸18辐后轮 _ light wheel.optimized.glb", tint: false, blackWheel: true };
-    case "rw-24-12":
-    case "rw-24-18":
-      return { key: "rearWheel", src: "/models/S5/24寸12辐条后轮 _ ultra light wheel.optimized.glb", tint: false, blackWheel: true };
-    case "rw-24-big":
-      return { key: "rearWheel", src: "/models/S5/S5加强后轮 _ S5 large hub rear wheels.optimized.glb", tint: false, blackWheel: true };
-    default:
-      return { key: "rearWheel", src: "/models/S5/Antriebsraede-Klein.glb", tint: false, blackWheel: true };
-  }
-}
-
-function getS5HandrimPart(selection) {
-  if (selection.handrim === "hr-big-24") {
-    return {
-      key: "handrim",
-      src: "/models/S5/S5异形手轮 _ S5 big ergonom handrail incl rubber strap.optimized.glb",
+function getS5RearWheelParts(selection) {
+  const makeWheelPair = (src, options = {}) => {
+    const reverseFacing = !!options.reverseFacing;
+    const alignmentYDeg = Number(options.alignmentYDeg) || 0;
+    const alignmentZDeg = Number(options.alignmentZDeg) || 0;
+    const role = options.role || "wheel";
+    const keyStem = role === "wheel" ? "rearWheel" : `rearWheel${role[0].toUpperCase()}${role.slice(1)}`;
+    return [
+    {
+      key: `${keyStem}Left`,
+      src: withS5ModelVersion(src),
       tint: false,
-    };
-  }
-  return null;
+      blackWheel: role === "tyre",
+      rearWheelRole: role,
+      mirrorX: reverseFacing,
+      instanceOffsetX: 0,
+      reverseWheelFacing: reverseFacing,
+      wheelAlignmentYDeg: -alignmentYDeg,
+      wheelAlignmentZDeg: alignmentZDeg,
+    },
+    {
+      key: `${keyStem}Right`,
+      src: withS5ModelVersion(src),
+      tint: false,
+      blackWheel: role === "tyre",
+      rearWheelRole: role,
+      mirrorX: !reverseFacing,
+      instanceOffsetX: -0.609255862,
+      reverseWheelFacing: reverseFacing,
+      wheelAlignmentYDeg: alignmentYDeg,
+      wheelAlignmentZDeg: -alignmentZDeg,
+    },
+    ];
+  };
+
+  const wheelCatalog = {
+    "rw-22s": { size: 22, wheel: "/models/S5/rear-component-wheel-22S.lite.glb" },
+    "rw-24s": {
+      size: 24,
+      wheel: "/models/S5/rear-component-wheel-24S.lite.glb",
+      alignmentZDeg: { wheel: 2, handrim: 2.03, tyre: 2.01 },
+    },
+    "rw-22ul": { size: 22, wheel: "/models/S5/rear-component-wheel-22UL.lite.glb" },
+    "rw-24ul": {
+      size: 24,
+      wheel: "/models/S5/rear-component-wheel-24UL.lite.glb",
+      alignmentZDeg: { wheel: 1.82, handrim: 2.03, tyre: 2.01 },
+    },
+    "rw-24b": {
+      size: 24,
+      wheel: "/models/S5/rear-component-wheel-24B.lite.glb",
+      largeHub: true,
+      alignmentZDeg: { wheel: 0.03, handrim: 0.01, tyre: 2.01 },
+    },
+  };
+  const legacyIds = {
+    "rw-22sl": "rw-22s",
+    "rw-22-18": "rw-22s",
+    "rw-24sl": "rw-24s",
+    "rw-24-18": "rw-24s",
+    "rw-24-12": "rw-24ul",
+    "rw-24bh": "rw-24b",
+    "rw-24-big": "rw-24b",
+  };
+  const wheelId = legacyIds[selection.rearWheel] || selection.rearWheel || "rw-22s";
+  const wheel = wheelCatalog[wheelId] || wheelCatalog["rw-22s"];
+  const wheelAlignment = wheel.alignmentZDeg || {};
+  const handrimSource = wheel.largeHub
+    ? "/models/S5/rear-component-handrim-24B.lite.glb"
+    : wheel.size === 22
+      ? "/models/S5/rear-component-handrim-22.lite.glb"
+      : "/models/S5/rear-component-handrim-24.lite.glb";
+  const tyreSource = wheel.size === 22
+    ? "/models/S5/rear-component-tyre-22-pu.lite.glb"
+    : "/models/S5/rear-component-tyre-24-pneumatic.lite.glb";
+
+  return [
+    ...makeWheelPair(wheel.wheel, {
+      role: "wheel",
+      alignmentZDeg: wheelAlignment.wheel,
+    }),
+    ...makeWheelPair(handrimSource, {
+      role: "handrim",
+      alignmentZDeg: wheelAlignment.handrim,
+    }),
+    ...makeWheelPair(tyreSource, {
+      role: "tyre",
+      alignmentZDeg: wheelAlignment.tyre,
+    }),
+  ];
 }
 
-function getS5BrakePart(selection) {
+function getS5BrakeParts(selection) {
+  let src = "";
   switch (selection.brake) {
     case "brake-push-bent":
-      return { key: "brake", src: "/models/S5/前倒刹车 _ push to brake bended lever.optimized.glb", tint: false };
+      src = "/models/S5/前倒刹车 _ push to brake bended lever.optimized.glb";
+      break;
     case "brake-push-folding":
-      return {
-        key: "brake",
-        src: "/models/S5/延长车柄刹车-推刹 _ push to brake folding extended lever.optimized.glb",
-        tint: false,
-      };
+      src = "/models/S5/延长车柄刹车-推刹 _ push to brake folding extended lever.optimized.glb";
+      break;
     case "brake-pull-folding":
-      return {
-        key: "brake",
-        src: "/models/S5/延长车柄刹车-拉刹 _ Pull to brake folding extended lever.optimized.glb",
-        tint: false,
-      };
+      src = "/models/S5/延长车柄刹车-拉刹 _ Pull to brake folding extended lever.optimized.glb";
+      break;
     case "brake-scissors":
-      return { key: "brake", src: "/models/S5/剪刀款刹车scissors folding brak aluminum.optimized.glb", tint: false };
+      src = "/models/S5/剪刀款刹车scissors folding brak aluminum.lite.glb";
+      break;
     case "brake-push-straight":
     case "brake-pull-straight":
-      return { key: "brake", src: "/models/S5/普通刹车 _ standard brake.optimized.glb", tint: false };
+      src = "/models/S5/普通刹车 _ standard brake.optimized.glb";
+      break;
     default:
-      return null;
+      return [];
   }
+
+  const versionedSrc = withS5ModelVersion(src);
+  return [
+    { key: "brakeRight", src: versionedSrc, tint: false },
+    { key: "brakeLeft", src: versionedSrc, tint: false },
+  ];
 }
 
-function getS5AxlePart(selection) {
-  if (!selection.axle) {
-    return null;
+function getS5AxleParts(selection) {
+  const axleId = String(selection.axle || "");
+  const isTetra = axleId.indexOf("tetra") >= 0;
+  const isStandard = axleId.indexOf("std") >= 0;
+  const is24B = selection.rearWheel === "rw-24b";
+
+  // Quick-release axle models only exist for the 24B wheel. Other wheels use
+  // the implicit standard axle and must never render either axle asset.
+  if (!is24B || (!isTetra && !isStandard)) {
+    return [];
   }
-  if (selection.axle.indexOf("tetra") >= 0) {
-    return { key: "axle", src: "/models/S5/手板杆快拆 _ tetra quick release.optimized.glb", tint: false };
-  }
-  return { key: "axle", src: "/models/S5/普通快拆 _ standard quick release.optimized.glb", tint: false };
+
+  const src = withS5ModelVersion(
+    isTetra
+      ? "/models/S5/手板杆快拆 _ tetra quick release.optimized.glb"
+      : "/models/S5/普通快拆 _ standard quick release.optimized.glb"
+  );
+  return [
+    { key: "axleRight", src, tint: false },
+    { key: "axleLeft", src, tint: false },
+  ];
 }
 
-function getS5BackrestHandlePart(selection) {
-  if (selection.backrestHandles === "bh-folding") {
-    return { key: "backrestHandles", src: "/models/S5/可折手把folding grip handle.optimized.glb", tint: false };
+function getS5BackrestHandleParts(selection) {
+  if (selection.backrestHandles === "bh-none") {
+    return [];
   }
-  return null;
+  const folding = selection.backrestHandles === "bh-folding";
+  const src = withS5ModelVersion(
+    folding
+      ? "/models/S5/可折手把folding grip handle.optimized.glb"
+      : "/models/S5/backrest-handle-standard.glb"
+  );
+  const handleStyle = folding ? "folding" : "standard";
+  return [
+    {
+      key: "backrestHandleLeft",
+      src,
+      tint: !folding,
+      blackWheel: folding,
+      handleStyle,
+      handleSide: -1,
+    },
+    {
+      key: "backrestHandleRight",
+      src,
+      tint: !folding,
+      blackWheel: folding,
+      handleStyle,
+      handleSide: 1,
+    },
+  ];
 }
 
 function getS5AntiTipPart(selection) {
@@ -224,14 +377,14 @@ export function getModelPartsForSourceModel(sourceModel, selection = {}) {
   if ((sourceModel || "").toUpperCase() === "S5") {
     return [
       ...getS5FrameParts(selection),
+      ...getS5LateralFrameParts(selection),
       getS5StepPart(selection),
       getS5FootrestPlatePart(selection),
       ...getS5BaseParts(selection),
-      getS5RearWheelPart(selection),
-      getS5HandrimPart(selection),
-      getS5BrakePart(selection),
-      selection.axle && selection.axle.indexOf("tetra") >= 0 ? getS5AxlePart(selection) : null,
-      getS5BackrestHandlePart(selection),
+      ...getS5RearWheelParts(selection),
+      ...getS5BrakeParts(selection),
+      ...getS5AxleParts(selection),
+      ...getS5BackrestHandleParts(selection),
       getS5AntiTipPart(selection),
       getS5TippingHelpPart(selection),
       getS5TransitWheelsPart(selection),

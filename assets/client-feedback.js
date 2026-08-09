@@ -228,15 +228,72 @@
   const FRAME_COLOR_HEX = {
     "color-red": "#9b2731",
     "color-green": "#354a46",
-    "color-yellow": "#ba7640",
+    "color-pearl": "#e7d3ce",
     "color-blue": "#313c5a",
+    "color-bronze": "#ba7640",
+    "color-black": "#232323",
+    "color-pastel-pink": "#f2c0c3",
+    "color-pastel-blue": "#94a6c4",
+    "color-pastel-green": "#a6b89b",
+    "color-lavender-grey": "#aeabbc",
+    "color-sky-blue": "#9dc3e3",
+    "color-beige": "#bfae9b",
   };
 
   const FRAME_COLOR_SWATCH = {
     "color-red": "linear-gradient(145deg, #c96d75 0%, #9b2731 42%, #61171c 100%)",
     "color-green": "linear-gradient(145deg, #708b83 0%, #354a46 40%, #202b29 100%)",
-    "color-yellow": "linear-gradient(145deg, #d9aa77 0%, #ba7640 42%, #7d4d26 100%)",
+    "color-pearl": "linear-gradient(145deg, #fff8f5 0%, #e7d3ce 48%, #bca7a2 100%)",
     "color-blue": "linear-gradient(145deg, #7582a6 0%, #313c5a 44%, #1e2640 100%)",
+    "color-bronze": "linear-gradient(145deg, #d9aa77 0%, #ba7640 42%, #7d4d26 100%)",
+    "color-black": "linear-gradient(145deg, #626262 0%, #232323 46%, #090909 100%)",
+    "color-pastel-pink": "linear-gradient(145deg, #fff0f1 0%, #f2c0c3 52%, #cf969a 100%)",
+    "color-pastel-blue": "linear-gradient(145deg, #d7e1f1 0%, #94a6c4 52%, #687c9e 100%)",
+    "color-pastel-green": "linear-gradient(145deg, #dce8d6 0%, #a6b89b 52%, #788d6d 100%)",
+    "color-lavender-grey": "linear-gradient(145deg, #dddbe5 0%, #aeabbc 52%, #817e91 100%)",
+    "color-sky-blue": "linear-gradient(145deg, #dff2ff 0%, #9dc3e3 52%, #6898bf 100%)",
+    "color-beige": "linear-gradient(145deg, #e7ded4 0%, #bfae9b 52%, #8e7d6c 100%)",
+  };
+
+  const ORDER_FORM_FRAME_COLORS = [
+    { id: "color-red", label: "Deep metallic red", zh: "深金属红" },
+    { id: "color-green", label: "Metallic green", zh: "金属绿" },
+    { id: "color-pearl", label: "Pearl rose", zh: "珍珠玫瑰" },
+    { id: "color-blue", label: "Metallic navy", zh: "金属海军蓝" },
+    { id: "color-bronze", label: "Metallic bronze", zh: "金属古铜" },
+    { id: "color-black", label: "Metallic black", zh: "金属黑" },
+    { id: "color-pastel-pink", label: "Pastel pink", zh: "柔粉色" },
+    { id: "color-pastel-blue", label: "Pastel blue", zh: "柔蓝色" },
+    { id: "color-pastel-green", label: "Pastel green", zh: "柔绿色" },
+    { id: "color-lavender-grey", label: "Lavender grey", zh: "薰衣草灰" },
+    { id: "color-sky-blue", label: "Sky blue", zh: "天蓝色" },
+    { id: "color-beige", label: "Warm beige", zh: "暖米色" },
+  ];
+
+  const ORDER_FORM_EXTRA_OPTIONS = new Set([
+    "frame-magnesium", "lf-extended", "camber-4",
+    "sg-carbon-straight", "sg-carbon-mudguard", "bh-folding",
+    "seat-carbon", "seat-crossed", "foot-carbon", "foot-magnesium", "foot-none",
+    "fw-3-alu", "fw-4-alu", "fw-5-alu", "ff-one-arm",
+    "rw-22ul", "rw-24ul", "rw-24b", "hr-big-24",
+    "brake-push-straight", "brake-pull-folding", "axle-tetra-stainless",
+    "antitipp-left", "antitipp-right", "tiphelp-left", "tiphelp-right", "transit-pair",
+  ]);
+
+  const ORDER_FORM_ZH_LABELS = {
+    "Deep metallic red": "深金属红",
+    "Metallic green": "金属绿",
+    "Pearl rose": "珍珠玫瑰",
+    "Metallic navy": "金属海军蓝",
+    "Metallic bronze": "金属古铜",
+    "Metallic black": "金属黑",
+    "Pastel pink": "柔粉色",
+    "Pastel blue": "柔蓝色",
+    "Pastel green": "柔绿色",
+    "Lavender grey": "薰衣草灰",
+    "Sky blue": "天蓝色",
+    "Warm beige": "暖米色",
+    "No backrest handles": "无推把",
   };
 
   const MODULE_ORDER = [
@@ -267,6 +324,36 @@
     "accessoryTransitWheels",
   ];
 
+  const REAR_WHEEL_OPTIONS = [
+    { id: "rw-22s", code: "22S", label: '22" light 18-spoke', size: 22, available: true, spokes: 18 },
+    { id: "rw-24s", code: "24S", label: '24" light 18-spoke', size: 24, available: true, spokes: 18 },
+    { id: "rw-22ul", code: "22UL", label: '22" ultralight 12-spoke', size: 22, available: true, spokes: 12 },
+    { id: "rw-24ul", code: "24UL", label: '24" ultralight 12-spoke', size: 24, available: true, spokes: 12 },
+    { id: "rw-24b", code: "24B", label: '24" large hub 12-spoke', size: 24, available: true, spokes: 12, largeHub: true },
+  ];
+
+  const HANDRIM_OPTIONS = [
+    { id: "hr-al-silver-22", label: 'Aluminium anodized silver 22"', size: 22, profile: "round", finish: "silver", available: true },
+    { id: "hr-al-black-22", label: 'Aluminium anodized black 22"', size: 22, profile: "round", finish: "black", available: true },
+    { id: "hr-al-silver-24", label: 'Aluminium anodized silver 24"', size: 24, profile: "round", finish: "silver", available: true },
+    { id: "hr-al-black-24", label: 'Aluminium anodized black 24"', size: 24, profile: "round", finish: "black", available: true },
+    { id: "hr-big-24", label: 'Aluminium big ergonomic shape with rubber strip 24"', size: 24, profile: "ergonomic", finish: "rubber", available: true },
+  ];
+
+  const TYRE_OPTIONS = [
+    { id: "tyre-pu", label: "PU tyre · anti-slip tread", tread: "pu", modelSizes: [22] },
+    { id: "tyre-pneumatic", label: "Pneumatic tyre · smooth tread", tread: "pneumatic", modelSizes: [24] },
+  ];
+
+  // Only expose front-wheel variants that currently have verified 3D assets.
+  const AVAILABLE_FRONT_WHEEL_IDS = new Set([
+    "fw-3-alu",
+    "fw-4-plastic",
+    "fw-4-alu",
+    "fw-5-plastic",
+    "fw-5-alu",
+  ]);
+
   const state = {
     cardId: "",
     sourceModel: "",
@@ -289,8 +376,22 @@
     mobileEdgeSwipeActive: false,
     mobileEdgeSwipeConsumed: false,
     mobileEdgeSwipeLockUntil: 0,
+    boundaryWheelAmount: 0,
+    boundaryWheelDirection: 0,
+    boundaryWheelResetTimer: 0,
+    boundarySwitchLockUntil: 0,
+    boundaryTouchStartX: 0,
+    boundaryTouchStartY: 0,
+    boundaryTouchActive: false,
+    boundaryTouchConsumed: false,
     viewerRuntime: null,
     viewerModulePromise: null,
+    viewerUpdatePromise: null,
+    partFocusTimer: 0,
+    partFocusRequestId: 0,
+    lastFocusedModuleId: "",
+    applyingSeatDepthConstraint: false,
+    applyingFrontForkWheelConstraint: false,
     syntheticSeatWidthMarkup: "",
     seatWidthDesktopGuardTimer: 0,
     observers: [],
@@ -351,6 +452,8 @@
   function enforceBilingualUi() {
     enforceBilingualLanguage();
     enforceCategoryLanguage();
+    enforceFrameLengthSeatDepthConstraint();
+    enforceFrontForkWheelConstraint();
   }
 
   function tr(key) {
@@ -362,6 +465,9 @@
     const raw = String(value == null ? "" : value);
     if (!raw) {
       return "";
+    }
+    if (getLang() === "zh-CN" && ORDER_FORM_ZH_LABELS[raw]) {
+      return ORDER_FORM_ZH_LABELS[raw];
     }
     if (window.__WC_I18N && typeof window.__WC_I18N.translateText === "function") {
       return window.__WC_I18N.translateText(raw, getLang());
@@ -585,6 +691,44 @@
     return FRAME_COLOR_HEX[(selection && selection.frameColor) || ""] || "#9aa6bd";
   }
 
+  function patchOrderFormCatalog() {
+    const store = getConfigStore();
+    const modules = store && store.catalog && store.catalog.modules;
+    if (!Array.isArray(modules)) return;
+
+    const replaceOptions = function (moduleId, options) {
+      const module = modules.find(function (item) { return item.id === moduleId; });
+      if (!module) return;
+      module.options = options.map(function (option) {
+        return Object.assign({ priceDelta: 0 }, option, {
+          pricingType: ORDER_FORM_EXTRA_OPTIONS.has(option.id) ? "extra" : "standard",
+        });
+      });
+    };
+
+    replaceOptions("frameColor", ORDER_FORM_FRAME_COLORS.map(function (color) {
+      return { id: color.id, label: color.label, zh: color.zh };
+    }));
+    replaceOptions("legLength", [38, 39.5, 41, 42.5, 44].map(function (value) {
+      return { id: "ll-" + String(value).replace(".", "-"), label: value + " cm" };
+    }));
+    replaceOptions("backrestHandles", [
+      { id: "bh-std-bent", label: "STD bended backrest handles" },
+      { id: "bh-folding", label: "Folding backrest handles" },
+      { id: "bh-none", label: "No backrest handles" },
+    ]);
+    replaceOptions("axle", [
+      { id: "axle-std-stainless", label: "Standard stainless steel axle" },
+      { id: "axle-tetra-stainless", label: "Tetra release stainless steel axle" },
+    ]);
+
+    modules.forEach(function (module) {
+      (module.options || []).forEach(function (option) {
+        option.pricingType = ORDER_FORM_EXTRA_OPTIONS.has(option.id) ? "extra" : "standard";
+      });
+    });
+  }
+
   function buildRuntimeSelection(store, sourceModel) {
     const selection = Object.assign({}, (store && store.selection) || {});
     const modelId = sourceModel || (store && store.modelId) || state.sourceModel || "S5";
@@ -637,7 +781,7 @@
     }
 
     if (!state.viewerModulePromise) {
-      state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260730-middle-trim-v6");
+    state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260809-one-arm-sync-v126");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";
@@ -656,16 +800,38 @@
           state.viewerRuntime = viewerModule.mountRuntimeModelViewer(viewer);
         }
         if (state.viewerRuntime && typeof state.viewerRuntime.update === "function") {
-          state.viewerRuntime.update({
+          state.viewerUpdatePromise = Promise.resolve(state.viewerRuntime.update({
             sourceModel: sourceModel,
             selection: selection,
             frameColor: frameColor,
+          })).catch(function (error) {
+            console.error("Runtime viewer update failed", error);
           });
         }
       })
       .catch(function (error) {
         console.error("Runtime viewer sync failed", error);
       });
+  }
+
+  function schedulePartFocus(moduleId) {
+    if (!moduleId) return;
+    const requestId = ++state.partFocusRequestId;
+    window.clearTimeout(state.partFocusTimer);
+    state.partFocusTimer = window.setTimeout(function () {
+      const pendingUpdate = state.viewerUpdatePromise || Promise.resolve();
+      Promise.resolve(pendingUpdate).finally(function () {
+        if (requestId !== state.partFocusRequestId) return;
+        const runtime = state.viewerRuntime;
+        if (!runtime || typeof runtime.focusAndHighlightModule !== "function") return;
+        const focusEnabled = runtime.selectionFocusEnabled !== false;
+        const sameModule = state.lastFocusedModuleId === moduleId;
+        runtime.focusAndHighlightModule(moduleId, undefined, {
+          changeView: focusEnabled && !sameModule,
+        });
+        state.lastFocusedModuleId = focusEnabled ? moduleId : "";
+      });
+    }, 240);
   }
 
   function syncDesktopViewerSticky() {
@@ -683,6 +849,47 @@
       return;
     }
     viewerPanel.classList.add("wc-is-sticky");
+  }
+
+  function syncDesktopHeaderSpace() {
+    const header = getHeaderCard();
+    const toolbar = header && qs(".wc-inline-toolbar", header);
+    const card = getConfiguratorCard();
+    const main = card && qs(".wc-desktop-config-main", card);
+    const viewerPanel = main && qs(".wc-desktop-viewer-panel", main);
+    const optionsPanel = main && qs(".wc-desktop-options-panel", main);
+    const enabled =
+      window.matchMedia("(min-width: 1280px)").matches &&
+      document.body.classList.contains("wc-config-active") &&
+      header &&
+      toolbar &&
+      main &&
+      viewerPanel &&
+      optionsPanel;
+
+    document.body.classList.remove("wc-desktop-header-space-reused");
+    if (main) {
+      main.style.removeProperty("--wc-desktop-options-lift");
+      main.style.removeProperty("--wc-desktop-options-expanded-height");
+    }
+    if (header) {
+      header.style.removeProperty("--wc-desktop-header-left-width");
+    }
+    if (!enabled) {
+      return;
+    }
+
+    const toolbarRect = toolbar.getBoundingClientRect();
+    const viewerRect = viewerPanel.getBoundingClientRect();
+    const optionsRect = optionsPanel.getBoundingClientRect();
+    const lift = Math.max(0, optionsRect.top - toolbarRect.top);
+    const expandedHeight = optionsRect.height + lift;
+    const leftWidth = Math.max(320, viewerRect.right - toolbarRect.left);
+
+    main.style.setProperty("--wc-desktop-options-lift", lift.toFixed(2) + "px");
+    main.style.setProperty("--wc-desktop-options-expanded-height", expandedHeight.toFixed(2) + "px");
+    header.style.setProperty("--wc-desktop-header-left-width", leftWidth.toFixed(2) + "px");
+    document.body.classList.add("wc-desktop-header-space-reused");
   }
 
   function findOptionByLabel(moduleId, label) {
@@ -710,7 +917,834 @@
   }
 
   function annotateVisibleOptionButtons() {
+    patchOrderFormCatalog();
+    patchFrontWheelCatalog();
+    patchRearWheelCatalog();
+    patchHandrimCatalog();
+    patchTyreCatalog();
+    renderRearWheelOptions();
+    renderHandrimOptions();
+    renderTyreOptions();
+    renderRearWheelSubcomponent();
+    renderFrameColorOptions();
+    decorateOrderFormOptions();
     qsa(".option-group", getConfiguratorCard()).forEach(annotateGroupOptionIds);
+    enforceRearWheelAxleConstraint();
+    enforceFrameLengthSeatDepthConstraint();
+    enforceFrontForkWheelConstraint();
+    enhanceRearWheelCamberOptions();
+  }
+
+  function patchFrontWheelCatalog() {
+    const store = getConfigStore();
+    const module = getModuleDefinition("frontWheel");
+    if (!module || !Array.isArray(module.options)) return;
+
+    const availableOptions = module.options.filter(function (option) {
+      return AVAILABLE_FRONT_WHEEL_IDS.has(option.id);
+    });
+    if (availableOptions.length !== module.options.length) {
+      module.options = availableOptions;
+    }
+
+    const selectedId = store && store.selection ? store.selection.frontWheel : "";
+    if (
+      store &&
+      typeof store.setOption === "function" &&
+      !AVAILABLE_FRONT_WHEEL_IDS.has(selectedId)
+    ) {
+      store.setOption("frontWheel", "fw-4-alu");
+      state.selectionLabels.frontWheel = '4" alu rim';
+    }
+  }
+
+  function patchRearWheelCatalog() {
+    const module = getModuleDefinition("rearWheel");
+    if (!module || module.wcRearWheelCatalogPatched) {
+      return;
+    }
+    module.options = REAR_WHEEL_OPTIONS.map(function (option) {
+      return { id: option.id, label: option.label, priceDelta: 0 };
+    });
+    module.wcRearWheelCatalogPatched = true;
+  }
+
+  function patchHandrimCatalog() {
+    const module = getModuleDefinition("handrim");
+    if (!module || module.wcHandrimCatalogPatched) {
+      return;
+    }
+    module.options = HANDRIM_OPTIONS.map(function (option) {
+      return { id: option.id, label: option.label, priceDelta: 0 };
+    });
+    module.wcHandrimCatalogPatched = true;
+  }
+
+  function patchTyreCatalog() {
+    const module = getModuleDefinition("tyre");
+    if (!module || module.wcTyreCatalogPatched) return;
+    module.options = TYRE_OPTIONS.map(function (option) {
+      return { id: option.id, label: option.label, priceDelta: 0 };
+    });
+    module.wcTyreCatalogPatched = true;
+  }
+
+  function getSelectedRearWheelSize(store) {
+    const selectedId = store && store.selection ? store.selection.rearWheel : "";
+    const selected = REAR_WHEEL_OPTIONS.find(function (option) {
+      return option.id === selectedId;
+    });
+    return selected ? selected.size : 22;
+  }
+
+  function getCompatibleRearWheelSelection(store, rearWheelId) {
+    const wheel = REAR_WHEEL_OPTIONS.find(function (option) {
+      return option.id === rearWheelId;
+    }) || REAR_WHEEL_OPTIONS[0];
+    const currentHandrim = store && store.selection ? store.selection.handrim : "";
+    const currentTyre = store && store.selection ? store.selection.tyre : "";
+    const handrim = HANDRIM_OPTIONS.find(function (option) {
+      return option.available && option.size === wheel.size && option.id === currentHandrim;
+    }) || HANDRIM_OPTIONS.find(function (option) {
+      return option.available && option.size === wheel.size && option.finish === "silver" && option.profile === "round";
+    }) || HANDRIM_OPTIONS.find(function (option) {
+      return option.available && option.size === wheel.size;
+    });
+    const tyre = TYRE_OPTIONS.find(function (option) {
+      return option.id === currentTyre && option.modelSizes.includes(wheel.size);
+    }) || TYRE_OPTIONS.find(function (option) {
+      return option.modelSizes.includes(wheel.size);
+    });
+
+    return {
+      rearWheel: wheel.id,
+      handrim: handrim ? handrim.id : currentHandrim,
+      tyre: tyre ? tyre.id : currentTyre,
+      axle: wheel.id === "rw-24b"
+        ? (store.selection.axle || "axle-std-stainless")
+        : "axle-std-stainless",
+    };
+  }
+
+  function setRearWheelSelection(store, rearWheelId) {
+    if (!store || !store.selection) return;
+    const next = getCompatibleRearWheelSelection(store, rearWheelId);
+    if (typeof store.$patch === "function") {
+      store.$patch(function (state) {
+        state.selection.rearWheel = next.rearWheel;
+        state.selection.handrim = next.handrim;
+        state.selection.tyre = next.tyre;
+        state.selection.axle = next.axle;
+      });
+      return;
+    }
+    store.selection.rearWheel = next.rearWheel;
+    store.selection.handrim = next.handrim;
+    store.selection.tyre = next.tyre;
+    store.selection.axle = next.axle;
+  }
+
+  function enforceRearWheelAxleConstraint() {
+    const store = getConfigStore();
+    const card = getConfiguratorCard();
+    if (!store || !store.selection || !card) return;
+    const is24B = store.selection.rearWheel === "rw-24b";
+    if (!is24B && store.selection.axle !== "axle-std-stainless") {
+      if (typeof store.setOption === "function") {
+        store.setOption("axle", "axle-std-stainless");
+      } else {
+        store.selection.axle = "axle-std-stainless";
+      }
+    }
+    const axleGroup = qsa(".option-group", card).find(function (group) {
+      return getGroupModuleId(group) === "axle";
+    });
+    if (!axleGroup) return;
+    qsa('[data-option-id="axle-tetra-stainless"]', axleGroup).forEach(function (button) {
+      button.hidden = !is24B;
+      button.disabled = !is24B;
+      button.setAttribute("aria-hidden", is24B ? "false" : "true");
+    });
+  }
+
+  function getRearWheelCopy(option) {
+    if (!option || getLang() === "en-US") return option ? option.label : "";
+    const labels = {
+      "rw-22s": "22英寸轻量18辐主轮",
+      "rw-24s": "24英寸轻量18辐主轮",
+      "rw-22ul": "22英寸超轻12辐主轮",
+      "rw-24ul": "24英寸超轻12辐主轮",
+      "rw-24b": "24英寸大轮毂12辐主轮",
+    };
+    return labels[option.id] || option.label;
+  }
+
+  function getHandrimCopy(option) {
+    if (getLang() === "en-US") {
+      return option.label;
+    }
+    if (option.id === "hr-big-24") return "铝合金大号异形截面（橡胶条）24英寸";
+    const finish = option.finish === "black" ? "黑色阳极氧化铝" : "银色阳极氧化铝";
+    return finish + " " + option.size + "英寸";
+  }
+
+  function createHandrimDiagram(option) {
+    const diagram = document.createElement("span");
+    diagram.className = "wc-handrim-diagram is-" + option.profile + " is-" + option.finish;
+    diagram.setAttribute("aria-hidden", "true");
+    const profilePath = option.profile === "round"
+      ? '<circle cx="48" cy="35" r="15" />'
+      : option.profile === "large-round"
+        ? '<circle cx="48" cy="35" r="20" />'
+        : option.profile === "tetra"
+          ? '<path d="M35 24Q48 18 61 24L58 47Q48 54 38 47Z" />'
+          : '<path d="M32 27Q48 15 64 27L59 49Q48 55 37 49Z" />';
+    diagram.innerHTML =
+      '<svg viewBox="0 0 96 70" focusable="false" role="presentation">' +
+      '<path class="wc-handrim-arc" d="M12 55A40 40 0 0 1 84 55" />' +
+      '<g class="wc-handrim-section">' + profilePath + "</g>" +
+      '<text x="76" y="17" text-anchor="middle">' + option.size + "\u2033</text>" +
+      "</svg>";
+    return diagram;
+  }
+
+  function renderHandrimOptions() {
+    const card = getConfiguratorCard();
+    const store = getConfigStore();
+    if (!card || !store || !store.selection) {
+      return;
+    }
+    const group = qsa(".option-group", card).find(function (candidate) {
+      return getGroupModuleId(candidate) === "handrim";
+    });
+    if (!group) {
+      return;
+    }
+    const grid = qs(".choice-grid", group);
+    if (!grid) {
+      return;
+    }
+
+    const wheelSize = getSelectedRearWheelSize(store);
+    const compatible = HANDRIM_OPTIONS.filter(function (option) {
+      return option.available && option.size === wheelSize;
+    });
+    let selectedId = store.selection.handrim || "";
+    if (!compatible.some(function (option) { return option.id === selectedId; })) {
+      const fallback = compatible.find(function (option) {
+        return option.finish === "silver" && option.profile === "round";
+      }) || compatible[0];
+      if (fallback && typeof store.setOption === "function") {
+        selectedId = fallback.id;
+        store.setOption("handrim", selectedId);
+      }
+    }
+
+    const signature = HANDRIM_OPTIONS.map(function (option) {
+      return option.id + ":" + (option.available ? "1" : "0");
+    }).join("|");
+    if (grid.dataset.wcHandrimSignature !== signature) {
+      grid.textContent = "";
+      HANDRIM_OPTIONS.forEach(function (option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice-btn wc-handrim-choice";
+        button.dataset.optionId = option.id;
+        button.dataset.wcBoundChoice = "1";
+        button.appendChild(createHandrimDiagram(option));
+        const label = document.createElement("span");
+        label.className = "choice-label";
+        button.appendChild(label);
+        button.addEventListener("click", function () {
+          const configStore = getConfigStore();
+          const currentSize = getSelectedRearWheelSize(configStore);
+          if (!option.available || option.size !== currentSize || !configStore || typeof configStore.setOption !== "function") {
+            return;
+          }
+          configStore.setOption("handrim", option.id);
+          state.selectionLabels.handrim = option.label;
+          state.selectionDetails.handrim = {
+            title: getLang() === "en-US" ? "Part 2 · Handrim" : "Part 2 · 扶手圈",
+            value: getHandrimCopy(option),
+          };
+          setGroupSelectionVisual(group, option.label, option.id);
+          syncSummaryExtras();
+          window.setTimeout(function () {
+            reflectSelectionsFromStore();
+            syncVisibleSelections();
+            syncRuntimeViewer();
+          }, 40);
+        });
+        grid.appendChild(button);
+      });
+      grid.dataset.wcHandrimSignature = signature;
+    }
+
+    qsa(".wc-handrim-choice", grid).forEach(function (button) {
+      const option = HANDRIM_OPTIONS.find(function (item) {
+        return item.id === button.dataset.optionId;
+      });
+      if (!option) {
+        return;
+      }
+      const wrongSize = option.size !== wheelSize;
+      button.disabled = !option.available || wrongSize;
+      button.classList.toggle("wc-option-unavailable", wrongSize);
+      button.classList.toggle("active", option.id === selectedId);
+      button.setAttribute("aria-disabled", button.disabled ? "true" : "false");
+      const label = qs(".choice-label", button);
+      if (label) {
+        label.textContent = getHandrimCopy(option);
+      }
+      let note = qs(".wc-wheel-pending", button);
+      if (!option.available && !note) {
+        note = document.createElement("span");
+        note.className = "wc-wheel-pending";
+        button.appendChild(note);
+      }
+      if (note) {
+        note.textContent = getLang() === "en-US" ? "3D model pending" : "3D 模型待补充";
+      }
+    });
+    const selectedOption = HANDRIM_OPTIONS.find(function (option) {
+      return option.id === selectedId;
+    });
+    setGroupSelectionVisual(group, selectedOption && selectedOption.label, selectedId);
+  }
+
+  function getTyreCopy(option) {
+    if (getLang() === "en-US") return option.label;
+    const labels = {
+      pu: "PU 防滑纹轮胎",
+      pneumatic: "空气光面轮胎",
+    };
+    return labels[option.tread] || option.label;
+  }
+
+  function createTyreDiagram(option) {
+    const diagram = document.createElement("span");
+    diagram.className = "wc-tyre-diagram is-" + option.tread;
+    diagram.setAttribute("aria-hidden", "true");
+    const tread = option.tread === "pu"
+      ? '<path class="wc-tyre-tread" d="M20 42l10-6m-2 12 10-6m-2 12 10-6m-2 12 10-6m-2 12 10-6" />'
+      : '<path class="wc-tyre-tread" d="M22 48Q48 35 74 48" />';
+    diagram.innerHTML =
+      '<svg viewBox="0 0 96 72" focusable="false" role="presentation">' +
+      '<path class="wc-tyre-body" d="M14 57A38 38 0 0 1 82 57" />' +
+      tread +
+      "</svg>";
+    return diagram;
+  }
+
+  function renderTyreOptions() {
+    const card = getConfiguratorCard();
+    const store = getConfigStore();
+    if (!card || !store || !store.selection) return;
+    const group = qsa(".option-group", card).find(function (candidate) {
+      return getGroupModuleId(candidate) === "tyre";
+    });
+    if (!group) return;
+    const grid = qs(".choice-grid", group);
+    if (!grid) return;
+
+    const wheelSize = getSelectedRearWheelSize(store);
+    const available = TYRE_OPTIONS.filter(function (option) {
+      return option.modelSizes.includes(wheelSize);
+    });
+    let selectedId = store.selection.tyre || "";
+    if (!available.some(function (option) { return option.id === selectedId; })) {
+      selectedId = available[0] && available[0].id;
+      if (selectedId && typeof store.setOption === "function") store.setOption("tyre", selectedId);
+    }
+
+    const signature = wheelSize + "|" + TYRE_OPTIONS.map(function (option) {
+      return option.id + ":" + option.modelSizes.join(",");
+    }).join("|");
+    if (grid.dataset.wcTyreSignature !== signature) {
+      grid.textContent = "";
+      TYRE_OPTIONS.forEach(function (option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice-btn wc-tyre-choice";
+        button.dataset.optionId = option.id;
+        button.dataset.wcBoundChoice = "1";
+        const hasModel = option.modelSizes.includes(wheelSize);
+        button.disabled = !hasModel;
+        button.appendChild(createTyreDiagram(option));
+        const label = document.createElement("span");
+        label.className = "choice-label";
+        button.appendChild(label);
+        if (hasModel) {
+          button.addEventListener("click", function () {
+            const configStore = getConfigStore();
+            if (!configStore || typeof configStore.setOption !== "function") return;
+            configStore.setOption("tyre", option.id);
+            state.selectionLabels.tyre = option.label;
+            state.selectionDetails.tyre = {
+              title: getLang() === "en-US" ? "Part 3 · Tyre" : "Part 3 · 轮胎",
+              value: getTyreCopy(option),
+            };
+            setGroupSelectionVisual(group, option.label, option.id);
+            syncSummaryExtras();
+            window.setTimeout(function () {
+              reflectSelectionsFromStore();
+              syncVisibleSelections();
+              syncRuntimeViewer();
+            }, 40);
+          });
+        } else {
+          const pending = document.createElement("span");
+          pending.className = "wc-wheel-pending";
+          button.appendChild(pending);
+        }
+        grid.appendChild(button);
+      });
+      grid.dataset.wcTyreSignature = signature;
+    }
+
+    qsa(".wc-tyre-choice", grid).forEach(function (button) {
+      const option = TYRE_OPTIONS.find(function (item) { return item.id === button.dataset.optionId; });
+      if (!option) return;
+      button.classList.toggle("active", option.id === selectedId);
+      const hasModel = option.modelSizes.includes(wheelSize);
+      button.disabled = !hasModel;
+      button.classList.toggle("wc-option-unavailable", !hasModel);
+      button.setAttribute("aria-disabled", hasModel ? "false" : "true");
+      const label = qs(".choice-label", button);
+      if (label) label.textContent = getTyreCopy(option);
+      const pending = qs(".wc-wheel-pending", button);
+      if (pending) {
+        pending.textContent = getLang() === "en-US"
+          ? (wheelSize === 22 ? '22" 3D model pending' : '24" 3D model pending')
+          : (wheelSize === 22 ? "缺少22英寸3D模型" : "缺少24英寸3D模型");
+      }
+    });
+    const selectedOption = TYRE_OPTIONS.find(function (option) { return option.id === selectedId; });
+    setGroupSelectionVisual(group, selectedOption && selectedOption.label, selectedId);
+  }
+
+  function renderRearWheelSubcomponent() {
+    const card = getConfiguratorCard();
+    const groupsWrap = card && qs(".option-groups", card);
+    if (!groupsWrap) {
+      return;
+    }
+    const rearWheelGroup = qsa(".option-group", groupsWrap).find(function (group) {
+      return getGroupModuleId(group) === "rearWheel";
+    });
+    const handrimGroup = qsa(".option-group", groupsWrap).find(function (group) {
+      return getGroupModuleId(group) === "handrim";
+    });
+    const tyreGroup = qsa(".option-group", groupsWrap).find(function (group) {
+      return getGroupModuleId(group) === "tyre";
+    });
+    if (!rearWheelGroup || !handrimGroup || !tyreGroup) {
+      return;
+    }
+
+    let component = qs(".wc-drive-wheel-component", groupsWrap);
+    if (!component) {
+      component = document.createElement("section");
+      component.className = "wc-drive-wheel-component";
+      component.innerHTML =
+        '<header class="wc-drive-wheel-header">' +
+        '<span class="wc-drive-wheel-kicker"></span>' +
+        '<strong class="wc-drive-wheel-title"></strong>' +
+        '<span class="wc-drive-wheel-copy"></span>' +
+        "</header>" +
+        '<div class="wc-drive-wheel-parts"></div>';
+      groupsWrap.insertBefore(component, rearWheelGroup);
+    }
+    const parts = qs(".wc-drive-wheel-parts", component);
+    if (rearWheelGroup.parentElement !== parts) {
+      parts.appendChild(rearWheelGroup);
+    }
+    if (handrimGroup.parentElement !== parts) {
+      parts.appendChild(handrimGroup);
+    }
+    if (tyreGroup.parentElement !== parts) {
+      parts.appendChild(tyreGroup);
+    }
+    const english = getLang() === "en-US";
+    qs(".wc-drive-wheel-kicker", component).textContent = english ? "SUB-COMPONENT" : "子组件";
+    qs(".wc-drive-wheel-title", component).textContent = english ? "Main drive wheel assembly" : "主驱动轮组件";
+    qs(".wc-drive-wheel-copy", component).textContent = english
+      ? "Select the main wheel, compatible handrim, and tyre tread independently."
+      : "主轮、扶手圈和轮胎胎纹可分别选择。";
+    const rearTitle = qs(".option-title", rearWheelGroup);
+    const handrimTitle = qs(".option-title", handrimGroup);
+    const tyreTitle = qs(".option-title", tyreGroup);
+    if (rearTitle) rearTitle.textContent = english ? "Part 1 · Main wheel" : "Part 1 · 主轮";
+    if (handrimTitle) handrimTitle.textContent = english ? "Part 2 · Handrim" : "Part 2 · 扶手圈";
+    if (tyreTitle) tyreTitle.textContent = english ? "Part 3 · Tyre" : "Part 3 · 轮胎";
+    rearWheelGroup.classList.add("wc-drive-wheel-part", "is-part-one");
+    handrimGroup.classList.add("wc-drive-wheel-part", "is-part-two");
+    tyreGroup.classList.add("wc-drive-wheel-part", "is-part-three");
+    syncRearWheelSubcomponentVisibility();
+  }
+
+  function syncRearWheelSubcomponentVisibility() {
+    const card = getConfiguratorCard();
+    const component = card && qs(".wc-drive-wheel-component", card);
+    if (!component) {
+      return;
+    }
+    // This supplemental header is outside Vue's tree, so category changes must
+    // explicitly control its visibility.
+    component.hidden = getActiveCategoryIndex() !== 6;
+  }
+
+  function createRearWheelDiagram(option) {
+    const spokes = [];
+    const count = option.spokes || 12;
+    const hubRadius = option.largeHub ? 8 : 4;
+    for (let index = 0; index < count; index += 1) {
+      const angle = (Math.PI * 2 * index) / count;
+      const innerX = 48 + Math.cos(angle) * hubRadius;
+      const innerY = 44 + Math.sin(angle) * hubRadius;
+      const outerX = 48 + Math.cos(angle) * 30;
+      const outerY = 44 + Math.sin(angle) * 30;
+      spokes.push('<path d="M' + innerX.toFixed(2) + " " + innerY.toFixed(2) + "L" + outerX.toFixed(2) + " " + outerY.toFixed(2) + '" />');
+    }
+    const diagram = document.createElement("span");
+    diagram.className = "wc-rear-wheel-diagram";
+    diagram.setAttribute("aria-hidden", "true");
+    diagram.innerHTML =
+      '<svg viewBox="0 0 96 88" focusable="false" role="presentation">' +
+      '<circle class="wc-wheel-tyre' + (option.offroad ? " is-offroad" : "") + '" cx="48" cy="44" r="34" />' +
+      '<circle class="wc-wheel-rim" cx="48" cy="44" r="30" />' +
+      '<g class="wc-wheel-spokes">' + spokes.join("") + "</g>" +
+      '<circle class="wc-wheel-hub" cx="48" cy="44" r="' + hubRadius + '" />' +
+      "</svg>";
+    return diagram;
+  }
+
+  function renderRearWheelOptions() {
+    const card = getConfiguratorCard();
+    const store = getConfigStore();
+    if (!card || !store) {
+      return;
+    }
+    const group = qsa(".option-group", card).find(function (candidate) {
+      return getGroupModuleId(candidate) === "rearWheel";
+    });
+    if (!group) {
+      return;
+    }
+    const grid = qs(".choice-grid", group);
+    if (!grid) {
+      return;
+    }
+
+    const availableIds = REAR_WHEEL_OPTIONS.filter(function (option) {
+      return option.available;
+    }).map(function (option) {
+      return option.id;
+    });
+    let selectedId = (store.selection && store.selection.rearWheel) || "";
+    if (!availableIds.includes(selectedId)) {
+      selectedId = availableIds[0];
+      setRearWheelSelection(store, selectedId);
+    }
+
+    const signature = REAR_WHEEL_OPTIONS.map(function (option) {
+      return option.id + ":" + (option.available ? "1" : "0");
+    }).join("|");
+    if (grid.dataset.wcRearWheelSignature !== signature) {
+      grid.textContent = "";
+      REAR_WHEEL_OPTIONS.forEach(function (option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice-btn wc-rear-wheel-choice";
+        button.dataset.optionId = option.id;
+        button.dataset.wcBoundChoice = "1";
+        button.disabled = !option.available;
+        button.setAttribute("aria-disabled", option.available ? "false" : "true");
+        button.appendChild(createRearWheelDiagram(option));
+
+        const code = document.createElement("span");
+        code.className = "wc-wheel-code";
+        code.textContent = option.code;
+        button.appendChild(code);
+
+        const label = document.createElement("span");
+        label.className = "choice-label";
+        label.textContent = getRearWheelCopy(option);
+        button.appendChild(label);
+
+        if (!option.available) {
+          const pending = document.createElement("span");
+          pending.className = "wc-wheel-pending";
+          pending.textContent = getLang() === "en-US" ? "3D model pending" : "3D 模型待补充";
+          button.appendChild(pending);
+        } else {
+          button.addEventListener("click", function () {
+            const configStore = getConfigStore();
+            if (!configStore || typeof configStore.setOption !== "function") {
+              return;
+            }
+            setRearWheelSelection(configStore, option.id);
+            state.selectionLabels.rearWheel = option.label;
+            state.selectionDetails.rearWheel = {
+              title: translateUiText("Rear Wheels Setting") || "Rear Wheels Setting",
+              value: translateUiText(option.label) || option.label,
+            };
+            setGroupSelectionVisual(group, option.label, option.id);
+            renderHandrimOptions();
+            renderTyreOptions();
+            syncSummaryExtras();
+            window.setTimeout(function () {
+              reflectSelectionsFromStore();
+              syncVisibleSelections();
+              syncRuntimeViewer();
+            }, 40);
+          });
+        }
+        grid.appendChild(button);
+      });
+      grid.dataset.wcRearWheelSignature = signature;
+    }
+
+    qsa(".wc-rear-wheel-choice", grid).forEach(function (button) {
+      const option = REAR_WHEEL_OPTIONS.find(function (item) {
+        return item.id === button.dataset.optionId;
+      });
+      const label = qs(".choice-label", button);
+      if (option && label) {
+        label.textContent = getRearWheelCopy(option);
+      }
+      button.classList.toggle("active", button.dataset.optionId === selectedId);
+    });
+    const selectedOption = REAR_WHEEL_OPTIONS.find(function (option) {
+      return option.id === selectedId;
+    });
+    setGroupSelectionVisual(group, selectedOption && selectedOption.label, selectedId);
+  }
+
+  function enforceFrameLengthSeatDepthConstraint() {
+    const store = getConfigStore();
+    const card = getConfiguratorCard();
+    if (!store || !store.selection || !card || state.applyingSeatDepthConstraint) {
+      return;
+    }
+
+    const isLongFrame = store.selection.frameLength === "fl-long";
+    const allowedOptionIds = new Set(
+      isLongFrame
+        ? ["sd-42-5", "sd-45", "sd-47-5"]
+        : ["sd-37-5", "sd-40", "sd-42-5"]
+    );
+    const fallbackOptionId = isLongFrame ? "sd-42-5" : "sd-37-5";
+    const group = qsa(".option-group", card).find(function (candidate) {
+      return getGroupModuleId(candidate) === "seatDepth";
+    });
+
+    if (group) {
+      annotateGroupOptionIds(group);
+      qsa(".choice-btn", group).forEach(function (button) {
+        const available = allowedOptionIds.has(button.dataset.optionId || "");
+        button.hidden = false;
+        button.disabled = !available;
+        button.classList.toggle("wc-option-unavailable", !available);
+        button.setAttribute("aria-disabled", available ? "false" : "true");
+      });
+
+      let note = qs(".wc-seat-depth-rule-note", group);
+      if (!note) {
+        note = document.createElement("p");
+        note.className = "wc-seat-depth-rule-note";
+        group.appendChild(note);
+      }
+      note.textContent = getLang() === "en-US"
+        ? "Grey options are unavailable for the current frame length. Change the frame length to select them."
+        : "灰色选项不适用于当前车架长度。如需选择，请先更改车架长度。";
+    }
+
+    if (allowedOptionIds.has(store.selection.seatDepth)) {
+      return;
+    }
+
+    const module = getModuleDefinition("seatDepth");
+    const fallbackOption = module && module.options
+      ? module.options.find(function (option) { return option.id === fallbackOptionId; })
+      : null;
+    if (!fallbackOption || typeof store.setOption !== "function") {
+      return;
+    }
+
+    state.applyingSeatDepthConstraint = true;
+    try {
+      store.setOption("seatDepth", fallbackOptionId);
+      state.selectionLabels.seatDepth = fallbackOption.label;
+      state.selectionDetails.seatDepth = {
+        title: translateUiText((module && module.name) || "Seat Depth"),
+        value: translateUiText(fallbackOption.label) || fallbackOption.label,
+      };
+      if (group) {
+        setGroupSelectionVisual(group, fallbackOption.label, fallbackOptionId);
+      }
+    } finally {
+      state.applyingSeatDepthConstraint = false;
+    }
+    window.setTimeout(function () {
+      reflectSelectionsFromStore();
+      syncVisibleSelections();
+      syncSummaryExtras();
+      syncRuntimeViewer();
+    }, 0);
+  }
+
+  function getFrontWheelSize(optionId) {
+    const match = /^fw-(3|4|5)-/.exec(String(optionId || ""));
+    return match ? Number(match[1]) : 0;
+  }
+
+  function isFrontForkWheelCompatible(frontForkId, frontWheelId) {
+    const wheelSize = getFrontWheelSize(frontWheelId);
+    if (!wheelSize) {
+      return true;
+    }
+    return frontForkId === "ff-long"
+      ? wheelSize === 4 || wheelSize === 5
+      : wheelSize === 3 || wheelSize === 4;
+  }
+
+  function enforceFrontForkWheelConstraint(changedModuleId) {
+    const store = getConfigStore();
+    const card = getConfiguratorCard();
+    if (!store || !store.selection || !card || state.applyingFrontForkWheelConstraint) {
+      return;
+    }
+
+    const forkGroup = qsa(".option-group", card).find(function (candidate) {
+      return getGroupModuleId(candidate) === "frontFork";
+    });
+    const wheelGroup = qsa(".option-group", card).find(function (candidate) {
+      return getGroupModuleId(candidate) === "frontWheel";
+    });
+    const forkModule = getModuleDefinition("frontFork");
+    const wheelModule = getModuleDefinition("frontWheel");
+    let frontForkId = store.selection.frontFork || "ff-std";
+    let frontWheelId = store.selection.frontWheel || "fw-4-alu";
+    let correctedModuleId = "";
+    let correctedOptionId = "";
+
+    if (!isFrontForkWheelCompatible(frontForkId, frontWheelId)) {
+      if (changedModuleId === "frontWheel") {
+        correctedModuleId = "frontFork";
+        correctedOptionId = getFrontWheelSize(frontWheelId) === 5 ? "ff-long" : "ff-std";
+        frontForkId = correctedOptionId;
+      } else {
+        correctedModuleId = "frontWheel";
+        correctedOptionId = "fw-4-alu";
+        frontWheelId = correctedOptionId;
+      }
+    }
+
+    if (correctedModuleId && typeof store.setOption === "function") {
+      const correctedModule = correctedModuleId === "frontFork" ? forkModule : wheelModule;
+      const correctedOption = correctedModule && correctedModule.options
+        ? correctedModule.options.find(function (option) { return option.id === correctedOptionId; })
+        : null;
+      state.applyingFrontForkWheelConstraint = true;
+      try {
+        store.setOption(correctedModuleId, correctedOptionId);
+        if (correctedOption) {
+          state.selectionLabels[correctedModuleId] = correctedOption.label;
+          state.selectionDetails[correctedModuleId] = {
+            title: translateUiText((correctedModule && correctedModule.name) || correctedModuleId),
+            value: translateUiText(correctedOption.label) || correctedOption.label,
+          };
+        }
+      } finally {
+        state.applyingFrontForkWheelConstraint = false;
+      }
+    }
+
+    if (forkGroup) {
+      annotateGroupOptionIds(forkGroup);
+      qsa(".choice-btn", forkGroup).forEach(function (button) {
+        const available = isFrontForkWheelCompatible(button.dataset.optionId || "", frontWheelId);
+        button.hidden = false;
+        button.disabled = !available;
+        button.classList.toggle("wc-option-unavailable", !available);
+        button.setAttribute("aria-disabled", available ? "false" : "true");
+      });
+    }
+
+    if (wheelGroup) {
+      annotateGroupOptionIds(wheelGroup);
+      qsa(".choice-btn", wheelGroup).forEach(function (button) {
+        const available = isFrontForkWheelCompatible(frontForkId, button.dataset.optionId || "");
+        button.hidden = false;
+        button.disabled = !available;
+        button.classList.toggle("wc-option-unavailable", !available);
+        button.setAttribute("aria-disabled", available ? "false" : "true");
+      });
+    }
+
+    [forkGroup, wheelGroup].forEach(function (group) {
+      if (!group) {
+        return;
+      }
+      let note = qs(".wc-front-fork-wheel-rule-note", group);
+      if (!note) {
+        note = document.createElement("p");
+        note.className = "wc-front-fork-wheel-rule-note";
+        group.appendChild(note);
+      }
+      note.textContent = getLang() === "en-US"
+        ? "Standard and one-arm forks support 3\u2033 and 4\u2033 front wheels; the long fork supports 4\u2033 and 5\u2033 front wheels. Grey options are incompatible."
+        : "\u6807\u51c6\u524d\u53c9\u548c\u5355\u81c2\u524d\u53c9\u9002\u7528\u4e8e 3\u82f1\u5bf8\u30014\u82f1\u5bf8\u524d\u8f6e\uff1b\u52a0\u957f\u524d\u53c9\u9002\u7528\u4e8e 4\u82f1\u5bf8\u30015\u82f1\u5bf8\u524d\u8f6e\u3002\u7070\u8272\u9009\u9879\u4e0e\u5f53\u524d\u7ec4\u5408\u4e0d\u517c\u5bb9\u3002";
+    });
+
+    if (correctedModuleId) {
+      window.setTimeout(function () {
+        reflectSelectionsFromStore();
+        syncVisibleSelections();
+        syncSummaryExtras();
+        syncRuntimeViewer();
+      }, 0);
+    }
+  }
+
+  function createRearWheelCamberDiagram(degrees) {
+    const tilt = degrees === 4 ? 9 : degrees === 2 ? 5 : 0;
+    const diagram = document.createElement("span");
+    diagram.className = "wc-camber-diagram";
+    diagram.setAttribute("aria-hidden", "true");
+    diagram.innerHTML =
+      '<svg viewBox="0 0 160 64" focusable="false" role="presentation">' +
+      '<path class="wc-camber-ground" d="M10 55H150" />' +
+      '<path class="wc-camber-axle" d="M30 33H130" />' +
+      '<circle class="wc-camber-hub" cx="30" cy="33" r="3" />' +
+      '<circle class="wc-camber-hub" cx="130" cy="33" r="3" />' +
+      '<path class="wc-camber-wheel" d="M' + (30 + tilt) + ' 8L' + (30 - tilt) + ' 54" />' +
+      '<path class="wc-camber-wheel" d="M' + (130 - tilt) + ' 8L' + (130 + tilt) + ' 54" />' +
+      '<path class="wc-camber-frame" d="M58 18L66 33H94L102 18M66 33L60 47M94 33L100 47" />' +
+      '<text class="wc-camber-angle" x="80" y="14" text-anchor="middle">' + degrees + '°</text>' +
+      "</svg>";
+    return diagram;
+  }
+
+  function enhanceRearWheelCamberOptions() {
+    const card = getConfiguratorCard();
+    if (!card) {
+      return;
+    }
+    qsa('.option-group[data-module-id="rearWheelsBar"] .choice-btn', card).forEach(function (button) {
+      if (button.dataset.wcCamberDiagram === "1") {
+        return;
+      }
+      const optionId = button.dataset.optionId || "";
+      const match = optionId.match(/^camber-(0|2|4)$/);
+      if (!match) {
+        return;
+      }
+      button.classList.add("wc-camber-choice");
+      button.insertBefore(createRearWheelCamberDiagram(Number(match[1])), button.firstChild);
+      button.dataset.wcCamberDiagram = "1";
+    });
   }
 
   function setGroupSelectionVisual(group, value, optionId) {
@@ -725,10 +1759,10 @@
       const matches = optionId
         ? button.dataset.optionId === optionId
         : !!normalizedValue && (label === normalizedValue || label === displayValue);
-      button.classList.toggle("active", matches);
+      if (button.classList.contains("active") !== matches) button.classList.toggle("active", matches);
     });
     const currentNode = qs(".option-current", group);
-    if (currentNode && displayValue) {
+    if (currentNode && displayValue && currentNode.textContent !== displayValue) {
       currentNode.textContent = displayValue;
     }
   }
@@ -743,12 +1777,159 @@
       }
       const background = FRAME_COLOR_SWATCH[optionId];
       const solid = FRAME_COLOR_HEX[optionId];
+      if (swatch.dataset.wcAppliedColor === optionId) return;
+      swatch.dataset.wcAppliedColor = optionId;
       if (background) {
         swatch.style.background = background;
       } else {
         swatch.style.background = solid || "#9aa6bd";
       }
       swatch.style.backgroundColor = solid || "#9aa6bd";
+    });
+  }
+
+  function getOrderFormOptionLabel(option) {
+    if (!option) return "";
+    if (getLang() === "zh-CN" && option.zh) return option.zh;
+    return translateUiText(option.label) || option.label || "";
+  }
+
+  function renderFrameColorOptions() {
+    const card = getConfiguratorCard();
+    const group = card && qs('.option-group[data-module-id="frameColor"]', card);
+    const store = getConfigStore();
+    const module = getModuleDefinition("frameColor");
+    const grid = group && qs(".choice-grid", group);
+    if (!group || !grid || !store || !module) return;
+
+    const selectedId = (store.selection && store.selection.frameColor) || "color-red";
+    const renderKey = getLang() + ":" + module.options.map(function (option) { return option.id; }).join("|");
+    if (grid.dataset.wcFrameColorRenderKey === renderKey && qsa(".wc-frame-color-choice", grid).length === module.options.length) {
+      qsa(".wc-frame-color-choice", grid).forEach(function (button) {
+        const active = button.dataset.optionId === selectedId;
+        if (button.classList.contains("active") !== active) button.classList.toggle("active", active);
+      });
+      applyRealisticFrameColorSwatches(group);
+      return;
+    }
+    grid.innerHTML = "";
+    grid.dataset.wcFrameColorRenderKey = renderKey;
+    module.options.forEach(function (option) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "choice-btn wc-frame-color-choice" + (option.id === selectedId ? " active" : "");
+      button.dataset.optionId = option.id;
+      button.innerHTML =
+        '<span class="chip-swatch" aria-hidden="true"></span>' +
+        '<span class="choice-label"></span>';
+      qs(".choice-label", button).textContent = getOrderFormOptionLabel(option);
+      button.addEventListener("click", function () {
+        if (typeof store.setOption === "function") store.setOption("frameColor", option.id);
+        state.selectionLabels.frameColor = option.label;
+        setGroupSelectionVisual(group, option.label, option.id);
+        window.setTimeout(function () {
+          applyRealisticFrameColorSwatches(group);
+          syncRuntimeViewer();
+          schedulePartFocus("frameColor");
+        }, 30);
+      });
+      grid.appendChild(button);
+    });
+    applyRealisticFrameColorSwatches(group);
+  }
+
+  function createOptionSchematic(moduleId, optionId) {
+    if (["rearWheel", "handrim", "tyre", "rearWheelsBar", "frameColor"].indexOf(moduleId) >= 0) return null;
+    const svg = document.createElement("span");
+    svg.className = "wc-option-schematic";
+    svg.dataset.optionId = optionId || "";
+    svg.setAttribute("aria-hidden", "true");
+    let drawing = "";
+    if (moduleId === "frameAngle") {
+      const angle = optionId === "fa-90" ? 90 : 100;
+      drawing = '<path d="M17 48V25Q17 14 29 14H75"/><path d="M17 31L9 48"/><text x="55" y="38">' + angle + '°</text>';
+    } else if (moduleId === "frameLength" || moduleId === "lateralFrame") {
+      const long = /long|extended/.test(optionId);
+      drawing = '<path d="M12 38H' + (long ? 84 : 68) + '"/><path d="M12 29V47M' + (long ? 84 : 68) + ' 29V47"/><path d="M20 19H' + (long ? 77 : 61) + '"/>';
+    } else if (moduleId === "seatSetting") {
+      drawing = optionId === "seat-crossed"
+        ? '<path d="M15 14L81 50M37 14L81 38M15 26L59 50M15 50L81 14M15 38L59 14M37 50L81 26"/>'
+        : '<rect x="15" y="14" width="66" height="36" rx="3"/><path d="M20 20H76M20 44H76"/>';
+    } else if (moduleId === "footrestSetting") {
+      drawing = optionId === "foot-none" ? '<path d="M16 17V45Q16 51 23 51H74Q81 51 81 44V17"/>' : '<path d="M16 14V41Q16 49 24 49H73Q81 49 81 41V14"/><rect x="25" y="28" width="47" height="15" rx="3"/>';
+    } else if (moduleId === "frontWheel") {
+      const size = (optionId.match(/fw-(\d)/) || [0, 4])[1];
+      drawing = '<circle cx="48" cy="32" r="' + (Number(size) * 4 + 5) + '"/><circle cx="48" cy="32" r="3"/><text x="76" y="17">' + size + '″</text>';
+    } else if (moduleId === "frontFork") {
+      drawing = optionId === "ff-one-arm" ? '<path d="M35 9V41Q35 52 47 52H59"/><circle cx="59" cy="43" r="13"/>' : '<path d="M28 9V41Q28 52 40 52H56Q68 52 68 41V9"/><circle cx="48" cy="40" r="13"/>';
+    } else if (moduleId === "brake") {
+      drawing = '<path d="M20 45H67M35 45L56 18M52 18H76"/><circle cx="22" cy="45" r="5"/>';
+    } else if (moduleId === "axle") {
+      drawing = '<path d="M13 32H83"/><circle cx="20" cy="32" r="9"/><circle cx="76" cy="32" r="9"/><path d="M43 24L52 32L43 40"/>';
+    } else if (moduleId === "backrestHandles") {
+      drawing = optionId === "bh-none" ? '<path d="M30 49V17M66 49V17"/><path d="M21 14L75 52M75 14L21 52"/>' : '<path d="M29 50V19Q29 11 38 11H46M67 50V19Q67 11 76 11H84"/>';
+    } else if (/^accessory/.test(moduleId)) {
+      drawing = '<path d="M18 45H72L82 23"/><circle cx="27" cy="45" r="8"/><circle cx="67" cy="45" r="8"/><path d="M82 23L75 15M82 23L89 16"/>';
+    } else {
+      return null;
+    }
+    svg.innerHTML = '<svg viewBox="0 0 96 64" focusable="false"><g>' + drawing + '</g></svg>';
+    return svg;
+  }
+
+  function decorateOrderFormOptions() {
+    const english = getLang() === "en-US";
+    const firstGroup = qs(".option-group", getConfiguratorCard());
+    const groups = firstGroup && firstGroup.parentElement;
+    if (groups) {
+      let legend = qs(".wc-order-form-legend", groups);
+      if (!legend) {
+        legend = document.createElement("div");
+        legend.className = "wc-order-form-legend";
+        groups.insertBefore(legend, firstGroup);
+      }
+      const legendKey = english ? "en" : "zh";
+      if (legend.dataset.lang !== legendKey) {
+        legend.dataset.lang = legendKey;
+        legend.innerHTML = english
+          ? '<span><i></i>Standard choice</span><span class="is-extra"><i></i>Option with surcharge</span>'
+          : '<span><i></i>标准免费项</span><span class="is-extra"><i></i>收费选配项</span>';
+      }
+    }
+    qsa(".option-group", getConfiguratorCard()).forEach(function (group) {
+      const moduleId = getGroupModuleId(group);
+      const module = getModuleDefinition(moduleId);
+      qsa(".choice-btn", group).forEach(function (button) {
+        const optionId = button.dataset.optionId || "";
+        const option = module && (module.options || []).find(function (item) { return item.id === optionId; });
+        let badge = qs(".wc-price-type", button);
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "wc-price-type";
+          button.appendChild(badge);
+        }
+        const extra = ORDER_FORM_EXTRA_OPTIONS.has(optionId);
+        if (badge.classList.contains("is-extra") !== extra) badge.classList.toggle("is-extra", extra);
+        const badgeText = extra ? (english ? "Extra" : "加价") : (english ? "Standard" : "标准");
+        if (badge.textContent !== badgeText) badge.textContent = badgeText;
+        const badgeTitle = extra
+          ? (english ? "Optional item with surcharge" : "收费选配项，具体金额以报价为准")
+          : (english ? "Standard choice, no surcharge" : "标准免费选项");
+        if (badge.title !== badgeTitle) badge.title = badgeTitle;
+        const existingSchematic = qs(".wc-option-schematic", button);
+        if (existingSchematic && existingSchematic.dataset.optionId !== optionId) {
+          existingSchematic.remove();
+        }
+        if (!qs(".wc-option-schematic", button)) {
+          const schematic = createOptionSchematic(moduleId, optionId);
+          if (schematic) button.insertBefore(schematic, button.firstChild);
+        }
+        if (option && moduleId === "frameColor") {
+          const label = qs(".choice-label", button);
+          const nextLabel = getOrderFormOptionLabel(option);
+          if (label && label.textContent !== nextLabel) label.textContent = nextLabel;
+        }
+      });
     });
   }
 
@@ -771,7 +1952,10 @@
           })
         : null;
       if (selectedOption && selectedOption.label) {
-        setGroupSelectionVisual(group, selectedOption.label, selectedOption.id);
+        const selectedLabel = moduleId === "frameColor"
+          ? getOrderFormOptionLabel(selectedOption)
+          : selectedOption.label;
+        setGroupSelectionVisual(group, selectedLabel, selectedOption.id);
       }
     });
     applyRealisticFrameColorSwatches();
@@ -1111,6 +2295,9 @@
       case "frontFork":
         return includesAny(label, ["carbon", "碳"]) ? -0.08 : 0;
       case "rearWheel":
+        if (includesAny(label, ["ultralight", "\u8d85\u8f7b"])) return -0.3;
+        if (includesAny(label, ['22" light', '22" \u8f7b\u91cf'])) return -0.12;
+        if (includesAny(label, ["large hub", "\u5927\u8f6e\u6bc2"])) return 0.18;
         if (includesAny(label, ["carbon", "cf"])) return -0.55;
         if (includesAny(label, ["24-big", "big", "大"])) return 0.18;
         if (includesAny(label, ["22-12"])) return -0.2;
@@ -1197,6 +2384,7 @@
   function ensureToolbar() {
     const container = getRootContainer();
     const grid = getGrid();
+    const header = getHeaderCard();
     if (!container || !grid) {
       return null;
     }
@@ -1211,6 +2399,13 @@
         '<div class="wc-inline-copy"></div>' +
         "</div>" +
         '<button class="btn secondary wc-switch-model" type="button"></button>';
+    }
+
+    // Keep the selected-model context inside the primary page header instead
+    // of presenting it as a second, visually competing header card.
+    if (header && toolbar.parentNode !== header) {
+      header.appendChild(toolbar);
+    } else if (!header && toolbar.parentNode !== container) {
       container.insertBefore(toolbar, grid);
     }
     return toolbar;
@@ -1700,6 +2895,100 @@
     return true;
   }
 
+  function switchCategoryByOffset(offset) {
+    if (!document.body.classList.contains("wc-config-active") || document.body.classList.contains("wc-summary-open")) {
+      return false;
+    }
+    if (isMobileViewport()) {
+      return switchMobileCategoryByOffset(offset);
+    }
+
+    const buttons = getMobileNativeCategoryButtons();
+    const currentIndex = getActiveMobileCategoryIndex();
+    const nextIndex = currentIndex + offset;
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= buttons.length) {
+      return false;
+    }
+
+    triggerNativeCategoryButton(buttons[nextIndex]);
+    window.setTimeout(function () {
+      scrollCategoryContentToTop("smooth");
+    }, 130);
+    return true;
+  }
+
+  function getBoundaryGestureTarget(target) {
+    if (!target || !target.closest) {
+      return null;
+    }
+    if (target.closest(".model-viewer, .wc-desktop-category-rail, .wc-mobile-category-dock, .wc-mobile-config-bar, .wc-summary-backdrop, .wc-object-tuner")) {
+      return null;
+    }
+    const card = getConfiguratorCard();
+    const optionsPanel = card && (qs(".wc-desktop-options-panel", card) || qs(".option-groups", card));
+    return optionsPanel && optionsPanel.contains(target) ? optionsPanel : null;
+  }
+
+  function getCategoryContentBoundaryState() {
+    const card = getConfiguratorCard();
+    const optionsPanel = card && (qs(".wc-desktop-options-panel", card) || qs(".option-groups", card));
+    const anchor = optionsPanel && (qs(".option-groups", optionsPanel) || optionsPanel);
+    if (!optionsPanel || !anchor) {
+      return { atTop: false, atBottom: false };
+    }
+
+    if (!isMobileViewport() && optionsPanel.classList.contains("wc-desktop-options-panel")) {
+      const maxScrollTop = Math.max(0, optionsPanel.scrollHeight - optionsPanel.clientHeight);
+      return {
+        atTop: optionsPanel.scrollTop <= 3,
+        atBottom: maxScrollTop <= 3 || optionsPanel.scrollTop >= maxScrollTop - 3,
+      };
+    }
+
+    const anchorRect = anchor.getBoundingClientRect();
+    const panelRect = optionsPanel.getBoundingClientRect();
+    const stickyOffset = isMobileViewport()
+      ? (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--wc-mobile-sticky-stack-height")) || 0) + 10
+      : 18;
+    const dock = isMobileViewport() ? qs(".wc-mobile-category-dock:not([hidden])") : null;
+    const bottomInset = dock ? dock.getBoundingClientRect().height + 12 : 18;
+    const anchorDocumentTop = window.scrollY + anchorRect.top;
+    const topScrollPosition = Math.max(0, anchorDocumentTop - stickyOffset);
+
+    return {
+      atTop: window.scrollY <= topScrollPosition + 6,
+      atBottom: panelRect.bottom <= window.innerHeight - bottomInset + 6,
+    };
+  }
+
+  function resetBoundaryWheelAmount() {
+    state.boundaryWheelAmount = 0;
+    state.boundaryWheelDirection = 0;
+    if (state.boundaryWheelResetTimer) {
+      window.clearTimeout(state.boundaryWheelResetTimer);
+      state.boundaryWheelResetTimer = 0;
+    }
+  }
+
+  function queueBoundaryWheelReset() {
+    if (state.boundaryWheelResetTimer) {
+      window.clearTimeout(state.boundaryWheelResetTimer);
+    }
+    state.boundaryWheelResetTimer = window.setTimeout(resetBoundaryWheelAmount, 260);
+  }
+
+  function tryBoundaryCategorySwitch(direction) {
+    if (Date.now() < state.boundarySwitchLockUntil) {
+      return false;
+    }
+    if (!switchCategoryByOffset(direction)) {
+      return false;
+    }
+    state.boundarySwitchLockUntil = Date.now() + 760;
+    resetBoundaryWheelAmount();
+    return true;
+  }
+
   function syncCategoryTitleVisibility() {
     const leftCard = getConfiguratorCard();
     if (!leftCard) {
@@ -1726,6 +3015,16 @@
       if (!anchor) {
         return;
       }
+      const desktopOptionsPanel = qs(".wc-desktop-options-panel", card);
+      if (!isMobileViewport() && desktopOptionsPanel) {
+        const previousInlineBehavior = desktopOptionsPanel.style.scrollBehavior;
+        desktopOptionsPanel.style.scrollBehavior = "auto";
+        desktopOptionsPanel.scrollTop = 0;
+        window.requestAnimationFrame(function () {
+          desktopOptionsPanel.style.scrollBehavior = previousInlineBehavior;
+        });
+        return;
+      }
       anchor.classList.add("wc-option-anchor");
       const stickyOffset = isMobileViewport() && document.body.classList.contains("wc-config-active")
         ? (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--wc-mobile-sticky-stack-height")) || 0) + 10
@@ -1743,6 +3042,66 @@
         align(index === 0 ? behavior : "auto");
       }, delay);
       state.categoryScrollTimers.push(timer);
+    });
+  }
+
+  const CATEGORY_ICON_KEYS = [
+    "frame",
+    "seat",
+    "backrest",
+    "sideguard",
+    "footrest",
+    "frontWheel",
+    "rearWheel",
+    "brake",
+    "accessory",
+  ];
+
+  function categoryAccentSvg(key) {
+    const accents = {
+      frame: '<path class="accent" d="M22 18.5h21l8 21H35L22 18.5Z"/><path class="accent" d="M35 39.5h16"/>',
+      seat: '<path class="accent accent-fill" d="M21 16.5h23.5l2 6H24Z"/>',
+      backrest: '<path class="accent accent-fill" d="M35 5.5h9l2.5 14H39Z"/>',
+      sideguard: '<path class="accent accent-fill" d="M27 11.5h15v5H29Z"/><path class="accent" d="M30 16.5v9"/>',
+      footrest: '<path class="accent" d="M51 39.5l7 5"/><path class="accent accent-fill" d="M56 42h12v5H58Z"/>',
+      frontWheel: '<circle class="accent" cx="58" cy="43" r="7"/><circle class="accent accent-fill" cx="58" cy="43" r="1.8"/>',
+      rearWheel: '<circle class="accent" cx="22" cy="34" r="17"/><circle class="accent accent-fill" cx="22" cy="34" r="2"/>',
+      brake: '<path class="accent" d="M13 16l10 4 7-2"/><path class="accent" d="M23 20l4 7"/><circle class="accent accent-fill" cx="13" cy="16" r="2"/>',
+      accessory: '<path class="accent accent-fill" d="M58 3l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7Z"/><path class="accent" d="M46 39.5h9l5 5"/>',
+    };
+    return accents[key] || accents.frame;
+  }
+
+  function categoryIconSvg(key) {
+    return [
+      '<svg viewBox="0 0 72 58" aria-hidden="true" focusable="false">',
+      '<g class="base">',
+      '<circle cx="22" cy="34" r="17"/>',
+      '<circle cx="58" cy="43" r="6"/>',
+      '<path d="M22 18.5h21l8 21H35"/>',
+      '<path d="M35 5.5l4 14"/>',
+      '<path d="M35 5.5h8.5"/>',
+      '<path d="M43 19l8 20 7 4"/>',
+      '<path d="M27 12.5h15"/>',
+      '<path d="M51 39.5l7 5"/>',
+      '</g>',
+      categoryAccentSvg(key),
+      '</svg>',
+    ].join("");
+  }
+
+  function syncCategoryIcons() {
+    qsa(".category-btn", getConfiguratorCard()).forEach(function (button, index) {
+      const iconNode = qs(".category-icon", button);
+      if (!iconNode) {
+        return;
+      }
+      const key = CATEGORY_ICON_KEYS[index] || "frame";
+      if (iconNode.getAttribute("data-wc-category-icon") === key) {
+        return;
+      }
+      iconNode.setAttribute("data-wc-category-icon", key);
+      iconNode.innerHTML = categoryIconSvg(key);
     });
   }
 
@@ -1790,6 +3149,7 @@
   }
 
   function renderMobileCategoryDock() {
+    syncCategoryIcons();
     const dock = ensureMobileCategoryDock();
     const track = qs(".wc-mobile-category-track", dock);
     const nativeButtons = qsa(".category-btn", getConfiguratorCard());
@@ -1929,6 +3289,8 @@
       return;
     }
 
+    syncCategoryIcons();
+
     const viewer = qs(".model-viewer", card);
     const categoryGrid = qs(".category-grid", card);
     if (!viewer || !categoryGrid) {
@@ -1956,6 +3318,8 @@
     if (!categoryTitle || !configStart) {
       return;
     }
+
+    configStart.classList.add("wc-config-section-heading");
 
     let shell = qs(".wc-desktop-config-shell", card);
     let rail = shell && qs(".wc-desktop-category-rail", shell);
@@ -2006,6 +3370,9 @@
     if (viewer.parentNode !== viewerPanel) {
       viewerPanel.appendChild(viewer);
     }
+    if (rail.parentNode !== main) {
+      main.appendChild(rail);
+    }
 
     let node = configStart;
     while (node) {
@@ -2033,6 +3400,8 @@
     state.selectionDetails = {};
     state.desktopSummaryOpen = false;
     state.viewerMinimized = false;
+    state.lastFocusedModuleId = "";
+    state.partFocusRequestId += 1;
     dispatchNativeSelect(select, card.sourceModel);
     document.body.classList.remove("wc-preselect");
     document.body.classList.add("wc-config-active");
@@ -2048,6 +3417,7 @@
     renderMobileCategoryDock();
     ensureDesktopCategoryLayout();
     syncDesktopViewerSticky();
+    syncDesktopHeaderSpace();
     renderSyntheticSeatWidthGroup();
     normalizeDesktopSeatWidthControl();
     syncVisibleSelections();
@@ -2062,6 +3432,8 @@
     state.selectionDetails = {};
     state.desktopSummaryOpen = false;
     state.viewerMinimized = false;
+    state.lastFocusedModuleId = "";
+    state.partFocusRequestId += 1;
     state.mobileCategoryTransitionDirection = "";
     toggleSummary(false);
     document.body.classList.add("wc-preselect");
@@ -2076,6 +3448,7 @@
     renderDesktopSummaryDrawer();
     renderMobileCategoryDock();
     syncDesktopViewerSticky();
+    syncDesktopHeaderSpace();
     window.scrollTo({ top: 0, behavior: "smooth" });
     refreshRuntimeTranslations(80);
   }
@@ -2143,7 +3516,9 @@
       state.syncTimer = 0;
       bindDynamicControls();
       ensureDesktopCategoryLayout();
+      syncRearWheelSubcomponentVisibility();
       syncDesktopViewerSticky();
+      syncDesktopHeaderSpace();
       renderSyntheticSeatWidthGroup();
       normalizeDesktopSeatWidthControl();
       annotateVisibleOptionButtons();
@@ -2195,7 +3570,9 @@
         const module = modulesById.get(moduleId);
         const defaultOptionId = moduleId === "skirtGuards"
           ? "sg-plastic-straight"
-          : module && module.options && module.options[0] && module.options[0].id;
+          : moduleId === "frontWheel"
+            ? "fw-4-alu"
+            : module && module.options && module.options[0] && module.options[0].id;
         if (defaultOptionId && typeof store.setOption === "function") {
           store.setOption(moduleId, defaultOptionId);
         }
@@ -2229,6 +3606,7 @@
       button.dataset.wcBoundCategory = "1";
       button.addEventListener("click", function () {
         window.setTimeout(function () {
+          syncRearWheelSubcomponentVisibility();
           if (state.applyingDefaults) {
             reflectSelectionsFromStore();
             renderMobileCategoryDock();
@@ -2270,6 +3648,12 @@
             : findOptionByLabel(key, value);
           if (store && option && typeof store.setOption === "function") {
             store.setOption(key, option.id);
+            if (key === "frameLength") {
+              enforceFrameLengthSeatDepthConstraint();
+            }
+            if (key === "frontFork" || key === "frontWheel") {
+              enforceFrontForkWheelConstraint(key);
+            }
           }
           state.selectionLabels[key] = value;
           state.selectionDetails[key] = {
@@ -2285,6 +3669,7 @@
           syncVisibleSelections();
           syncSummaryExtras();
           syncRuntimeViewer();
+          schedulePartFocus(moduleId);
         }, 60);
       });
     });
@@ -2384,6 +3769,79 @@
   }
 
   function bindEvents() {
+    document.addEventListener("wheel", function (event) {
+      if (!document.body.classList.contains("wc-config-active") || document.body.classList.contains("wc-summary-open")) {
+        resetBoundaryWheelAmount();
+        return;
+      }
+      if (!getBoundaryGestureTarget(event.target) || !Number.isFinite(event.deltaY) || Math.abs(event.deltaY) < 1) {
+        resetBoundaryWheelAmount();
+        return;
+      }
+
+      const direction = event.deltaY > 0 ? 1 : -1;
+      const boundary = getCategoryContentBoundaryState();
+      const isAtRequestedBoundary = direction > 0 ? boundary.atBottom : boundary.atTop;
+      if (!isAtRequestedBoundary) {
+        resetBoundaryWheelAmount();
+        return;
+      }
+
+      if (state.boundaryWheelDirection !== direction) {
+        state.boundaryWheelAmount = 0;
+        state.boundaryWheelDirection = direction;
+      }
+      state.boundaryWheelAmount += Math.min(120, Math.abs(event.deltaY));
+      queueBoundaryWheelReset();
+      if (state.boundaryWheelAmount >= 96) {
+        tryBoundaryCategorySwitch(direction);
+      }
+    }, { passive: true });
+
+    document.addEventListener("touchstart", function (event) {
+      state.boundaryTouchActive = false;
+      state.boundaryTouchConsumed = false;
+      if (!document.body.classList.contains("wc-config-active") || document.body.classList.contains("wc-summary-open")) {
+        return;
+      }
+      if (!getBoundaryGestureTarget(event.target) || !event.touches || !event.touches.length) {
+        return;
+      }
+      state.boundaryTouchActive = true;
+      state.boundaryTouchStartX = event.touches[0].clientX;
+      state.boundaryTouchStartY = event.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener("touchmove", function (event) {
+      if (!state.boundaryTouchActive || state.boundaryTouchConsumed || !event.touches || !event.touches.length) {
+        return;
+      }
+      const deltaX = event.touches[0].clientX - state.boundaryTouchStartX;
+      const deltaY = event.touches[0].clientY - state.boundaryTouchStartY;
+      if (Math.abs(deltaY) < 84 || Math.abs(deltaY) <= Math.abs(deltaX) * 1.15) {
+        return;
+      }
+
+      const direction = deltaY < 0 ? 1 : -1;
+      const boundary = getCategoryContentBoundaryState();
+      if ((direction > 0 && !boundary.atBottom) || (direction < 0 && !boundary.atTop)) {
+        return;
+      }
+      if (tryBoundaryCategorySwitch(direction)) {
+        state.boundaryTouchConsumed = true;
+      }
+    }, { passive: true });
+
+    document.addEventListener("touchend", function () {
+      state.boundaryTouchActive = false;
+      state.boundaryTouchConsumed = false;
+    }, { passive: true });
+
+    document.addEventListener("touchcancel", function () {
+      state.boundaryTouchActive = false;
+      state.boundaryTouchConsumed = false;
+    }, { passive: true });
+
     document.addEventListener("touchstart", function (event) {
       if (!document.body.classList.contains("wc-config-active") || !isMobileViewport() || document.body.classList.contains("wc-summary-open")) {
         state.mobileEdgeSwipeActive = false;
@@ -2483,6 +3941,7 @@
       const categoryButton = event.target.closest(".category-btn");
       if (categoryButton) {
         window.setTimeout(function () {
+          syncRearWheelSubcomponentVisibility();
           if (state.applyingDefaults) {
             reflectSelectionsFromStore();
             syncVisibleSelections();
@@ -2517,6 +3976,12 @@
             : findOptionByLabel(key, value);
           if (store && option && typeof store.setOption === "function") {
             store.setOption(key, option.id);
+            if (key === "frameLength") {
+              enforceFrameLengthSeatDepthConstraint();
+            }
+            if (key === "frontFork" || key === "frontWheel") {
+              enforceFrontForkWheelConstraint(key);
+            }
           }
           state.selectionLabels[key] = value;
           state.selectionDetails[key] = {
@@ -2531,6 +3996,7 @@
           syncVisibleSelections();
           syncSummaryExtras();
           refreshRuntimeTranslations();
+          schedulePartFocus(moduleId);
         }, 60);
         return;
       }
@@ -2562,6 +4028,7 @@
         enforceBilingualUi();
         renderToolbar();
         ensureDesktopCategoryLayout();
+        syncRearWheelSubcomponentVisibility();
         renderMobileCategoryDock();
         reflectSelectionsFromStore();
         syncVisibleSelections();
@@ -2594,6 +4061,7 @@
         renderMobileViewerState();
         renderSummaryTrigger();
         renderDesktopSummaryDrawer();
+        syncDesktopHeaderSpace();
       }, 60);
     });
   }
@@ -2698,6 +4166,14 @@
       }
     }, 250);
   }
+
+  window.addEventListener("pageshow", function (event) {
+    if (!event.persisted || !state.mounted) {
+      return;
+    }
+    backToModelStage();
+    window.scrollTo({ top: 0, behavior: "auto" });
+  });
 
   waitForApp();
 })();
