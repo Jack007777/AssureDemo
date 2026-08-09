@@ -781,7 +781,7 @@
     }
 
     if (!state.viewerModulePromise) {
-    state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260809-one-arm-sync-v126");
+    state.viewerModulePromise = import("/assets/runtime-model-viewer.mjs?v=20260809-front-assembly-final-v132");
     }
 
     const sourceModel = state.sourceModel || store.modelId || "S5";

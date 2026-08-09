@@ -417,6 +417,42 @@ const LEFT_FORK_PIVOT_HELPER_NAMES = ["Object_188", "Object_189"];
 const LEFT_FORK_LONG_EXTENSION_M = 0.03;
 const LEFT_FORK_BASE_TUBE_LENGTH_M = 0.492804;
 const LEFT_FORK_ANGLE_OVERLAP_90_M = 0.01;
+// Verified 36 cm assembly positions before separating fork and caster controls.
+// Values exclude the existing fork-type manual deltas applied later.
+const S5_INDEPENDENT_FRONT_FORK_BASELINES = Object.freeze({
+  "ff-std|fa-100|fl-std": Object.freeze({
+    left: Object.freeze({ position: [-0.55021562, -0.220971988, 0.297131394], rotation: [0, 0, 0] }),
+    right: Object.freeze({ position: [-0.05678438, -0.219971988, 0.296131394], rotation: [0, 0, 0] }),
+  }),
+  "ff-std|fa-100|fl-long": Object.freeze({
+    left: Object.freeze({ position: [-0.55021562, -0.220155306, 0.310742771], rotation: [0, 0, 0] }),
+    right: Object.freeze({ position: [-0.057056607, -0.218883078, 0.309742771], rotation: [0, 0, 0] }),
+  }),
+  "ff-std|fa-90|fl-std": Object.freeze({
+    left: Object.freeze({ position: [-0.550470929, -0.22180648, 0.300111424], rotation: [-0.893581, 0, 0] }),
+    right: Object.freeze({ position: [-0.057497723, -0.222735409, 0.296821242], rotation: [1.787161, 0, 0] }),
+  }),
+  "ff-std|fa-90|fl-long": Object.freeze({
+    left: Object.freeze({ position: [-0.55039552, -0.221795404, 0.301144196], rotation: [-0.899974, 0, 0] }),
+    right: Object.freeze({ position: [-0.057574882, -0.222608677, 0.29804954], rotation: [1.62002, 0, 0] }),
+  }),
+  "ff-long|fa-100|fl-std": Object.freeze({
+    left: Object.freeze({ position: [-0.55021562, -0.230971988, 0.301131394], rotation: [0, 0, 0] }),
+    right: Object.freeze({ position: [-0.05678438, -0.230971988, 0.301131394], rotation: [0, 0, 0] }),
+  }),
+  "ff-long|fa-100|fl-long": Object.freeze({
+    left: Object.freeze({ position: [-0.549738247, -0.2311152, 0.302420301], rotation: [0, 0, 0] }),
+    right: Object.freeze({ position: [-0.057331828, -0.231114801, 0.302440509], rotation: [0, 0, 0] }),
+  }),
+  "ff-long|fa-90|fl-std": Object.freeze({
+    left: Object.freeze({ position: [-0.549664202, -0.231173194, 0.302319089], rotation: [-0.013991, 0, 0] }),
+    right: Object.freeze({ position: [-0.05742558, -0.23121017, 0.302307355], rotation: [0.027983, 0, 0] }),
+  }),
+  "ff-long|fa-90|fl-long": Object.freeze({
+    left: Object.freeze({ position: [-0.549161029, -0.231405701, 0.302884665], rotation: [-0.038254, 0, 0] }),
+    right: Object.freeze({ position: [-0.058000365, -0.231466374, 0.302922433], rotation: [0.002687, 0, 0] }),
+  }),
+});
 const BUILT_IN_OBJECT_ADJUSTMENTS = [
   {
     sourceModel: "S5",
@@ -831,6 +867,43 @@ const S5_FINAL_PUBLIC_OBJECT_ADJUSTMENTS = [
     rotationDeg: { x: 10, y: 0, z: 0 },
   },
 ];
+
+// Final front-assembly calibration promoted from the local adjustment log.
+// Fork type is part of every caster key so standard and long forks cannot
+// inherit one another's wheel placement when the debug log is unavailable.
+const S5_FINAL_FRONT_ASSEMBLY_ADJUSTMENTS = [
+  ["frontFork=ff-std", "frontForkLeft", 0, -0.012, 0.004, 0, 0, 0],
+  ["frontFork=ff-std", "frontForkRight", 0, -0.013, 0.005, 0, 0, 0],
+  ["frontFork=ff-long", "frontForkLeft", 0, -0.01, 0.004, 0, 0, 0],
+  ["frontFork=ff-long", "frontForkRight", 0, -0.011, 0.005, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-std&frontFork=ff-long", "frontForkLeft", 0, -0.001, -0.001, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-std&frontFork=ff-long", "frontForkRight", 0, -0.001, -0.001, 0, 0, 0],
+
+  ["frameAngle=fa-100&frameLength=fl-std&frontFork=ff-std", "frontCasterLeft", -0.385, -0.003, -0.041, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-std&frontFork=ff-std", "frontCasterRight", -0.22, -0.003, -0.04, 0, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-std&frontFork=ff-std", "frontCasterLeft", -0.387, 0.004, -0.071, 0, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-std&frontFork=ff-std", "frontCasterRight", -0.223, -0.01, -0.073, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std", "frontCasterLeft", -0.386, 0.012, 0.006, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-long&frontFork=ff-std", "frontCasterRight", -0.222, 0.014, 0.005, 0, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std", "frontCasterLeft", -0.385, 0.009, -0.021, 0, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-long&frontFork=ff-std", "frontCasterRight", -0.223, 0.01, -0.021, 0, 0, 0],
+
+  ["frameAngle=fa-100&frameLength=fl-std&frontFork=ff-long", "frontCasterLeft", -0.386, -0.002, -0.041, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-std&frontFork=ff-long", "frontCasterRight", -0.221, -0.002, -0.041, 0, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-std&frontFork=ff-long", "frontCasterLeft", -0.387, -0.054, -0.021, -10.5, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-std&frontFork=ff-long", "frontCasterRight", -0.223, -0.063, -0.034, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-long&frontFork=ff-long", "frontCasterLeft", -0.386, -0.009, -0.017, 0, 0, 0],
+  ["frameAngle=fa-100&frameLength=fl-long&frontFork=ff-long", "frontCasterRight", -0.222, -0.009, -0.016, 0, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-long&frontFork=ff-long", "frontCasterLeft", -0.385, -0.049, -0.004, -8, 0, 0],
+  ["frameAngle=fa-90&frameLength=fl-long&frontFork=ff-long", "frontCasterRight", -0.223, -0.05, -0.002, -8, 0, 0],
+].map(([selectionKey, objectName, x, y, z, rx, ry, rz]) => ({
+  sourceModel: "S5",
+  selectionKey,
+  objectName,
+  mode: "delta",
+  position: { x, y, z },
+  rotationDeg: { x: rx, y: ry, z: rz },
+}));
 
 export function mountRuntimeModelViewer(container) {
   const viewer = new RuntimeModelViewer(container);
@@ -1749,12 +1822,41 @@ class RuntimeModelViewer {
   normalizeAdjustmentSelectionKeyForObject(objectName, selectionOrKey) {
     const normalized = this.normalizeAdjustmentSelectionKey(selectionOrKey);
     const normalizedObjectName = objectName || "";
+    if (/^rearWheel(?:Handrim|Tyre)?(?:Left|Right)(?:::|$)/.test(normalizedObjectName)) {
+      const pairs = new Map(this.parseAdjustmentSelectionPairs(normalized));
+      // Wheel roots already receive seat-width and camber transforms from the
+      // assembly. Keep only the wheel specification here so unrelated options
+      // cannot create stale copies of the same calibration.
+      const rearWheel = pairs.get("rearWheel") || "";
+      return rearWheel ? `rearWheel=${rearWheel}` : "";
+    }
+    if (/^sideguards?(?:Left|Right)?(?:::|$)/.test(normalizedObjectName)) {
+      const pairs = new Map(this.parseAdjustmentSelectionPairs(normalized));
+      // Sideguard roots follow seat width parametrically. Plastic and carbon
+      // variants may share geometry, but each style keeps its own calibration.
+      const skirtGuards = pairs.get("skirtGuards") || "";
+      return skirtGuards ? `skirtGuards=${skirtGuards}` : "";
+    }
+    if (/^lateralFrame(?:Left|Right)(?:::|$)/.test(normalizedObjectName)) {
+      const pairs = new Map(this.parseAdjustmentSelectionPairs(normalized));
+      const lateralFrame = pairs.get("lateralFrame") || "";
+      return lateralFrame ? `lateralFrame=${lateralFrame}` : "";
+    }
+    if (/^frontFork(?:Left|Right)(?:::|$)/.test(normalizedObjectName)) {
+      const pairs = new Map(this.parseAdjustmentSelectionPairs(normalized));
+      // Forks are independent from caster wheels and keep separate calibration
+      // for each physical fork, angle and frame-length assembly.
+      return ["frameAngle", "frameLength", "frontFork"]
+        .map((key) => (pairs.get(key) ? `${key}=${pairs.get(key)}` : ""))
+        .filter(Boolean)
+        .join("&");
+    }
     if (/^frontCaster(?:Left|Right)(?:::|$)/.test(normalizedObjectName)) {
       const pairs = new Map(this.parseAdjustmentSelectionPairs(normalized));
-      // Caster placement is defined by the fork angle and frame length only.
-      // Wheel, tyre, seat and appearance choices must not create competing
-      // calibration records or make a saved caster position appear inactive.
-      return ["frameAngle", "frameLength"]
+      // Caster placement follows the selected fork asset as well as angle and
+      // frame length. Keeping the fork type prevents long/one-arm calibration
+      // from moving the caster used by the standard fork.
+      return ["frameAngle", "frameLength", "frontFork"]
         .map((key) => (pairs.get(key) ? `${key}=${pairs.get(key)}` : ""))
         .filter(Boolean)
         .join("&");
@@ -2351,32 +2453,8 @@ class RuntimeModelViewer {
   }
 
   syncFrontForksToCasterRoots(selection = {}) {
-    // The one-arm fork has its own calibrated GLB placement. Its caster and
-    // fork must remain independent so either component can be tuned without
-    // moving the other one. Legacy standard/long forks still use the shared
-    // caster-root calibration below.
-    if (selection.frontFork === "ff-one-arm") {
-      return;
-    }
-    ["Left", "Right"].forEach((sideName) => {
-      const caster = this.partObjects.find(
-        (entry) => entry && entry.key === `frontCaster${sideName}`
-      )?.object;
-      const fork = this.partObjects.find(
-        (entry) => entry && entry.key === `frontFork${sideName}`
-      )?.object;
-      if (!caster || !fork) {
-        return;
-      }
-
-      // The wheel and fork assets share the same assembly-space origin. The
-      // historical calibration is stored on frontCasterLeft/Right, so copy the
-      // final root transform after all automatic and manual placement steps.
-      fork.position.copy(caster.position);
-      fork.quaternion.copy(caster.quaternion);
-      fork.scale.copy(caster.scale);
-      fork.updateMatrixWorld(true);
-    });
+    // Intentionally empty. Fork roots and caster roots are independent
+    // adjustable assemblies; neither is allowed to overwrite the other.
   }
 
   applyManualObjectAdjustments(selection) {
@@ -2399,6 +2477,7 @@ class RuntimeModelViewer {
         ...FOOTREST_PLATE_FINAL_ADJUSTMENTS,
         ...S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS,
         ...S5_FINAL_PUBLIC_OBJECT_ADJUSTMENTS,
+        ...S5_FINAL_FRONT_ASSEMBLY_ADJUSTMENTS,
         ...this.getS5AxleBaselineEntries(selection),
       ].filter(
         (entry) =>
@@ -2573,9 +2652,7 @@ class RuntimeModelViewer {
     }
     deferredLeftAxleEntries.forEach((entry) => applyResolvedEntry(entry, true));
     this.applyAxleSeatWidthPlacement(selection);
-    this.syncFrontForksToCasterRoots(selection);
-    // One-arm forks remain independent from their caster roots. Apply their
-    // manual calibration after the optional legacy synchronization.
+    // Apply fork calibration independently after caster placement.
     deferredFrontForkEntries.forEach((entry) => applyResolvedEntry(entry, true));
     this.syncOrbitTargetToModelCenter();
   }
@@ -2883,9 +2960,10 @@ class RuntimeModelViewer {
     const sourceModel = this.lastSourceModel || this.currentSourceModel || "";
     const frameAngle = (selection && selection.frameAngle) || "";
     const frameLength = (selection && selection.frameLength) || "";
+    const frontFork = (selection && selection.frontFork) || "";
 
-    let matchedEntry = null;
-    for (let index = this.manualAdjustmentEntries.length - 1; index >= 0; index -= 1) {
+    const matchingEntries = [];
+    for (let index = 0; index < this.manualAdjustmentEntries.length; index += 1) {
       const entry = this.manualAdjustmentEntries[index];
       if (!entry || entry.sourceModel !== sourceModel || entry.objectName !== objectName) {
         continue;
@@ -2904,13 +2982,16 @@ class RuntimeModelViewer {
         ) {
           continue;
         }
-        matchedEntry = entry;
-        break;
+        matchingEntries.push(entry);
+        continue;
       }
       if (pairs.has("frameAngle") && pairs.get("frameAngle") !== frameAngle) {
         continue;
       }
       if (pairs.has("frameLength") && pairs.get("frameLength") !== frameLength) {
+        continue;
+      }
+      if (pairs.has("frontFork") && pairs.get("frontFork") !== frontFork) {
         continue;
       }
       if (pairs.has("seatWidth") && pairs.get("seatWidth") !== S5_POSITION_REFERENCE_SEAT_WIDTH_ID) {
@@ -2919,9 +3000,18 @@ class RuntimeModelViewer {
       if (pairs.has("seatDepth") && pairs.get("seatDepth") !== S5_POSITION_REFERENCE_SEAT_DEPTH_ID) {
         continue;
       }
-      matchedEntry = entry;
-      break;
+      matchingEntries.push(entry);
     }
+    matchingEntries.sort((left, right) => {
+      const specificity =
+        this.getAdjustmentSelectionSpecificity(right.selectionKey) -
+        this.getAdjustmentSelectionSpecificity(left.selectionKey);
+      if (specificity) {
+        return specificity;
+      }
+      return (Date.parse(right.updatedAt || "") || 0) - (Date.parse(left.updatedAt || "") || 0);
+    });
+    const matchedEntry = matchingEntries[0] || null;
     if (!matchedEntry) {
       return null;
     }
@@ -2930,13 +3020,20 @@ class RuntimeModelViewer {
         objectName,
         frameAngle,
         frameLength,
+        frontFork,
         matchedEntry
       );
     }
     return matchedEntry;
   }
 
-  inheritFrontCasterReferenceCalibration(objectName, frameAngle, frameLength, matchedEntry) {
+  inheritFrontCasterReferenceCalibration(
+    objectName,
+    frameAngle,
+    frameLength,
+    frontFork,
+    matchedEntry
+  ) {
     const referenceAngle = "fa-100";
     const referenceLength = "fl-std";
     if (frameAngle === referenceAngle && frameLength === referenceLength) {
@@ -2955,6 +3052,9 @@ class RuntimeModelViewer {
           pairs.get("frameAngle") !== targetAngle ||
           pairs.get("frameLength") !== targetLength
         ) {
+          continue;
+        }
+        if (pairs.has("frontFork") && pairs.get("frontFork") !== frontFork) {
           continue;
         }
         if (
@@ -3045,6 +3145,7 @@ class RuntimeModelViewer {
     const allEntries = [
       ...BUILT_IN_OBJECT_ADJUSTMENTS,
       ...S5_FINAL_PUBLIC_OBJECT_ADJUSTMENTS,
+      ...S5_FINAL_FRONT_ASSEMBLY_ADJUSTMENTS,
       ...this.manualAdjustmentEntries,
     ].map((entry) => this.normalizeAdjustmentEntry(entry));
 
@@ -3110,6 +3211,7 @@ class RuntimeModelViewer {
         ...FOOTREST_PLATE_FINAL_ADJUSTMENTS,
         ...S5_WHEEL_FOOTREST_REFERENCE_ADJUSTMENTS,
         ...S5_FINAL_PUBLIC_OBJECT_ADJUSTMENTS,
+        ...S5_FINAL_FRONT_ASSEMBLY_ADJUSTMENTS,
       ].filter(
         (entry) =>
           entry.sourceModel === sourceModel &&
@@ -3845,6 +3947,26 @@ class RuntimeModelViewer {
       return this.normalizeAdjustmentEntry({
         ...entry,
         selectionKey: rearWheel ? `rearWheel=${rearWheel}` : "",
+        mode: "delta",
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    if (/^sideguards?(?:Left|Right)?$/.test(adjustableTarget.partKey)) {
+      const activePairs = new Map(this.parseAdjustmentSelectionPairs(this.lastSelection || {}));
+      const skirtGuards = activePairs.get("skirtGuards") || "";
+      return this.normalizeAdjustmentEntry({
+        ...entry,
+        selectionKey: skirtGuards ? `skirtGuards=${skirtGuards}` : "",
+        mode: "delta",
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    if (/^lateralFrame(?:Left|Right)$/.test(adjustableTarget.partKey)) {
+      const activePairs = new Map(this.parseAdjustmentSelectionPairs(this.lastSelection || {}));
+      const lateralFrame = activePairs.get("lateralFrame") || "";
+      return this.normalizeAdjustmentEntry({
+        ...entry,
+        selectionKey: lateralFrame ? `lateralFrame=${lateralFrame}` : "",
         mode: "delta",
         updatedAt: new Date().toISOString(),
       });
@@ -6165,6 +6287,48 @@ class RuntimeModelViewer {
 
   }
 
+  applyIndependentFrontForkPlacement(
+    object,
+    side,
+    seatWidthCm,
+    depthDelta,
+    activeAdjust,
+    frameLengthOffset,
+    selection
+  ) {
+    // Preserve asset setup and the one-arm fallback, but do not consume a
+    // caster wheel's saved adjustment when placing a standard or long fork.
+    this.applyFrontCasterInstancePlacement(
+      object,
+      side,
+      seatWidthCm,
+      depthDelta,
+      activeAdjust,
+      frameLengthOffset,
+      null
+    );
+
+    const frontFork = (selection && selection.frontFork) || "ff-std";
+    const frameAngle = (selection && selection.frameAngle) || "fa-100";
+    const frameLength = (selection && selection.frameLength) || "fl-std";
+    const baseline =
+      S5_INDEPENDENT_FRONT_FORK_BASELINES[`${frontFork}|${frameAngle}|${frameLength}`];
+    if (!baseline) {
+      return;
+    }
+
+    const sideBaseline = side < 0 ? baseline.left : baseline.right;
+    const halfOffsetMeters =
+      ((seatWidthCm - S5_WHEEL_FOOTREST_REFERENCE_SEAT_WIDTH_CM) * 0.01) * 0.5;
+    object.position.fromArray(sideBaseline.position);
+    object.position.x += (side < 0 ? -1 : 1) * halfOffsetMeters;
+    object.rotation.set(
+      THREE.MathUtils.degToRad(sideBaseline.rotation[0]),
+      THREE.MathUtils.degToRad(sideBaseline.rotation[1]),
+      THREE.MathUtils.degToRad(sideBaseline.rotation[2])
+    );
+  }
+
   applySharedFrontDeltaFromFrame(object, frameObject, offsets = null) {
     if (!object || !frameObject || !this.modelRoot) {
       return false;
@@ -6433,25 +6597,25 @@ class RuntimeModelViewer {
           );
           break;
         case "frontForkLeft":
-          this.applyFrontCasterInstancePlacement(
+          this.applyIndependentFrontForkPlacement(
             object,
             -1,
             seatWidthCm,
             fixedReferenceDepthDelta,
             isFrontAngle90 ? this.debugFrontCaster90Adjust : activeFrameAdjust,
             frameLengthOffset,
-            frontCasterLeftAbsoluteAdjust
+            selection
           );
           break;
         case "frontForkRight":
-          this.applyFrontCasterInstancePlacement(
+          this.applyIndependentFrontForkPlacement(
             object,
             1,
             seatWidthCm,
             fixedReferenceDepthDelta,
             isFrontAngle90 ? this.debugFrontCaster90Adjust : activeFrameAdjust,
             frameLengthOffset,
-            frontCasterRightAbsoluteAdjust
+            selection
           );
           break;
         case "lateralFrameLeft":
